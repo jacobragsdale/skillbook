@@ -90,6 +90,12 @@ def validate(skill_dir: Path) -> tuple[list[str], list[str]]:
         if field not in KNOWN_FIELDS:
             warnings.append(f"unknown frontmatter field {field!r} — agents will ignore it silently")
 
+    if fm.get("disable-model-invocation") is not True:
+        warnings.append(
+            "disable-model-invocation is not true — house default is explicit-invoke only; "
+            "confirm the user actually asked for auto-triggering"
+        )
+
     body_lines = body.count("\n") + 1 if body else 0
     if body_lines > BODY_MAX_LINES:
         errors.append(f"body is {body_lines} lines (hard limit {BODY_MAX_LINES}; accuracy degrades)")
