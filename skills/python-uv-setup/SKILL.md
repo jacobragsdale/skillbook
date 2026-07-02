@@ -119,6 +119,10 @@ Gitignore block:
 Cross-check: every var the audit script found in code must appear in
 `.env.example`, and vice versa.
 
+For sharing the VALUES across the team (encrypted `secrets/*.env` committed
+to the repo, decrypted locally), READ `references/secrets.md` — it also has
+the Windows-specific commands and the no-symlink variant of this scheme.
+
 ### 5. Entry points
 
 Every way of running the project becomes exactly one `uv run` command:
@@ -167,6 +171,7 @@ README Running table whose only entry is
 - `scripts/audit_repo.py` — RUN first on any brownfield repo; prints the migration worklist.
 - `references/troubleshooting.md` — READ at the first `uv sync` failure; APPEND newly solved errors. Contains the private-PyPI TODO block.
 - `references/precommit-and-lint.md` — READ in step 3; copy templates from it.
+- `references/secrets.md` — READ when the team needs to share env values (SOPS + age, Windows-first).
 - `references/docs-templates.md` — READ in step 6; README + AGENTS.md skeletons.
 
 ## Improving this skill
