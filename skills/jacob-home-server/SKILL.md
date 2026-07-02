@@ -61,6 +61,15 @@ scripts/deploy.sh   # re-sync host scripts
 git -C ~/Development/home-server add -A && git commit && git push
 ```
 
+## Hardware
+
+Beelink SER8: Ryzen 7 8745HS (8C/16T), Radeon 780M iGPU only — **CPU-only
+for ML inference** (no NVIDIA/ROCm/NPU), 27GB RAM. A Seeed reSpeaker
+XVF3800 4-Mic Array (USB, 16kHz in/out, on-chip beamforming + AEC) and a
+generic Jieli USB speaker are plugged in for the voice-assistant project
+(`~/Development/jarvis`). Details: `docs/services.md` § Hardware detail.
+Audio is ALSA-direct (`hw:CARD=Array`); PipeWire is installed but inactive.
+
 ## Debugging
 
 - Logs: `make logs` (personal site), Dozzle at `http://100.103.224.99:9999`,
