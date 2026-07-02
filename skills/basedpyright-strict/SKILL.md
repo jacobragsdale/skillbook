@@ -1,6 +1,7 @@
 ---
 name: basedpyright-strict
 description: Set up strict basedpyright type checking on a Python repo and fix the resulting type errors without changing runtime behavior. Use when the user mentions basedpyright or pyright, strict typing or strict mode, fixing type errors, adding type annotations across a repo, or a type-error baseline.
+disable-model-invocation: true
 ---
 
 # Strict type checking with basedpyright

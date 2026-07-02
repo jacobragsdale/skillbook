@@ -21,7 +21,7 @@ SKILL_TEMPLATE = """\
 ---
 name: {name}
 description: {description}
----
+{invocation_line}---
 
 # {title}
 
@@ -78,6 +78,11 @@ def main() -> int:
     parser.add_argument("name", help="skill name: lowercase letters, digits, hyphens; max 64 chars")
     parser.add_argument("--dir", default="skills", help="skills root to create the folder in (default: ./skills)")
     parser.add_argument("--description", default=DEFAULT_DESCRIPTION, help="frontmatter description (trigger-style)")
+    parser.add_argument(
+        "--auto-trigger", action="store_true",
+        help="omit disable-model-invocation (house default is explicit-invoke only); "
+        "pass this only when the user asked for automatic triggering",
+    )
     args = parser.parse_args()
 
     if not NAME_RE.match(args.name) or len(args.name) > 64:
@@ -91,15 +96,22 @@ def main() -> int:
 
     skill_dir.mkdir(parents=True)
     title = args.name.replace("-", " ").capitalize()
+    invocation_line = "" if args.auto_trigger else "disable-model-invocation: true\n"
     (skill_dir / "SKILL.md").write_text(
         # json.dumps produces a YAML-safe double-quoted scalar
-        SKILL_TEMPLATE.format(name=args.name, description=json.dumps(args.description), title=title)
+        SKILL_TEMPLATE.format(
+            name=args.name, description=json.dumps(args.description), title=title, invocation_line=invocation_line
+        )
     )
     (skill_dir / "LEARNINGS.md").write_text(LEARNINGS_TEMPLATE)
 
     print(f"created {skill_dir}/")
     print(f"  SKILL.md      — fill in the TODO sections, keep the body under 300 lines")
     print(f"  LEARNINGS.md  — seeded empty")
+    print(
+        "  invocation    — explicit only (disable-model-invocation: true)" if not args.auto_trigger
+        else "  invocation    — auto-trigger enabled (--auto-trigger passed)"
+    )
     print("next: draft, then validate with scripts/validate_skill.py")
     return 0
 
