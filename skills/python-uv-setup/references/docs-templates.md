@@ -43,7 +43,7 @@ All variables:
 
     uv run pytest                                  # tests
     uv run ruff check --fix && uv run ruff format  # lint + format
-    uv run pyright                                 # type check
+    uv run basedpyright                                 # type check
 
 Pre-commit runs all of the above on commit.
 
@@ -72,17 +72,17 @@ file alone without reading the README.
 - Run: `uv run --env-file .env <entry>`
 - Test: `uv run pytest`
 - Lint/format: `uv run ruff check --fix && uv run ruff format`
-- Type check: `uv run pyright`
+- Type check: `uv run basedpyright`
 
 ## Conventions
 
 - All dependency and tool config lives in `pyproject.toml` — no other config
-  files for packaging, ruff, or pyright.
+  files for packaging, ruff, or basedpyright.
 - Env vars: code reads `os.environ` only. Any new variable must be added to
   `.env.example` with a comment.
 - New entry points get a `[project.scripts]` entry (or documented
   `python -m` command) AND a row in the README Running table.
-- Commits must pass pre-commit (ruff, pyright, uv-lock).
+- Commits must pass pre-commit (ruff, basedpyright, uv-lock).
 
 ## Gotchas
 

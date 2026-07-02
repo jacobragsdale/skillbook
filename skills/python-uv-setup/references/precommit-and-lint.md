@@ -31,14 +31,18 @@ select = [
 # to silence one module.
 ```
 
-## pyproject.toml — pyright
+## pyproject.toml — basedpyright
 
-`basic` mode for brownfield — it still catches undefined names, bad calls,
-and wrong argument types without demanding annotations everywhere. Once the
-repo is clean under `basic`, ratchet to `"standard"` in a dedicated commit.
+Set `basic` mode explicitly for brownfield — basedpyright's DEFAULT is
+"recommended", which is stricter than pyright strict and will bury an
+untyped repo in thousands of findings. `basic` still catches undefined
+names, bad calls, and wrong argument types without demanding annotations
+everywhere. Once clean under `basic`, ratchet to `"standard"` in a
+dedicated commit; for going fully strict, use the `basedpyright-strict`
+skill.
 
 ```toml
-[tool.pyright]
+[tool.basedpyright]
 pythonVersion = "3.11"
 venvPath = "."
 venv = ".venv"
@@ -48,10 +52,10 @@ exclude = [".venv"]
 
 ## .pre-commit-config.yaml
 
-Pyright runs as a **local** hook via `uv run` — the published mirrors-pyright
-hook runs in an isolated environment without the project's dependencies and
-produces bogus import errors. `pass_filenames: false` = whole-project check;
-pyright is incremental enough for this to stay fast.
+Basedpyright runs as a **local** hook via `uv run` — published type-checker
+hooks run in an isolated environment without the project's dependencies and
+produce bogus import errors. `pass_filenames: false` = whole-project check;
+basedpyright is incremental enough for this to stay fast.
 
 The `rev:` pins below go stale — run `uv run pre-commit autoupdate` right
 after copying this file in.
@@ -83,9 +87,9 @@ repos:
 
   - repo: local
     hooks:
-      - id: pyright
-        name: pyright
-        entry: uv run pyright
+      - id: basedpyright
+        name: basedpyright
+        entry: uv run basedpyright
         language: system
         types: [python]
         pass_filenames: false
@@ -94,7 +98,7 @@ repos:
 ## Install and first run
 
 ```bash
-uv add --dev ruff pyright pre-commit
+uv add --dev ruff basedpyright pre-commit
 uv run pre-commit install
 uv run pre-commit run --all-files
 ```

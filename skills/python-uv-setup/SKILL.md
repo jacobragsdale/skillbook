@@ -1,6 +1,6 @@
 ---
 name: python-uv-setup
-description: "Standardize or set up a Python repo on uv: single pyproject.toml, pre-commit (ruff + pyright), .env management, uv run entry points, README/AGENTS.md. Use when onboarding brownfield code to uv, fixing uv sync failures (undeclared build deps, SSL, corporate proxy, private PyPI auth), or migrating off requirements.txt / setup.py / custom setup scripts."
+description: "Standardize or set up a Python repo on uv: single pyproject.toml, pre-commit (ruff + basedpyright), .env management, uv run entry points, README/AGENTS.md. Use when onboarding brownfield code to uv, fixing uv sync failures (undeclared build deps, SSL, proxy, private PyPI auth), or migrating off requirements.txt / setup.py / custom setup scripts."
 disable-model-invocation: true
 ---
 
@@ -14,11 +14,11 @@ standard: uv-managed, one pyproject.toml, zero custom setup steps.
 - [ ] `.python-version` pins `3.11`; `requires-python = ">=3.11"` (everything is 3.11 for now)
 - [ ] One `pyproject.toml` declares everything: runtime deps, dev deps in
       `[dependency-groups]`, build workarounds under `[tool.uv]`, and all tool
-      config (ruff, pyright, pytest)
+      config (ruff, basedpyright, pytest)
 - [ ] No `requirements*.txt`, `setup.py`, `setup.cfg`, `Pipfile`,
       `environment.yml`, or custom setup scripts remain
 - [ ] `uv.lock` committed; `uv sync` succeeds from a fresh clone with no manual steps
-- [ ] Pre-commit installed: ruff format + lint, pyright, uv-lock, hygiene hooks
+- [ ] Pre-commit installed: ruff format + lint, basedpyright, uv-lock, hygiene hooks
 - [ ] `.env.example` committed; real env files gitignored; switch convention documented
 - [ ] Every entry point runs as a single `uv run` command and is listed in the README
 - [ ] `README.md` and `AGENTS.md` written from the templates
@@ -80,12 +80,13 @@ plus `uv run pytest` if tests exist.
 ### 3. Lint, types, pre-commit
 
 READ `references/precommit-and-lint.md` and copy its three templates:
-`[tool.ruff]`, `[tool.pyright]` (basic mode for brownfield), and
-`.pre-commit-config.yaml` (pyright runs as a local hook via `uv run` so it
-sees the project venv). Then:
+`[tool.ruff]`, `[tool.basedpyright]` (basic mode for brownfield — NOT the
+default "recommended", which buries untyped code), and
+`.pre-commit-config.yaml` (basedpyright runs as a local hook via `uv run`
+so it sees the project venv). Then:
 
 ```bash
-uv add --dev ruff pyright pre-commit
+uv add --dev ruff basedpyright pre-commit
 uv run pre-commit install
 uv run pre-commit run --all-files
 ```
@@ -157,7 +158,7 @@ dependencies = ["fastapi>=0.115", "internal-billing-client>=2"]
 serve = "billing_sync.server:main"
 
 [dependency-groups]
-dev = ["ruff", "pyright", "pre-commit", "pytest"]
+dev = ["ruff", "basedpyright", "pre-commit", "pytest"]
 
 [tool.uv.extra-build-dependencies]
 old-c-lib = ["setuptools", "cython"]   # undeclared build dep, found via sync loop
