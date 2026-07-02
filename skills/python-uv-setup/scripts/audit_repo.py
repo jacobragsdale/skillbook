@@ -84,7 +84,7 @@ def audit_pyproject(root: Path) -> None:
     ]
     if "poetry" in data.get("tool", {}):
         lines.append("WARNING: [tool.poetry] present — migrate to [project] and remove")
-    for tool in ("ruff", "pyright"):
+    for tool in ("ruff", "basedpyright", "pyright"):
         lines.append(f"[tool.{tool}] configured: {'yes' if tool in data.get('tool', {}) else 'no'}")
     section("pyproject.toml", lines, "")
 
