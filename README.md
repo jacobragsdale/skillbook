@@ -37,11 +37,12 @@ after adding a new skill.
 
 `voice-skills/` deploys to the home server over git, not symlinks: the
 server keeps a clone at `~/jarvis-skills` with a write deploy key, because
-jarvis edits its own skills by voice — learnings commit to `main`, new or
-rewritten skills land on the `jarvis` branch. `make deploy` pushes, pulls
-the server clone, and relinks; `make review-jarvis` shows what jarvis has
-drafted. Conventions differ from dev skills — read `voice-skills/README.md`
-before writing one.
+jarvis edits its own skills by voice — everything commits straight to
+`main` and goes live immediately (post-hoc review, not a gate). A host
+timer pulls the server clone every ten minutes, so Mac pushes to `main`
+reach jarvis on their own; `make deploy` does the same pull instantly, and
+`make review-jarvis` lists jarvis's recent commits. Conventions differ
+from dev skills — read `voice-skills/README.md` before writing one.
 
 ## Creating a skill
 

@@ -17,42 +17,37 @@ Voice skills are `voice-skills/<name>/SKILL.md` (+ `LEARNINGS.md`);
 conventions are in `voice-skills/README.md` — read it before writing a
 skill. Never touch `skills/` (Jacob's Mac-side dev skills).
 
-## Corrections and lessons → main, immediately
+## Every change → main, immediately
 
-For "the X skill got Y wrong" or "remember that Z": append one dated line
-to that skill's `LEARNINGS.md` — never edit SKILL.md for a one-off:
+All voice-skill work — corrections, new skills, rewrites — commits to
+`main` and goes live at once; Jacob reviews after the fact
+(`make review-jarvis` on his Mac). Pull first, push when done:
 
 ```
 ssh jacob@100.103.224.99 'cd ~/jarvis-skills \
-  && echo "- $(date +%F): <what happened> → <what to do instead>" >> voice-skills/<name>/LEARNINGS.md \
-  && git add -A && git commit -m "learn(<name>): <short summary>" \
+  && git pull --rebase origin main \
+  && <edits under voice-skills/ — heredocs or a script via ssh> \
+  && git add -A && git commit -m "<type>(<name>): <what and why>" \
   && git push origin main'
 ```
 
-If the push is rejected, `git pull --rebase origin main` and push again.
-Then tell Jacob it's saved and takes effect on his next request.
+Commit types: `learn(<name>)` for LEARNINGS.md appends, `skill(<name>)`
+for new or changed skills. If the push is rejected, `git pull --rebase
+origin main` and push again. Then tell Jacob it's saved and takes effect
+on his next request.
 
-## New skills and rewrites → the `jarvis` branch for review
+Rules that keep auto-merge safe:
 
-Bigger changes (a new skill, restructuring a SKILL.md) don't go live
-unreviewed. Work on the `jarvis` branch and **always leave the clone on
-main** — the working tree is what's live:
-
-```
-ssh jacob@100.103.224.99 'cd ~/jarvis-skills \
-  && git checkout -B jarvis origin/main'
-# ... edit under voice-skills/<name>/ (heredocs or a script via ssh) ...
-ssh jacob@100.103.224.99 'cd ~/jarvis-skills \
-  && git add -A && git commit -m "skill(<name>): <what and why>" \
-  && git push -u origin jarvis --force-with-lease \
-  && git checkout main'
-```
-
-Then tell Jacob the skill is on the jarvis branch waiting for his review on
-the Mac. Keep new skills small: description written as a trigger ("Use
-when …"), body only what an agent would otherwise get wrong, a LEARNINGS.md
-seeded empty, and no `disable-model-invocation` — voice skills must
-auto-trigger.
+- For "the X skill got Y wrong" or "remember that Z": append one dated
+  line (`- YYYY-MM-DD: <what happened> → <what to do instead>`) to that
+  skill's `LEARNINGS.md` — never edit SKILL.md for a one-off.
+- Only touch `voice-skills/`. Never `skills/`, `install.py`, the Makefile,
+  or `scripts/` — if a task needs that, say it needs Jacob's Mac.
+- Keep new skills small: description written as a trigger ("Use when …"),
+  body only what an agent would otherwise get wrong, a LEARNINGS.md seeded
+  empty, and no `disable-model-invocation` — voice skills must
+  auto-trigger.
+- Commit messages carry the why — they're Jacob's review trail.
 
 ## Improving this skill
 

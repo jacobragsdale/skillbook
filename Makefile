@@ -10,10 +10,10 @@ deploy:
 	ssh $(SERVER) 'git -C ~/jarvis-skills pull --ff-only \
 		&& bash ~/jarvis-skills/scripts/install-server.sh'
 
-# Review anything jarvis drafted on its branch.
+# Post-hoc review: jarvis commits straight to main (author "jarvis").
 review-jarvis:
-	git fetch origin jarvis
-	git log --oneline main..origin/jarvis
-	git diff main...origin/jarvis
+	git pull --rebase origin main
+	git log --author=jarvis --oneline -15
+	@echo "(git show <sha> for any of the above)"
 
 .PHONY: deploy review-jarvis
