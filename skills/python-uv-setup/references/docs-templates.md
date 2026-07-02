@@ -56,7 +56,9 @@ before `uv sync`, double-sync for no-build-isolation packages, etc.>
 ## AGENTS.md skeleton
 
 Keep it short and command-first — an agent should be productive from this
-file alone without reading the README.
+file alone without reading the README. (This is the quick Python-specific
+version; for a thorough, interview-driven AGENTS.md, use the `agents-md`
+skill.)
 
 ```markdown
 # AGENTS.md
