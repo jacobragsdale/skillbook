@@ -7,13 +7,16 @@ the open standard.
 ## Layout
 
 ```
-skills/                    # canonical source of truth — one folder per skill
+skills/                    # Mac-side dev skills — one folder per skill
   jacob-create-skill/      # meta-skill: creates and improves other skills
     SKILL.md               # instructions (loaded when the skill triggers)
     LEARNINGS.md           # dated corrections from real use (self-improvement)
     scripts/               # self-contained uv/PEP 723 scripts
     references/            # docs loaded on demand
-install.py                 # symlinks each skill into agent skill directories
+voice-skills/              # jarvis (voice assistant) skills — see its README
+install.py                 # symlinks skills/ into agent skill directories
+scripts/install-server.sh  # symlinks voice-skills/ into ~/.codex/skills (server)
+Makefile                   # `make deploy` = sync voice skills to the server
 ```
 
 ## Install
@@ -29,6 +32,16 @@ uv run install.py --uninstall
 Per-skill symlinks mean edits in this repo take effect everywhere
 immediately, and each skill's `LEARNINGS.md` stays versioned here. Re-run
 after adding a new skill.
+
+## Voice skills (jarvis)
+
+`voice-skills/` deploys to the home server over git, not symlinks: the
+server keeps a clone at `~/jarvis-skills` with a write deploy key, because
+jarvis edits its own skills by voice — learnings commit to `main`, new or
+rewritten skills land on the `jarvis` branch. `make deploy` pushes, pulls
+the server clone, and relinks; `make review-jarvis` shows what jarvis has
+drafted. Conventions differ from dev skills — read `voice-skills/README.md`
+before writing one.
 
 ## Creating a skill
 
