@@ -25,9 +25,10 @@ whole release process — skills are read per-session, no restart needed.
   service down that Jacob didn't explicitly name must end the turn asking
   for confirmation instead of acting.
 - **Edits happen on the server clone, by jarvis itself** (see
-  `jarvis-skill-work`): learnings go straight to `main`, new skills and
-  SKILL.md rewrites go to the `jarvis` branch for review on the Mac.
-  On the Mac, treat `git pull` as part of editing this directory.
+  `jarvis-skill-work`): everything commits straight to `main` — jarvis
+  updates itself without the laptop, Jacob reviews after the fact with
+  `make review-jarvis`. On the Mac, treat `git pull` as part of editing
+  this directory.
 
 Everything else (LEARNINGS.md loop, description-as-trigger, short bodies,
 one skill one job) follows the house process in
