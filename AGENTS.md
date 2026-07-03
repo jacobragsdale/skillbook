@@ -20,3 +20,6 @@ Rules:
   SKILL.md is a deliberate, reviewed step.
 - One skill, one job. If a change makes a skill's description need an "and",
   split it.
+- `metrics/` and `learnings/<user>` branches are machine-written (hook +
+  daily harvest job — see README). Never hand-edit metrics files; learnings
+  PRs are reviewed by a human before merge.
