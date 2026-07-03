@@ -1,6 +1,6 @@
 # basedpyright rule catalog and mechanics
 
-Researched 2026-07-01 against basedpyright docs (`https://docs.basedpyright.com/latest/`).
+Researched 2026-07-03 against basedpyright docs (`https://docs.basedpyright.com/latest/`).
 Rules shift between releases — when a rule here doesn't match what triage
 prints, trust the installed version's docs
 (`https://docs.basedpyright.com/latest/configuration/config-files/` has the
@@ -18,14 +18,18 @@ per-mode rule matrix).
   syntax errors), `range.start/end.line/character` (zero-based).
 - Exit: 0 clean, 1 errors, 2 internal fatal, 3 config unreadable, 4 bad CLI.
 - `--level error` hides warnings; `--threads` parallelizes.
-- Default mode when unconfigured is `recommended` (harsher than strict, and
-  `failOnWarnings = true`) — always set the mode explicitly.
+- Default mode when unconfigured is `recommended`, not Pyright-style
+  `standard` or `basic`. `recommended` enables all diagnostic rules as
+  errors or warnings, and `failOnWarnings = true` makes warnings fail the
+  CLI. Always set the mode explicitly so reviewers know this was intentional.
 
 ## Config quick reference (`[tool.basedpyright]`)
 
-- Mode ladder: `off < basic < standard < strict < recommended < all`
-  (recommended/all are basedpyright-only; recommended = all rules with
-  error/warning severity split + failOnWarnings).
+- Modes: `off`, `basic`, `standard`, `strict`, `recommended`, `all`.
+  `recommended` and `all` are basedpyright-only. Do not treat the list as a
+  simple severity ladder: `recommended` is broader than `strict`, but it
+  downgrades many typing-hygiene diagnostics from errors to warnings while
+  keeping the CLI failing through `failOnWarnings`.
 - Per-rule override: `reportX = "error" | "warning" | "information" | "none"`.
 - `strict = ["src/core"]` — per-path strict; `executionEnvironments` give
   per-dir rule overrides but NOT per-env typeCheckingMode (open issue #1638).
@@ -34,6 +38,36 @@ per-mode rule matrix).
 - File pragmas override config: `# pyright: strict`,
   `# pyright: basic, reportPrivateUsage=false`.
 - A `pyrightconfig.json` silently takes precedence over pyproject.toml.
+
+## Recommended vs strict defaults
+
+Default `recommended` gives these settings that `strict` does not:
+
+| Setting | recommended effect |
+|---|---|
+| `deprecateTypingAliases` | Flags deprecated `typing.List`, `typing.Dict`, etc. |
+| `strictGenericNarrowing` | Narrows generic type parameters more strictly. |
+| `enableTypeIgnoreComments = false` | Discourages `# type: ignore`; use `# pyright: ignore[rule]`. |
+| `failOnWarnings = true` | Warnings make CLI/CI exit nonzero. |
+
+Rules enabled by `recommended` that are not enabled by `strict` include:
+`reportPropertyTypeMismatch`, `reportImportCycles`,
+`reportEmptyAbstractUsage`, `reportMissingSuperCall`,
+`reportUninitializedInstanceVariable`, `reportCallInDefaultInitializer`,
+`reportImplicitStringConcatenation`, `reportUnusedCallResult`,
+`reportUnnecessaryTypeIgnoreComment`, `reportImplicitOverride`,
+`reportAny`, `reportExplicitAny`, `reportIgnoreCommentWithoutRule`,
+`reportInvalidCast`, `reportImplicitRelativeImport`,
+`reportPrivateLocalImportUsage`, `reportUnsafeMultipleInheritance`,
+`reportImplicitAbstractClass`, `reportUnannotatedClassAttribute`,
+`reportInvalidAbstractMethod`, and `reportSelfClsDefault`.
+
+`recommended` also downgrades some `strict` errors to warnings, but
+`failOnWarnings = true` still makes them fail the CLI. Common examples:
+`reportUnusedImport`, `reportUnusedVariable`,
+`reportUntypedFunctionDecorator`, `reportPrivateUsage`,
+`reportUnknownVariableType`, `reportMissingParameterType`,
+`reportUnnecessaryCast`, and `reportMatchNotExhaustive`.
 
 ## Baseline mechanics (read before --writebaseline)
 
@@ -62,7 +96,8 @@ per-mode rule matrix).
 | reportImplicitRelativeImport | `import foo` in a package → `from . import foo`. Check the module isn't also run as a script first. |
 | reportUnusedCallResult | Assign to `_ = f(...)`. Teams often disable this rule instead. |
 | reportIgnoreCommentWithoutRule | Add the rule name into the brackets. |
-| reportDeprecated / reportTypeCommentUsage | Modernize (type comments → real annotations). |
+| reportImplicitStringConcatenation | Make the concatenation explicit or add a separator if it was a real missing-comma bug. |
+| reportDeprecated / reportTypeCommentUsage | Modernize deprecated typing aliases / type comments into current annotations. |
 
 ## Tier B — the checker may be right; judgment per site
 
@@ -71,7 +106,10 @@ per-mode rule matrix).
 | reportOptional{MemberAccess,Subscript,Call,Iterable,Operand} | `T \| None` used as `T`. Ladder: source annotation lie → fix it; impossible-here → `pyright: ignore[rule]`; genuinely reachable → latent bug, FLAG. The single most common strict-mode error class. |
 | reportAttributeAccessIssue | Annotation too wide (fix: narrow / Protocol / overloads) or a real typo/dead path (FLAG as bug). |
 | reportArgumentType / reportCallIssue / reportAssignmentType / reportReturnType / reportIndexIssue / reportOperatorIssue | Declared types disagree. Usually the annotation is the lie (e.g. `-> str` that returns `str \| None`) — correcting it is safe and surfaces the callers that were always broken. Code wrong → FLAG. |
+| reportPropertyTypeMismatch / reportInvalidCast | Types claim incompatible truths. Correct lying annotations first; if runtime truth is out-of-band, prefer `pyright: ignore[rule]` with a comment over a cast. |
 | reportPossiblyUnboundVariable | Assigned only in some branches. No pure-annotation fix exists: pre-initializing changes a NameError crash into a flowing value. Use `pyright: ignore[reportPossiblyUnboundVariable]` and FLAG if the unbound path looks reachable. |
+| reportImportCycles | Usually needs dependency-direction design, not a drive-by edit. Use `TYPE_CHECKING` for annotation-only cycles; otherwise flag. |
+| reportSelfClsDefault / reportInvalidAbstractMethod / reportEmptyAbstractUsage | Class model smells. Fix only if the intended abstraction is obvious and behavior stays unchanged; otherwise flag or disable. |
 | reportUnnecessaryComparison / reportUnnecessaryIsInstance / reportUnnecessaryContains / reportUnreachable | "Dead" per the declared types — but on a freshly typed repo the types are often the lie. Never delete the code in this pass: fix the annotation or ignore-with-rule. |
 
 ## Tier C — Any-policing (basedpyright-exclusive)
@@ -82,12 +120,15 @@ and list re-enabling them as a next ratchet in the report.
 
 ## Tier D — commonly suppressed on legacy repos
 
-`reportUnusedCallResult`, `reportMissingSuperCall`,
+`reportUnusedImport`, `reportUnusedVariable`, `reportUnusedCallResult`,
+`reportCallInDefaultInitializer`, `reportMissingSuperCall`,
 `reportUnnecessaryTypeIgnoreComment` (known false positives around
 overloads, issue #496), `reportUninitializedInstanceVariable`,
 `reportUnsafeMultipleInheritance`, `reportImplicitAbstractClass` (its "fix"
-— adding an ABC base — is behavior-modifying: instantiation starts raising).
-Downgrade to `"none"` with a config comment rather than scattering ignores.
+— adding an ABC base — is behavior-modifying: instantiation starts raising),
+`reportMatchNotExhaustive`, and `reportPrivateUsage`. Downgrade to `"none"`
+with a config comment rather than scattering ignores when fixing would change
+runtime behavior or public API shape.
 
 ## Ignore-comment semantics (why the skill bans bare ignores)
 

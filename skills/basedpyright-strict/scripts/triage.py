@@ -5,16 +5,17 @@
 # ///
 """Run basedpyright (via uvx) and print a deterministic, tiered triage report.
 
-Groups error diagnostics by rule (with a safety tier) and by file, so fixes
-can proceed cheapest-safe-first. Save raw output with --json and compare a
-later run against it with --diff to prove no new errors were introduced.
+Groups failing diagnostics by rule (with a safety tier) and by file, so
+fixes can proceed cheapest-safe-first. Save raw output with --json and
+compare a later run against it with --diff to prove no new diagnostics were
+introduced.
 
 Tiers: A = mechanical, always runtime-safe fix; B = judgment per site (the
 checker may have found a real bug); C = Any-policing; ? = unmapped rule
 (see references/rules.md); D = commonly suppressed on legacy repos.
 
-Exit codes: 0 = no errors reported, 1 = errors present, 2 = basedpyright
-itself failed (config/CLI/internal error).
+Exit codes: 0 = no failing diagnostics reported, 1 = diagnostics present,
+2 = basedpyright itself failed (config/CLI/internal error).
 """
 
 import argparse
@@ -42,7 +43,10 @@ TIERS: dict[str, str] = {
     "reportArgumentType": "B", "reportCallIssue": "B",
     "reportAssignmentType": "B", "reportReturnType": "B",
     "reportIndexIssue": "B", "reportOperatorIssue": "B",
+    "reportPropertyTypeMismatch": "B", "reportInvalidCast": "B",
     "reportPossiblyUnboundVariable": "B", "reportUnboundVariable": "B",
+    "reportImportCycles": "B", "reportSelfClsDefault": "B",
+    "reportInvalidAbstractMethod": "B", "reportEmptyAbstractUsage": "B",
     "reportUnnecessaryComparison": "B",
     "reportUnnecessaryIsInstance": "B", "reportUnnecessaryContains": "B",
     "reportRedeclaration": "B", "reportConstantRedefinition": "B",
@@ -51,8 +55,11 @@ TIERS: dict[str, str] = {
     "reportAny": "C", "reportExplicitAny": "C",
     # Tier D — commonly suppressed on legacy repos
     "reportMissingSuperCall": "D", "reportUnnecessaryTypeIgnoreComment": "D",
-    "reportUninitializedInstanceVariable": "D",
+    "reportUninitializedInstanceVariable": "D", "reportUnusedImport": "D",
+    "reportUnusedVariable": "D", "reportCallInDefaultInitializer": "D",
     "reportUnsafeMultipleInheritance": "D", "reportImplicitAbstractClass": "D",
+    "reportMatchNotExhaustive": "D", "reportPrivateUsage": "D",
+    "reportUntypedFunctionDecorator": "D", "reportUnnecessaryCast": "D",
 }
 TIER_SORT = {"A": 0, "B": 1, "?": 2, "C": 3, "D": 4}
 
@@ -94,19 +101,21 @@ def main() -> int:
     parser.add_argument("--project", "-p", help="repo root / config location")
     parser.add_argument("--json", type=Path, metavar="OUT", help="save raw basedpyright JSON snapshot here")
     parser.add_argument("--diff", type=Path, metavar="OLD", help="compare against a previous --json snapshot")
-    parser.add_argument("--include-warnings", action="store_true", help="triage warnings too (default: errors only)")
+    parser.add_argument("--errors-only", action="store_true",
+                        help="triage only errors; use only for explicit error-only adoption")
+    parser.add_argument("--include-warnings", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
 
     data = run_basedpyright(args.paths, args.project)
     if args.json:
         args.json.write_text(json.dumps(data, indent=1))
 
-    wanted = {"error"} | ({"warning"} if args.include_warnings else set())
+    wanted = {"error"} if args.errors_only else {"error", "warning"}
     diags = [d for d in data["generalDiagnostics"] if d["severity"] in wanted]
     s = data["summary"]
     print(f"basedpyright {data.get('version', '?')} | files {s['filesAnalyzed']} | "
           f"errors {s['errorCount']} | warnings {s['warningCount']}"
-          + ("" if args.include_warnings else " (triaging errors only)"))
+          + (" (triaging errors only)" if args.errors_only else " (triaging errors + warnings)"))
 
     by_rule: dict[str, list[dict]] = defaultdict(list)
     for d in diags:
@@ -121,7 +130,7 @@ def main() -> int:
             print(f"{rule:<40} {tier:<4} {len(ds):<6} {top}")
 
         dense = Counter(rel(d["file"]) for d in diags)
-        print("\nError-dense files (cascade candidates — fix boundary signatures here first):")
+        print("\nDiagnostic-dense files (cascade candidates — fix boundary signatures here first):")
         for f, n in dense.most_common(5):
             print(f"  {n:>5}  {f}")
 
@@ -136,7 +145,7 @@ def main() -> int:
             line = d["range"]["start"]["line"] + 1
             print(f"  NEW {rel(d['file'])}:{line} {d.get('rule', 'syntax')}: {d['message'].splitlines()[0]}")
         if introduced:
-            print("  ^ new errors — a fix above removed a lying annotation (good: now fix the truth)"
+            print("  ^ new diagnostics — a fix above removed a lying annotation (good: now fix the truth)"
                   " or was wrong (bad: revert). Inspect before proceeding.")
 
     return 1 if diags else 0

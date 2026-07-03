@@ -1,16 +1,22 @@
 ---
 name: basedpyright-strict
-description: Set up strict basedpyright type checking on a Python repo and fix the resulting type errors without changing runtime behavior. Use when the user mentions basedpyright or pyright, strict typing or strict mode, fixing type errors, adding type annotations across a repo, or a type-error baseline.
+description: Set up basedpyright type checking on a Python repo, defaulting to recommended mode and strict only on request, then fix failing diagnostics without changing runtime behavior. Use when the user mentions basedpyright or pyright, strict typing, recommended mode, fixing type errors, or a type baseline.
 disable-model-invocation: true
 ---
 
-# Strict type checking with basedpyright
+# basedpyright type checking
 
-Turn on `typeCheckingMode = "strict"` for a Python repo and drive the error
-count down using only fixes that cannot change runtime behavior. basedpyright
-runs through `uvx` — nothing is installed into the project except `types-*`
-stub dev-dependencies. This skill gates on **error-severity diagnostics
-only**; warnings are a later ratchet, offered in the final report.
+Default to `typeCheckingMode = "recommended"`, not `strict`. In current
+basedpyright, unconfigured/plain basedpyright already means `recommended`:
+all diagnostic rules are enabled as errors or warnings, and
+`failOnWarnings = true` makes warnings fail the CLI. `strict` is narrower
+than `recommended` in some basedpyright-exclusive areas, even though it
+reports some shared rules as errors that `recommended` reports as warnings.
+
+Use `strict` only when the user explicitly asks for it. basedpyright runs
+through `uvx` — nothing is installed into the project except `types-*` stub
+dev-dependencies. This skill gates on **failing diagnostics**: errors plus
+warnings when `failOnWarnings` applies.
 
 **Before executing, read `LEARNINGS.md` in this skill's folder** — entries
 there override the instructions below.
@@ -38,7 +44,9 @@ there override the instructions below.
 
 Run `setup_config.py` in the repo root. Exit 2 means config already exists
 (a `pyrightconfig.json` silently overrides pyproject — reconcile into one
-place); keep `typeCheckingMode = "strict"` either way.
+place); keep `typeCheckingMode` explicit. The script writes
+`typeCheckingMode = "recommended"` by default; pass `--mode strict` only
+when the user explicitly requested strict mode.
 
 ## Step 2 — Triage and plan
 
@@ -46,17 +54,20 @@ place); keep `typeCheckingMode = "strict"` either way.
 uv run <skill>/scripts/triage.py --project <repo> --json /tmp/tri-0.json
 ```
 
-Report to the user before fixing anything: total errors, the rule/tier
-table, and the plan. Fix everything feasible; if volume or Tier B judgment
-sites make zero infeasible, say which portion will be baselined at the end.
-The baseline is the remainder, never the strategy — do not skip to it.
+Report to the user before fixing anything: total errors and warnings, the
+rule/tier table, and the plan. `triage.py` includes warnings by default
+because recommended mode fails on warnings; pass `--errors-only` only for an
+explicitly error-only/strict adoption. Fix everything feasible; if volume or
+Tier B judgment sites make zero infeasible, say which portion will be
+baselined or explicitly rule-disabled at the end. The baseline is the
+remainder, never the strategy — do not skip to it.
 
 ## Step 3 — Fix, in this order
 
 Each numbered batch is one commit. After each batch:
-`triage.py --diff <last-snapshot>` — zero NEW errors allowed; save a fresh
-snapshot. While iterating inside a batch, pass just the touched files to
-`triage.py` for fast subset checks; full run at the commit.
+`triage.py --diff <last-snapshot>` — zero NEW failing diagnostics allowed;
+save a fresh snapshot. While iterating inside a batch, pass just the touched
+files to `triage.py` for fast subset checks; full run at the commit.
 
 1. **Stubs**: `uv add --dev types-<pkg>` for each `reportMissingTypeStubs`;
    `allowedUntypedLibraries` in config for libs with no stubs. Never
@@ -72,7 +83,9 @@ snapshot. While iterating inside a batch, pass just the touched files to
    policy per site.
 5. **Remainder**: `uvx basedpyright --writebaseline -p <repo>`, commit
    `.basedpyright/baseline.json`. Read the baseline notes in
-   `references/rules.md` first.
+   `references/rules.md` first. For broad recommended-mode hygiene rules
+   that require behavior-changing edits, prefer an explicit config override
+   with a comment over scattering ignores.
 
 ## Fix policy
 
@@ -105,6 +118,8 @@ snapshot. While iterating inside a batch, pass just the touched files to
 - Bare `# type: ignore` or bare `# pyright: ignore` (basedpyright disables
   `type: ignore` by default; leave it disabled).
 - `Any` or `cast` used to silence an error you cannot explain.
+- Deleting imports, variables, calls, or branches only because a warning says
+  they are unused — removal can drop import side effects or observable work.
 
 **Escape-hatch ladder — take the first rung that truthfully applies:**
 
@@ -115,7 +130,7 @@ snapshot. While iterating inside a batch, pass just the touched files to
    REQUIRED same-line comment stating the invariant.
 5. `Any` in the smallest possible scope; never on a public API.
 
-**When strict mode reveals a real bug** (a reachable None-deref, a genuine
+**When basedpyright reveals a real bug** (a reachable None-deref, a genuine
 typo): do not fix the behavior in this pass — the typing change must stay
 mechanically reviewable. Suppress, flag with the exact format below, and put
 it in the final report:
@@ -143,7 +158,8 @@ send(user.email)        # error: reportOptionalMemberAccess
 
 All four, in order:
 
-- [ ] `triage.py` full run: 0 errors, or only the baselined remainder.
+- [ ] `triage.py` full run: 0 failing diagnostics, or only the baselined /
+      explicitly rule-disabled remainder.
 - [ ] Test suite: identical result to the Step 0 run.
 - [ ] `audit_diff.py` clean — or every finding restated in the report.
 - [ ] Commits are per-batch and mechanical (one rule/module per commit).
@@ -152,11 +168,11 @@ End with this report (all sections REQUIRED):
 
 ```markdown
 ## basedpyright-strict report
-- Before: <N> errors | After: <M> errors | Baselined: <K>
+- Before: <N> failing diagnostics | After: <M> | Baselined/disabled: <K>
 - Commits: <one line each>
 - Flagged sites needing your decision:
   | file:line | rule | why risky | proposed real fix |
-- Suggested next ratchets: warnings pass / failOnWarnings, recommended mode, reportAny
+- Suggested next ratchets: stricter severity for chosen warnings / reportAny cleanup / remove temporary rule disables
 ```
 
 ## Improving this skill

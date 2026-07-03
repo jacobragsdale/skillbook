@@ -3,7 +3,7 @@
 # requires-python = ">=3.11"
 # dependencies = ["tomlkit"]
 # ///
-"""Write [tool.basedpyright] strict config into a repo's pyproject.toml.
+"""Write [tool.basedpyright] recommended config into a repo's pyproject.toml.
 
 Refuses (exit 2) when type-checker config already exists — a pyrightconfig.json
 (which silently takes precedence over pyproject.toml) or an existing
@@ -20,8 +20,8 @@ import tomlkit
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", default=".", help="repo root (default: cwd)")
-    parser.add_argument("--mode", default="strict", choices=["strict", "recommended", "all", "standard"],
-                        help="typeCheckingMode to set (default: strict)")
+    parser.add_argument("--mode", default="recommended", choices=["recommended", "strict", "all", "standard"],
+                        help="typeCheckingMode to set (default: recommended)")
     args = parser.parse_args()
 
     root = Path(args.project)
