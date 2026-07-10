@@ -1,127 +1,162 @@
-# Skill-writing best practices (distilled research, July 2026)
+# Skill-writing best practices
 
-Condensed from Anthropic's engineering guidance, the agentskills.io spec,
-Jesse Vincent's `writing-skills` (obra/superpowers), Simon Willison's skills
-coverage, and HN/community threads. Sources at the bottom.
+Primary-source synthesis, verified 2026-07-09. House policy is called out as
+house policy rather than attributed to the open specification.
 
-## Progressive disclosure — the core mechanic
+## Contents
 
-Three loading tiers; write for each:
+- Evidence before instructions
+- Coherent scope
+- Progressive disclosure
+- Descriptions and the 250-character budget
+- Calibrating control
+- Scripts and resources
+- Evaluation layers
+- Target portability
+- Maintenance
+- Primary sources
 
-1. **Frontmatter** (`name` + `description`) — always in context, ~30 tokens
-   per installed skill. This is the *only* thing the router sees.
-2. **SKILL.md body** — loaded when the skill triggers. Target < 300 lines;
-   hard stop 500 (community reports accuracy degrading past that).
-3. **`scripts/` / `references/` / `assets/`** — loaded or executed only on
-   demand. Unlimited size. Every reference needs an explicit pointer in the
-   body: "Read `references/x.md` when Y."
+## Evidence before instructions
 
-## Descriptions trigger, they don't summarize
+Create a skill from evidence that a capable agent would otherwise lack:
 
-- Pattern: one clause on what it does, then "Use when …" listing the concrete
-  phrases, symptoms, and error messages a user would actually type.
-- Observed failure mode: when the description summarizes the workflow, agents
-  follow the description and never load the body.
-- Routers may truncate around 250 characters — front-load.
-- Bad: "For async testing." Good: "Use when tests have race conditions,
-  timing dependencies, or pass/fail inconsistently."
-- Undertriggering is the common failure; be deliberately pushy about contexts.
+- a completed task transcript or recorded demonstration;
+- recurring corrections, failures, or wasted execution paths;
+- project artifacts such as runbooks, schemas, issue history, code review,
+  patches, or incident reports; or
+- a representative baseline run without the skill.
 
-## Only non-default information
+Do not make the user restate evidence already present in the conversation or
+repository. Extract an intent brief, propose answers, and ask only about gaps.
+If no evidence exists, perform the task once without a skill before encoding it.
 
-A skill competes with the model's own competence. Every line should push the
-agent away from a default it would otherwise follow. If a capable agent would
-do it anyway, delete the line. Skills accrete — prune on every edit.
+## Coherent scope
 
-## Scripts over prose
+One skill should represent one coherent capability, like a well-named function.
+The presence of "and" does not prove a split is needed: querying a database and
+formatting the result may be one useful workflow. Split when parts have distinct
+triggers, outputs, dependencies, owners, or useful independent lives.
 
-Deterministic work (parsing, validation, scaffolding, format conversion, API
-sequences) belongs in executable scripts, not instructions. "Be careful to X"
-in prose is a smell that X wanted a script. Scripts let the agent spend turns
-on composition instead of reconstruction — and they're testable.
+Start narrow and consolidate only after task evaluations show that a broader
+skill performs at least as well as its focused predecessors.
 
-House pattern: single-file Python with PEP 723 inline metadata, run via
-`uv run` — no venv, no setup prose:
+## Progressive disclosure
 
-```python
-#!/usr/bin/env -S uv run --script
-# /// script
-# requires-python = ">=3.11"
-# dependencies = ["httpx"]
-# ///
-```
+Use three loading tiers:
 
-Always state whether the agent should **run** or **read** each bundled file.
+1. `name` and `description` — discovery metadata.
+2. `SKILL.md` — core procedure loaded when invoked.
+3. `scripts/`, `references/`, and `assets/` — used only when needed.
 
-## One skill, one job
+Keep `SKILL.md` under 300 lines as a house target and under the open standard's
+500-line/5,000-token recommendation. Link references directly from `SKILL.md`
+and state when to read each one. Avoid reference-to-reference chains. Give any
+reference over 100 lines a table of contents.
 
-Describable in ten words. A handful of focused skills outperforms hundreds of
-overlapping ones (each installed skill costs idle tokens and routing
-ambiguity). Mixed concerns in one skill cause both over- and under-triggering.
+## Descriptions and the 250-character budget
 
-## Guidance form must match failure type
+This repository treats the first 250 description characters as the portable
+routing budget even though individual clients may expose more. Put the concrete
+job and `Use when ...` triggers there. Describe user intent, symptoms, formats,
+and relevant error text—not the internal workflow.
 
-| Observed failure | Right form | Wrong form |
-|---|---|---|
-| Agent skips a rule under pressure | Hard prohibition + the rationalizations it will try | "Prefer / consider" |
-| Wrong output shape | Exact template with REQUIRED fields | List of prohibitions |
-| Omissions | Checklist | Prose reminders |
+Separate description evaluation from task evaluation:
 
-No nuance clauses: "don't X unless it matters" reopens the negotiation the
-rule was written to close. Enumerate real exceptions or state the rule flat.
+- Minimum: three should-trigger messages and three near-misses, judged only
+  against the name and first 250 description characters.
+- Auto-triggered skill: run those prompts through each target client and inspect
+  whether it actually loads `SKILL.md`.
+- High-value auto-triggered skill: use roughly 20 balanced queries, three runs
+  per query, and a fixed 60/40 train/validation split.
 
-## Skills encode verified success, not speculation
+Real prompts vary in formality, explicitness, detail, typos, and whether the
+relevant task is buried inside a longer workflow. Negative cases should share
+vocabulary but need a different capability.
 
-The sharpest 2026 critique: asking a fresh agent to write a skill for a task
-nobody has struggled with produces restated defaults ("the PB&J problem" —
-you don't know what's hard until you've struggled). Write skills from real
-transcripts: what actually went wrong, what actually fixed it. Corollary for
-self-improvement: a learnings entry is valuable only when tied to a verified
-failure or an explicit user correction.
+## Calibrating control
 
-## The learnings loop
+Match instruction form to the observed failure:
 
-Endorsed pattern for skills that improve over time:
+| Need | Effective form |
+|---|---|
+| Fragile, ordered operation | Exact command or low-parameter script |
+| Preferred pattern with variation | Default plus observable escape condition |
+| Context-dependent judgment | Heuristics and the reason they matter |
+| Repeated omission | Checklist |
+| Exact output shape | Template with required fields |
+| Non-obvious environment fact | Prominent gotcha |
 
-- Keep SKILL.md clean and stable; append dated post-run notes to a sidecar
-  (`LEARNINGS.md`) the agent reads before executing.
-- Corrections take effect immediately (next read) without churning the skill.
-- Periodically *fold*: recurring/confirmed entries move into SKILL.md at the
-  point of the mistake; folded and stale entries are deleted.
-- Store run-history data outside the skill folder if the skill is installed
-  by copy (upgrades wipe it); with symlink installs the folder is the repo,
-  so sidecars are safe and versioned.
+Avoid vague nuance such as "unless it matters." State the default, the condition
+that changes it, and the allowed alternative. Prefer a clear default over a menu
+of equal options.
 
-## Testing without a harness
+## Scripts and resources
 
-Minimum viable rigor for a new skill:
+Bundle a script when the agent repeatedly reconstructs deterministic logic or
+when reliability matters. Scripts should be non-interactive, self-contained or
+explicit about dependencies, documented by `--help`, and fail with actionable
+messages. Use structured output when another step consumes the result.
 
-1. Lint (spec compliance, house rules).
-2. Trigger test: ~3 should-trigger paraphrases + ~3 near-miss should-nots,
-   judged against name + first 250 chars of description only.
-3. Ideally one real task run with the skill, reading the transcript for
-   wasted effort — not just checking the output.
+State whether the agent should run or read every bundled file. Execute each
+script with `--help` and a representative input. Verify rule names, flags,
+configuration keys, API fields, and similar identifiers against the real tool;
+handle version drift deliberately.
 
-Anthropic's skill-creator goes further (with/without-skill A/B runs, grader
-subagents, description-optimization loops); adopt that machinery only when a
-skill is high-stakes enough to justify it.
+For this repository, Python scripts use `uv` plus PEP 723. Outside this
+repository, follow the target project's runtime conventions and declare
+non-obvious requirements in `compatibility`.
 
-## Skills vs MCP (context for scoping)
+## Evaluation layers
 
-Community benchmark: an ~800-token markdown file of `gh` CLI tips
-outperformed ~28,000 tokens of MCP tool schemas. Default to CLI + skill for
-developer workflows; reserve MCP for auth-gated, non-filesystem, or
-customer-facing integrations. Skills handle the "squishy bits" — targeted
-instructions for tools the agent can already run.
+Test four different things rather than treating validation as one gate:
 
-## Sources
+1. **Structure:** frontmatter schema, naming, placeholder removal, local
+   references, script packaging, and target metadata.
+2. **Triggering:** should-trigger and near-miss prompts for auto invocation.
+3. **Task output:** two or three realistic cases with expected outputs and at
+   least one edge case, run in fresh contexts with the skill and a baseline.
+4. **Human quality:** usefulness, clarity, visual quality, and unexpected
+   behavior that mechanical assertions cannot capture.
 
-- https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills
-- https://agentskills.io/specification (the open spec; Cursor implements it)
+For a new skill, the baseline is no skill. For an improved skill, snapshot and
+run the previous version. Add objective assertions after inspecting the first
+outputs so they are observable rather than hypothetical. Read execution traces,
+not only final artifacts: a correct result reached through wasteful exploration
+still reveals a skill problem.
+
+Use one run per case initially for a low-risk personal skill. Repeat runs and
+track pass rate, time, and tokens for high-stakes, side-effecting, auto-triggered,
+or distributed skills. Test coexistence with the surrounding skill set when
+routing collisions are plausible.
+
+## Target portability
+
+The agentskills.io core and vendor extensions are different profiles:
+
+- Strict core accepts only the standard frontmatter fields.
+- Cursor and Claude Code support additional frontmatter fields.
+- Codex keeps invocation policy and UI/tool metadata in `agents/openai.yaml`.
+
+Do not assume unknown frontmatter is harmless: a client may ignore it, while a
+strict validator may reject it. Choose targets during discovery and validate
+each claimed target separately. Read `frontmatter.md` for the current matrix.
+
+## Maintenance
+
+After use, capture only verified surprises or explicit corrections in
+`LEARNINGS.md`. Fold recurring or user-confirmed lessons into the relevant step,
+then remove the sidecar entry. Preserve the existing name, invocation policy,
+and frontmatter while editing unless the user requested a change. Prune prose on
+every revision because skills accrete.
+
+## Primary sources
+
+- https://agentskills.io/specification
+- https://agentskills.io/skill-creation/best-practices
+- https://agentskills.io/skill-creation/evaluating-skills
+- https://agentskills.io/skill-creation/optimizing-descriptions
 - https://cursor.com/docs/skills
-- https://github.com/obra/superpowers — `writing-skills` skill
-- https://simonwillison.net/tags/skills/ (Oct 2025 → 2026 coverage)
-- https://notes.ansonbiggs.com/youre-probably-using-agent-skills-wrong/ (verified-struggle critique)
-- https://www.mindstudio.ai/blog/self-improving-ai-skills-claude-code (learnings loop)
-- https://blog.trashwbin.top/en/posts/cli-vs-mcp-vs-skills/ (token benchmarks)
-- https://pydevtools.com/handbook/how-to/how-to-write-a-self-contained-script/ (PEP 723 + uv)
+- https://code.claude.com/docs/en/skills
+- https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
+- https://github.com/anthropics/skills/tree/main/skills/skill-creator
+- https://learn.chatgpt.com/docs/build-skills

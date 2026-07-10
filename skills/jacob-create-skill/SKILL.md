@@ -8,41 +8,46 @@ disable-model-invocation: true
 
 # Creating and improving agent skills
 
-Build skills that conform to the agentskills.io open standard and work unchanged
-in Cursor (`.agents/skills/`) and Claude Code (`.claude/skills/`). A skill is a
-folder whose name matches the `name:` in its `SKILL.md`, optionally with
-`scripts/`, `references/`, and `assets/` alongside.
+Build skills from the agentskills.io core format plus deliberate target-specific
+extensions for Cursor, Claude Code, and optionally Codex. Do not call a skill
+strictly spec-conformant when its frontmatter contains vendor extensions. A skill
+is a folder whose name matches the `name:` in `SKILL.md`, optionally with
+`scripts/`, `references/`, `assets/`, and product metadata alongside.
 
 **Before doing anything else, read `LEARNINGS.md` in this skill's folder.**
 Entries there are corrections from real use and override anything below.
 
-## Step 1 — Clarify before writing anything
+## Step 1 — Confirm an evidence-backed intent brief
 
-Skills fail more often from fuzzy intent than bad prose. Interview the user
-before scaffolding. Skip a question only if the request already answers it.
+Mine the current conversation, repository, transcripts, examples, and existing
+artifacts before asking questions. Draft answers yourself, ask only about
+unresolved high-impact gaps (one to three questions at a time), then show the
+user the completed brief for confirmation before scaffolding:
 
-1. **The ten-word job.** Ask the user to state what the skill does in one short
-   sentence. If it takes two sentences joined by "and", it is two skills —
-   propose the split.
-2. **Trigger phrases.** What would the user actually type when they want this?
-   And what nearby requests should *not* trigger it? These become the
-   description and the trigger test in Step 5 — they still matter even
-   though skills default to explicit invocation (see Step 3): they're what
-   the agent sees in the `/` menu, and what Step 5 judges if the user later
-   asks to turn auto-triggering on.
-3. **The verified-struggle test.** What has an agent actually gotten wrong
-   doing this task without the skill? Skills encode lessons from verified
-   success, not speculation — a skill written before anyone has struggled is
-   usually restating the model's defaults. If the answer is "nothing yet,
-   I just think it would help", recommend doing the task once without a skill
-   and capturing what was hard, then writing the skill from that.
-4. **Script vs. prose split.** Which parts are deterministic (same input, same
-   output — parsing, validation, scaffolding, API calls)? Those become
-   self-contained scripts. Which parts need judgment? Those stay as prose
-   instructions. "Be careful to X" in prose is a smell that X wanted a script.
-
-Also confirm where the skill lives: this repo's `skills/` directory (installed
-globally via symlinks) or a specific project's `.agents/skills/`.
+1. **Job and boundary.** State the coherent capability in one short sentence.
+   Split it only when parts have different triggers, outputs, dependencies, or
+   useful independent lives; the word "and" alone does not require a split.
+2. **Evidence.** Ground the skill in at least one successful task transcript or
+   demonstration, recurring correction or failure, authoritative project
+   artifact (runbook, schema, issue, review, patch), or baseline task run. If
+   none exists, do the task once without a skill and capture the useful pattern.
+3. **Targets and scope.** Record the intended clients, personal or project
+   location, and explicit or automatic invocation. This repo defaults to
+   explicit invocation in Cursor and Claude Code; Codex uses separate metadata.
+4. **Triggers and near-misses.** Capture realistic user wording, indirect
+   phrasings, and adjacent requests that must use a different skill or no skill.
+5. **Inputs and sources of truth.** Identify files, APIs, schemas, examples,
+   existing conventions, runtime dependencies, and freshness requirements.
+6. **Output and definition of done.** Specify the artifact or response shape,
+   allowed side effects, required verification, and observable success criteria.
+7. **Edges and safety.** Identify a boundary case, likely failure, permissions,
+   destructive or external actions, and behavior the skill must never surprise
+   the user with.
+8. **Resources and freedom.** Put deterministic or repeatedly reconstructed work
+   in scripts; stable detail in references; reusable output material in assets;
+   and judgment in prose. Calibrate each step independently: fragile operations
+   get exact guardrails, while context-dependent work gets a default and a clear
+   decision rule.
 
 ## Step 2 — Scaffold
 
@@ -56,29 +61,33 @@ uv run <this-skill-dir>/scripts/init_skill.py <skill-name> --dir <skills-root>
 This defaults every new skill to `disable-model-invocation: true` (Cursor and
 Claude Code both honor it): explicit `/skill-name` only, never auto-triggered
 from conversation. Pass `--auto-trigger` only when the user has explicitly
-asked for automatic triggering in Step 1 — it is an opt-in, not a default.
+asked for automatic triggering in Step 1. Pass `--strict-core` to omit vendor
+frontmatter, and `--codex` to add Codex's explicit-invocation policy sidecar.
+
+Edit the scaffolded files in place, section by section. Do not replace the full
+`SKILL.md`; preserve its frontmatter and re-read the frontmatter after drafting.
 
 ## Step 3 — Draft the SKILL.md
 
 House rules, and why:
 
-- **The description is a trigger, not a summary.** Routers may only show the
-  first ~250 characters, so front-load "Use when …" with the concrete phrases,
-  symptoms, and error messages from Step 1. Do not describe the workflow in
-  the description — agents that see a workflow summary follow it and never
-  read the body.
-- **Keep the body under 300 lines** (hard limit 500 — reported accuracy drops
-  beyond that). Reference material over ~100 lines moves to `references/`
-  with an explicit pointer: "Read `references/x.md` when Y."
+- **Treat the first 250 description characters as the routing budget.** This is
+  the house portability limit even when a client exposes more. Front-load what
+  the skill does and "Use when …" with concrete intents, symptoms, formats, and
+  error text. Keep workflow steps out of the description.
+- **Keep the body under 300 lines** (house target; the open-spec recommendation
+  is under 500 lines and 5,000 tokens). Move conditional detail to a directly
+  linked reference and state exactly when to read it. Give references over 100
+  lines a table of contents.
 - **Only write what moves the agent off its defaults.** A capable agent
   already knows how to write Python and read docs. Every line should encode
   something it would otherwise get wrong. Delete the rest.
 - **Imperative voice, one excellent worked example.** "Run X, then check Y"
-  beats "the agent should…". One complete input→output example beats five
-  fragments.
-- **No nuance clauses.** "Don't X unless it matters" reopens the negotiation
-  you wrote the rule to close. If a rule has real exceptions, enumerate them;
-  otherwise state it flat.
+  beats "the agent should…". Keep one compact input→output example in the body;
+  keep behavioral test cases outside it.
+- **Replace vague nuance with decision rules.** Avoid "unless it matters."
+  State the default, the observable condition that changes it, and the allowed
+  alternative. Explain why when the task needs contextual judgment.
 - **Match the guidance form to the failure type.** Agent skips a rule → hard
   prohibition, not "prefer". Agent produces the wrong shape → exact template
   with REQUIRED fields, not a prohibition list. Agent forgets things → a
@@ -88,11 +97,11 @@ House rules, and why:
   trigger from conversation) when the user explicitly asked for that in
   Step 1 — never assume it because a skill seems "obviously" auto-triggerable.
 
-### Scripts: uv + PEP 723, always
+### Scripts and tool-specific facts
 
-Every bundled Python script is a self-contained single file with inline
-dependency metadata, runnable anywhere `uv` exists — no venv, no
-`pip install` prose in the skill body:
+For skills in this repository, every bundled Python script is a self-contained
+single file with PEP 723 dependency metadata, runnable through `uv` — no venv
+or `pip install` prose in the skill body:
 
 ```python
 #!/usr/bin/env -S uv run --script
@@ -104,38 +113,74 @@ dependency metadata, runnable anywhere `uv` exists — no venv, no
 
 Rules for skill scripts:
 
-- Run with `uv run scripts/name.py`. Manage deps with
-  `uv add --script scripts/name.py <pkg>`, never by editing prose.
+- Run with `uv run scripts/<name>.py`. Manage dependencies with
+  `uv add --script scripts/<name>.py <pkg>`, never by editing prose.
 - `argparse` with `--help` text good enough that SKILL.md doesn't need to
   restate the flags — the body says *when* to run it, `--help` says *how*.
 - Fail loudly: nonzero exit codes and error messages that say what to fix.
 - In SKILL.md, state for each script whether the agent should **run** it or
   **read** it as reference — agents guess wrong otherwise.
+- Run every script with `--help` and at least one representative input before
+  finishing. When instructions encode rule names, flags, config keys, API
+  fields, or other tool-specific identifiers, execute the real tool once to
+  reconcile them. Handle unknown identifiers with an actionable error or a
+  documented graceful fallback because tool versions drift.
 
-For frontmatter beyond `name` and `description` (Cursor's `paths` and
-`disable-model-invocation`, `allowed-tools`, Claude Code extensions), read
-`references/frontmatter.md` before using a field — support varies by agent.
+For a project-local skill outside this repository, follow that project's
+runtime and packaging conventions. Record non-obvious runtime requirements in
+`compatibility`; do not assume `uv` is installed everywhere.
+
+Before using frontmatter beyond `name` and `description`, read
+`references/frontmatter.md`. Validate strict core, Cursor, Claude Code, and
+Codex behavior separately instead of assuming unknown fields degrade safely.
 
 ## Step 4 — Validate
 
+Run the house profile, or select a target-specific profile:
+
 ```bash
 uv run <this-skill-dir>/scripts/validate_skill.py <path-to-skill-folder>
+uv run <this-skill-dir>/scripts/validate_skill.py --profile core <path>
 ```
 
-Fix every error. Address or consciously accept each warning — the warnings
-encode the house rules above.
+Fix every error. Address or consciously accept each warning. Validation must
+reject unfinished scaffold placeholders, verify target-specific frontmatter
+types, resolve real local references, and check bundled Python headers. Then run
+the scripts and tool-specific checks from Step 3; static lint is not execution.
 
 ## Step 5 — Trigger test
 
-Write six realistic user messages: three that should trigger the skill
-(varied phrasing, not just keyword swaps) and three near-misses that should
-not (share vocabulary but need something else). Judge each against **only the
-name and the first 250 characters of the description** — that is all a router
-sees. Show the user the table of message → expected → verdict. Revise the
-description until all six are correct. Do not fix a trigger miss by making
-the description vaguer; add the missing concrete phrase.
+Write six realistic user messages: three that should trigger the skill (varied
+phrasing, explicitness, and detail) and three near-misses that share vocabulary
+but need something else. Judge each against **only the name and first 250
+description characters**. Show message → expected → verdict and revise by
+general category, not by copying failed-query keywords.
 
-## Step 6 — Wire the learnings loop
+For an explicit-only skill, treat this as catalog and future-auto-trigger
+quality; do not claim automatic invocation was tested. For an auto-triggered
+skill, run the messages through the target client and inspect whether it loaded
+`SKILL.md`. For high-value or distributed skills, expand to roughly 20 balanced
+queries, run each three times, and keep a held-out validation split.
+
+## Step 6 — Forward-test output quality
+
+Triggering and correctness are separate. Create two or three realistic task
+cases with prompts, input files when needed, and a human-readable expected
+output. Include at least one boundary or ambiguous case.
+
+Run each case in a clean context with the skill and against a baseline: no skill
+for a new skill, or a snapshot of the previous version when improving one.
+After the first outputs, add objective assertions only for mechanically
+verifiable qualities; use human review for style, usefulness, and visual quality.
+Compare final artifacts and execution traces. Remove instructions that cause
+wasted paths, and iterate until the skill materially improves the baseline.
+
+For low-risk personal skills, one run per case is enough initially. For
+auto-triggered, high-stakes, side-effecting, or broadly distributed skills,
+repeat runs, record time/tokens when available, and check coexistence with the
+other skills likely to be installed.
+
+## Step 7 — Wire the learnings loop
 
 Every skill you create ships with a `LEARNINGS.md` (the scaffolder seeds it)
 and ends with this exact block:
@@ -155,22 +200,27 @@ directly; lessons are folded in deliberately, not on the fly.
 When asked to improve a skill (or to "fold learnings"):
 
 1. Read its `SKILL.md` and `LEARNINGS.md`.
-2. Fold entries that recur or were explicitly user-confirmed into the body,
+2. Snapshot the current skill outside its folder for the Step 6 baseline.
+3. Preserve the existing directory name, `name`, invocation policy, and other
+   frontmatter unless the user explicitly asked to change them. Edit in place.
+4. Fold entries that recur or were explicitly user-confirmed into the body,
    in the section where the mistake happened. Delete each folded entry.
-3. Delete stale or speculative entries — a lesson that never recurred and
+5. Delete stale or speculative entries — a lesson that never recurred and
    can't be tied to a real failure is noise.
-4. While in there, cut body lines that aren't pulling weight; skills accrete.
-5. Re-run Step 4 and Step 5 before finishing.
+6. Cut body lines that aren't pulling weight; skills accrete.
+7. Re-run Steps 4–6 before finishing.
 
 ## Bundled resources
 
 - `scripts/init_skill.py` — **run** to scaffold a new skill folder.
-- `scripts/validate_skill.py` — **run** to lint a skill against the spec and
-  these house rules.
+- `scripts/validate_skill.py` — **run** to lint core or target-specific
+  frontmatter plus these house rules.
+- `evals/evals.json` and `evals/trigger_queries.json` — **read** when testing
+  this skill; they cover output behavior and the six-message routing minimum.
 - `references/best-practices.md` — **read** when unsure about a design choice
-  (token budgets, description writing, script-vs-prose, sources).
+  (evidence, scope, control, evaluation, token budgets, sources).
 - `references/frontmatter.md` — **read** before using any frontmatter field
-  beyond `name`/`description`.
+  beyond `name`/`description` or adding Codex metadata.
 
 ## Improving this skill
 

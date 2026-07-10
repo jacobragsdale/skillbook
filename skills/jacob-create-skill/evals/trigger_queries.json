@@ -1,0 +1,26 @@
+[
+  {
+    "query": "Make a reusable skill for our release checklist and validation commands.",
+    "should_trigger": true
+  },
+  {
+    "query": "This SKILL.md never activates when uv sync fails. Improve its triggering.",
+    "should_trigger": true
+  },
+  {
+    "query": "Fold the confirmed LEARNINGS.md notes into my API audit skill and validate it.",
+    "should_trigger": true
+  },
+  {
+    "query": "Install the spreadsheet skill from Anthropic's GitHub repository.",
+    "should_trigger": false
+  },
+  {
+    "query": "Write an AGENTS.md with this repository's build and test commands.",
+    "should_trigger": false
+  },
+  {
+    "query": "Use the existing PDF skill to extract the tables from this report.",
+    "should_trigger": false
+  }
+]
