@@ -1,0 +1,23 @@
+{
+  "skill_name": "jacob-home-server",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Prowlarr stopped working after last night's maintenance. Diagnose the cause and tell me what happened, but do not change or restart anything.",
+      "expected_output": "The agent reads the skill learnings and routine operations reference, checks local repo status and relevant intent, uses drift/status/maintenance logs/container state and Prowlarr logs to establish the cause, and reports evidence without deploying, restarting, or editing anything.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Add Uptime Kuma to my home server. Keep it Tailscale-only, persist its data, include important state in backups, deploy it, and verify it works.",
+      "expected_output": "The agent checks the whole working tree before deployment, follows current stack conventions, binds the UI to the Tailscale IP, stores data outside the rsync-owned tree, updates backup and service inventory artifacts, validates Compose through SOPS if present, deploys only the new stack while acknowledging full-tree rsync, verifies the endpoint and drift, and avoids unnecessary public-ingress changes.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Retire Beszel from the server, but preserve all of its data in case I change my mind.",
+      "expected_output": "The agent inventories Beszel's homepage, ingress, health, credential, backup, documentation, and data dependencies; brings the compose project down while its deployed definition still exists and without --volumes; removes stale repo references; preserves bind data and named volumes; deploys affected shared stacks; and verifies no orphaned route, container, or drift remains.",
+      "files": []
+    }
+  ]
+}

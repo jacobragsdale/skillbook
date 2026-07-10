@@ -1,0 +1,26 @@
+[
+  {
+    "query": "Why did my home server's hourly healthcheck start failing after maintenance?",
+    "should_trigger": true
+  },
+  {
+    "query": "Use the home-server skill to add a private Tailscale-only service and back up its state.",
+    "should_trigger": true
+  },
+  {
+    "query": "Rehearse a fresh home-server rebuild on vmdesktop without touching production.",
+    "should_trigger": true
+  },
+  {
+    "query": "Jarvis runs on my home server; refactor the wake-word detector in its application repo.",
+    "should_trigger": false
+  },
+  {
+    "query": "Write a generic tutorial explaining Docker Compose healthchecks.",
+    "should_trigger": false
+  },
+  {
+    "query": "Recommend a mini PC for a new home lab I haven't built yet.",
+    "should_trigger": false
+  }
+]

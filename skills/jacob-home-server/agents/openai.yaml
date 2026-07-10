@@ -1,0 +1,7 @@
+interface:
+  display_name: "Jacob's Home Server"
+  short_description: "Operate Jacob's declarative home server"
+  default_prompt: "Use $jacob-home-server to diagnose or safely apply this home-server task."
+
+policy:
+  allow_implicit_invocation: false
