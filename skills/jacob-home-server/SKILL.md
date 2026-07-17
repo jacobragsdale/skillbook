@@ -17,7 +17,7 @@ GitHub; a verified commit and push are the configuration backup.
 2. Read `README.md`, `docs/services.md`, and the files that own the requested
    behavior. Do not trust a service list copied into this skill: this repo
    changes quickly.
-3. For current state, run `scripts/drift.sh`. For host health, run
+3. For current state, run `./scripts/drift.sh`. For host health, run
    `ssh 100.103.224.99 'bash ~/home-server/host/scripts/status.sh --summary'`.
    Docs describe intent; scripts and live inspection establish reality.
 4. Classify every target as repo-owned configuration, app-owned runtime data,
@@ -41,8 +41,7 @@ VM operation.
   unrelated, unready dirty change along with the requested work.
 - Never create a plaintext `.env`, inline a secret, write decrypted data to
   disk, or include a decrypted value in output. Edit `*.sops.env` with `sops`;
-  inspect key names only. Treat `host/codex/auth.sops.json` as the documented
-  special case and use `scripts/codex-auth.sh`.
+  inspect key names only.
 - Never put application data under `~/home-server`. Bind it from a separate
   server path recorded in `docs/services.md`.
 - Never delete a volume, bind-mount directory, backup snapshot, media, VM disk,
@@ -66,7 +65,7 @@ VM operation.
 3. Validate locally where possible. For a stack with secrets, run from its
    directory:
    `sops exec-env secrets.sops.env 'docker compose config --quiet'`.
-4. Deploy the narrowest scope: `scripts/deploy.sh <stack>`. Use a full deploy
+4. Deploy the narrowest scope: `./scripts/deploy.sh <stack>`. Use a full deploy
    only when multiple stacks or global behavior require it; remember that both
    forms sync the whole tree. For `host/` changes, deploy first, then run
    `ssh 100.103.224.99 'bash ~/home-server/host/install.sh'`.

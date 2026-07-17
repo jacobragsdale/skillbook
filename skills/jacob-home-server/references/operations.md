@@ -88,9 +88,6 @@ service facts in the home-server repo rather than copying them here.
 - Read the secrets inventory in `docs/services.md` and reset recipes in
   `docs/credentials.md`. Rotate every documented duplicate and downstream
   consumer; a SOPS value is not always the live app credential.
-- After `codex login` on the server, refresh the rebuild seed with
-  `scripts/codex-auth.sh pull`. Treat a push as recovery because it overwrites
-  the live auth file.
 
 ## App-owned and external state
 
