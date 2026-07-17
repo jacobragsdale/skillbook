@@ -12,16 +12,24 @@ Rules:
   finishing so the symlinks in `~/.agents/skills` and `~/.claude/skills`
   stay current. Editing an existing skill needs nothing — symlinks pick it
   up immediately.
+- **Creating or changing a skill?** Follow `skills/jacob-create-skill/SKILL.md`
+  — it is the house process (clarify → scaffold → draft → validate → trigger
+  test → learnings loop).
+- Every skill must pass
+  `uv run skills/jacob-create-skill/scripts/validate_skill.py skills/<name>`
+  before commit. Treat warnings as decisions, not noise.
+- Skills are model-invocable by default (no `disable-model-invocation`
+  field). Add `disable-model-invocation: true` only for skills that must
+  never fire on their own.
 - Keep the skill count low. Fold new material into an existing skill
   (`python-standards` for anything Python tooling/testing related) before
   creating a new one.
-- Every skill folder has `SKILL.md` (frontmatter: `name`, `description`)
-  and `LEARNINGS.md`.
 - All bundled Python is a single file with a PEP 723 `# /// script` header,
   runnable via `uv run` with no environment setup.
-- **Git workflow:** This is a personal repository; when authorized changes are
-  complete and checks pass, commit directly to the main branch and push it —
-  do not create a feature branch or PR unless the user explicitly requests one.
+- **Git workflow:** the `git-ops` skill. In short: work directly on main,
+  commit at every working checkpoint, push after every commit, end every
+  task with a clean working tree — no feature branches or PRs unless the
+  user explicitly requests one.
 - Never edit a skill's SKILL.md to record a one-off correction — append a
   dated line to that skill's `LEARNINGS.md` instead. Folding learnings into
   SKILL.md is a deliberate, reviewed step.
