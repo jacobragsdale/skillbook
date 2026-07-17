@@ -1,0 +1,7 @@
+interface:
+  display_name: "Create or Improve Skills"
+  short_description: "Build and evaluate reusable agent skills"
+  default_prompt: "Use $jacob-create-skill to create or improve an agent skill."
+
+policy:
+  allow_implicit_invocation: false

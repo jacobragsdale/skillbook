@@ -1,7 +1,6 @@
 ---
 name: jacob-home-server
 description: "Operates Jacob's declarative home server safely. Use when checking status/drift, debugging Docker/networking, changing stacks/services or SOPS secrets, deploying host config, handling backups, media, router/Tailscale, Windows VM, or rebuilds."
-disable-model-invocation: true
 ---
 
 # Jacob's home server

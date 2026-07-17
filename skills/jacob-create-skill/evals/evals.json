@@ -1,0 +1,23 @@
+{
+  "skill_name": "jacob-create-skill",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Make me a skill that helps with our database deploys. We have a runbook somewhere in this repo, and agents sometimes run the steps in the wrong order.",
+      "expected_output": "Before creating files, the agent searches for the runbook, drafts an intent brief covering targets, invocation, inputs, output, safety, and success criteria, then asks no more than three unresolved high-impact questions.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Improve my existing review skill and fold its confirmed LEARNINGS.md corrections into the instructions. Keep how I invoke it unchanged.",
+      "expected_output": "The agent snapshots the old skill, preserves its name and invocation frontmatter, folds confirmed lessons in place, prunes stale prose, validates it, runs the six-message 250-character trigger check, and compares realistic task outputs with the old version.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Create a strictly Agent Skills-compliant skill that also stays explicit-only in Codex. Its Python validator depends on PyYAML.",
+      "expected_output": "The agent explains that strict core frontmatter cannot contain vendor invocation fields, scaffolds with --strict-core and --codex, places the Codex policy in agents/openai.yaml, uses a PEP 723 uv script for this repository, and runs both core and Codex validation profiles.",
+      "files": []
+    }
+  ]
+}
