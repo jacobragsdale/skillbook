@@ -1,6 +1,6 @@
 ---
 name: jacob-create-skill
-description: Create, improve, or validate agent skills (SKILL.md folders). Use when the user wants to make a new skill, fix a skill that isn't triggering, review or refactor an existing skill, add scripts to a skill, or fold LEARNINGS.md notes into a skill.
+description: Create, improve, or validate agent skills (SKILL.md folders). Use whenever the user wants to make a new skill, fix one that isn't triggering, review, refactor, or scaffold a skill, add scripts to one, or fold LEARNINGS.md notes in — even if they don't say "skill" but want a reusable agent workflow, checklist, or SOP packaged for reuse.
 metadata:
   author: jacob
 ---
@@ -13,7 +13,7 @@ strictly spec-conformant when its frontmatter contains vendor extensions. A skil
 is a folder whose name matches the `name:` in `SKILL.md`, optionally with
 `scripts/`, `references/`, `assets/`, and product metadata alongside.
 
-**Before doing anything else, read `LEARNINGS.md` in this skill's folder.**
+**Before doing anything else, read `LEARNINGS.md` next to this SKILL.md.**
 Entries there are corrections from real use and override anything below.
 
 ## Step 1 — Confirm an evidence-backed intent brief
@@ -33,7 +33,10 @@ user the completed brief for confirmation before scaffolding:
 3. **Targets and scope.** Record the intended clients, personal or project
    location, and explicit or automatic invocation. This repo defaults to
    automatic invocation (the model triggers the skill from conversation);
-   Codex uses separate metadata.
+   Codex uses separate metadata. If the behavior must hold in *every*
+   session — a standing policy rather than an on-demand procedure — read
+   `references/placement-and-conflicts.md` first: it may belong in an
+   always-on rule, or a rule-plus-skill pair, rather than a skill alone.
 4. **Triggers and near-misses.** Capture realistic user wording, indirect
    phrasings, and adjacent requests that must use a different skill or no skill.
 5. **Inputs and sources of truth.** Identify files, APIs, schemas, examples,
@@ -72,10 +75,22 @@ Edit the scaffolded files in place, section by section. Do not replace the full
 
 House rules, and why:
 
-- **Treat the first 250 description characters as the routing budget.** This is
-  the house portability limit even when a client exposes more. Front-load what
-  the skill does and "Use when …" with concrete intents, symptoms, formats, and
-  error text. Keep workflow steps out of the description.
+- **Front-load the first sentence; keep the whole description under 250
+  characters.** Cursor shows the model only ~80 characters in cloud sessions
+  and trims variably locally, so the first sentence must name the capability
+  and top trigger keywords on its own. Claude Code shows up to 1,536 and
+  Codex budgets 2% of context, so 250 total is safe everywhere (the per-client
+  numbers are tabulated in `references/frontmatter.md`). Follow with
+  "Use when …" listing concrete intents, symptoms, formats, and error text.
+  Keep workflow steps out of the description.
+- **Write the description as a directive trigger in third person.** Models
+  undertrigger skills, so be pushy: "Use when(ever) the user …" plus an
+  "even if they don't explicitly mention <domain>" clause for adjacent
+  intents, and an anti-trigger sentence ("Not for …") when the domain is
+  high-frequency. Never first person — the text is injected into the system
+  prompt, and inconsistent point of view breaks discovery. Fix undertriggering
+  in the description only: keywords in the body have zero measured effect on
+  triggering.
 - **Keep the body under 300 lines** (house target; the open-spec recommendation
   is under 500 lines and 5,000 tokens). Move conditional detail to a directly
   linked reference and state exactly when to read it. Give references over 100
@@ -98,6 +113,12 @@ House rules, and why:
   `disable-model-invocation: true` only when a skill must never fire on its
   own — an orchestrator sub-step or a destructive operation — and say why in
   the brief.
+- **Purge contradictions; state precedence.** When a skill overrides a client
+  or harness default (default git behavior, default test style), say so
+  explicitly in the body — "these rules replace …" — because models burn
+  reasoning reconciling conflicting instructions instead of picking one.
+  When a skill overlaps an always-on rule, another skill, or a client
+  default, read `references/placement-and-conflicts.md`.
 
 ### Scripts and tool-specific facts
 
@@ -154,21 +175,30 @@ the scripts and tool-specific checks from Step 3; static lint is not execution.
 
 Write six realistic user messages: three that should trigger the skill (varied
 phrasing, explicitness, and detail) and three near-misses that share vocabulary
-but need something else. Judge each against **only the name and first 250
-description characters**. Show message → expected → verdict and revise by
-general category, not by copying failed-query keywords.
+but need something else. Judge each twice: against **only the name and first
+sentence** (~80 chars — what Cursor shows the model), then against **the first
+250 characters** (other clients). Show message → expected → verdict and revise
+by general category, not by copying failed-query keywords. Record the final
+set in the skill's `evals/trigger_queries.json` so the validator checks it on
+every revision.
 
 For an explicit-only skill, treat this as catalog and future-auto-trigger
 quality; do not claim automatic invocation was tested. For an auto-triggered
 skill, run the messages through the target client and inspect whether it loaded
-`SKILL.md`. For high-value or distributed skills, expand to roughly 20 balanced
-queries, run each three times, and keep a held-out validation split.
+`SKILL.md`. Agents often skip skills for tasks they can trivially handle
+alone, so a non-trigger on a trivial one-step ask is expected behavior, not a
+description failure — make most should-trigger messages substantive while
+still varying complexity. For high-value or distributed skills, expand to
+roughly 20 balanced queries, run each three times, and keep a held-out
+validation split.
 
 ## Step 6 — Forward-test output quality
 
 Triggering and correctness are separate. Create two or three realistic task
 cases with prompts, input files when needed, and a human-readable expected
-output. Include at least one boundary or ambiguous case.
+output. Include at least one boundary or ambiguous case. Record the cases in
+`evals/evals.json` (`{skill_name, evals: [{id, prompt, expected_output,
+files}]}`) so the validator checks them on every revision.
 
 Run each case in a clean context with the skill and against a baseline: no skill
 for a new skill, or a snapshot of the previous version when improving one.
@@ -185,14 +215,24 @@ other skills likely to be installed.
 ## Step 7 — Wire the learnings loop
 
 Every skill you create ships with a `LEARNINGS.md` (the scaffolder seeds it)
-and ends with this exact block:
+and wires the loop at both ends of the body. Near the top — instructions late
+in a body are the least reliably followed — the first section opens with this
+exact line:
+
+```markdown
+If `LEARNINGS.md` next to this SKILL.md has entries, read them first — they
+override the instructions below.
+```
+
+("next to this SKILL.md", never "in this skill's folder": the agent's working
+directory is usually another repo, and not every client tells the model where
+the skill lives.) The body then ends with this exact block:
 
 ```markdown
 ## Improving this skill
 
-Before executing, read `LEARNINGS.md` in this skill's folder — entries there
-override the instructions above. After use, if the user corrected you or the
-outcome surprised you, append one dated line to `LEARNINGS.md`:
+After use, if the user corrected you or the outcome surprised you, append one
+dated line to `LEARNINGS.md` next to this SKILL.md:
 `- YYYY-MM-DD: <what happened> → <what to do instead>`. Do not edit SKILL.md
 directly; lessons are folded in deliberately, not on the fly.
 ```
@@ -222,12 +262,15 @@ When asked to improve a skill (or to "fold learnings"):
 - `references/best-practices.md` — **read** when unsure about a design choice
   (evidence, scope, control, evaluation, token budgets, sources).
 - `references/frontmatter.md` — **read** before using any frontmatter field
-  beyond `name`/`description` or adding Codex metadata.
+  beyond `name`/`description` or adding Codex metadata, and for per-client
+  routing windows and Cursor reliability gotchas.
+- `references/placement-and-conflicts.md` — **read** when a capability must
+  hold in every session, when a skill overlaps a rule or another skill, or
+  when it contradicts a client default (rules-vs-skills, precedence).
 
 ## Improving this skill
 
-Before executing, read `LEARNINGS.md` in this skill's folder — entries there
-override the instructions above. After use, if the user corrected you or the
-outcome surprised you, append one dated line to `LEARNINGS.md`:
+After use, if the user corrected you or the outcome surprised you, append one
+dated line to `LEARNINGS.md` next to this SKILL.md:
 `- YYYY-MM-DD: <what happened> → <what to do instead>`. Do not edit SKILL.md
 directly; lessons are folded in deliberately, not on the fly.

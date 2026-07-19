@@ -1,6 +1,6 @@
 # Skill-writing best practices
 
-Primary-source synthesis, verified 2026-07-09. House policy is called out as
+Primary-source synthesis, verified 2026-07-18. House policy is called out as
 house policy rather than attributed to the open specification.
 
 ## Contents
@@ -40,6 +40,10 @@ triggers, outputs, dependencies, owners, or useful independent lives.
 Start narrow and consolidate only after task evaluations show that a broader
 skill performs at least as well as its focused predecessors.
 
+A skill is the wrong vehicle for a policy that must hold in every session —
+auto-triggering is best-effort. See `placement-and-conflicts.md` for the
+rules-vs-skills decision and for handling overlap with client defaults.
+
 ## Progressive disclosure
 
 Use three loading tiers:
@@ -55,17 +59,31 @@ reference over 100 lines a table of contents.
 
 ## Descriptions and the 250-character budget
 
-This repository treats the first 250 description characters as the portable
-routing budget even though individual clients may expose more. Put the concrete
-job and `Use when ...` triggers there. Describe user intent, symptoms, formats,
-and relevant error text—not the internal workflow.
+The first sentence (~80 characters) is the hard routing window — Cursor
+truncates injected descriptions there — and 250 characters is the total house
+budget; per-client numbers are tabulated in `frontmatter.md` ("Routing windows
+by client"). Put the concrete job and top trigger keywords in that first
+sentence, then `Use when ...` intents, symptoms, formats, and relevant error
+text — not the internal workflow.
+
+Write in third person: the text is injected into the system prompt, and
+inconsistent point of view breaks discovery. Phrase it as a directive trigger —
+"Use when(ever) the user …" plus an "even if they don't explicitly mention
+<domain>" clause — because models undertrigger skills, and directive phrasing
+measurably outperforms passive summaries (roughly 20–50% activation for
+passive descriptions vs ~100% for directive ones in published measurements).
+For high-frequency domains, add an anti-trigger sentence ("Not for …") so the
+skill doesn't fire on adjacent work. Only the description drives triggering:
+keywords added to the body have zero measured effect.
 
 Separate description evaluation from task evaluation:
 
-- Minimum: three should-trigger messages and three near-misses, judged only
-  against the name and first 250 description characters.
+- Minimum: three should-trigger messages and three near-misses, judged twice —
+  against the name and first sentence only, then against the first 250
+  characters. Persist the set in `evals/trigger_queries.json`.
 - Auto-triggered skill: run those prompts through each target client and inspect
-  whether it actually loads `SKILL.md`.
+  whether it actually loads `SKILL.md`. A non-trigger on a trivially handled
+  one-step ask is expected behavior, not a description failure.
 - High-value auto-triggered skill: use roughly 20 balanced queries, three runs
   per query, and a fixed 60/40 train/validation split.
 
@@ -159,4 +177,10 @@ every revision because skills accrete.
 - https://code.claude.com/docs/en/skills
 - https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
 - https://github.com/anthropics/skills/tree/main/skills/skill-creator
-- https://learn.chatgpt.com/docs/build-skills
+  (also shipped as a plugin in anthropics/claude-plugins-official)
+- https://developers.openai.com/codex/skills
+- Measured triggering evidence: directive vs passive descriptions (650-trial
+  study, 20.6x odds ratio) —
+  https://medium.com/@ivan.seleznov1/why-claude-code-skills-dont-activate-and-how-to-fix-it-86f679409af1;
+  forced-eval hook 84% vs 20% baseline —
+  https://scottspence.com/posts/how-to-make-claude-code-skills-activate-reliably

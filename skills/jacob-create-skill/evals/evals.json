@@ -10,7 +10,7 @@
     {
       "id": 2,
       "prompt": "Improve my existing review skill and fold its confirmed LEARNINGS.md corrections into the instructions. Keep how I invoke it unchanged.",
-      "expected_output": "The agent snapshots the old skill, preserves its name and invocation frontmatter, folds confirmed lessons in place, prunes stale prose, validates it, runs the six-message 250-character trigger check, and compares realistic task outputs with the old version.",
+      "expected_output": "The agent snapshots the old skill, preserves its name and invocation frontmatter, folds confirmed lessons in place, prunes stale prose, validates it, runs the six-message dual-window trigger check (first sentence, then first 250 characters), and compares realistic task outputs with the old version.",
       "files": []
     },
     {

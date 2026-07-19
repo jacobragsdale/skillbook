@@ -1,8 +1,32 @@
 # Skill metadata by target
 
-Verified 2026-07-09. Start with the agentskills.io core, then add only the
-extensions required by confirmed target clients. This repository keeps the
-first 250 description characters as its portable routing budget.
+Verified 2026-07-18. Start with the agentskills.io core, then add only the
+extensions required by confirmed target clients.
+
+## Contents
+
+- Routing windows by client
+- Core Agent Skills profile
+- Cursor profile
+- Cursor reliability gotchas
+- Claude Code profile
+- Codex profile
+- House choices
+- Sources
+
+## Routing windows by client
+
+What each client actually shows the model when deciding whether to invoke a
+skill — the numbers behind the house description rules:
+
+| Client | Router-visible description |
+|---|---|
+| Cursor | ~80 chars in cloud sessions (hard ellipsis); variable local trimming that grows with installed skill count |
+| Claude Code | up to 1,536 chars per entry (description + `when_to_use`); whole listing budgeted at 1% of the context window, least-invoked skills dropped first on overflow |
+| Codex | listing capped at 2% of the context window or 8,000 chars; descriptions shortened to fit |
+
+House rule: the first sentence must be self-sufficient in ~80 characters;
+keep the whole description under 250.
 
 ## Core Agent Skills profile
 
@@ -27,13 +51,41 @@ Cursor documents these additions:
 
 | Field | Meaning |
 |---|---|
-| `paths` | Comma-separated glob string or list; surface only for matching files |
+| `paths` | Comma-separated glob string or list; surface only for matching files (legacy alias `globs` accepted) |
 | `disable-model-invocation` | `true` makes the skill explicit `/skill-name` only |
+
+Cursor documents only `name`, `description`, `paths`, `disable-model-invocation`,
+and `metadata`; assume `license`, `compatibility`, and `allowed-tools` are
+ignored rather than honored.
 
 Cursor discovers `.agents/skills/`, `.cursor/skills/`, `.claude/skills/`, and
 `.codex/skills/` at project and user scope. Nested project skill directories are
 automatically scoped to their subtree. Cursor also walks nested category folders
 inside a skill root.
+
+## Cursor reliability gotchas
+
+Before blaming a description for not triggering in Cursor, verify discovery —
+these are all confirmed failure modes, and every one masquerades as a
+description-quality problem:
+
+- Cursor discovers skills **at startup only** — reload or start a new session
+  after adding a skill or changing frontmatter (Claude Code live-watches its
+  skill directories; Cursor does not).
+- Sessions launched seconds after Cursor starts can get an **empty skill
+  list** (confirmed race); wait a moment or reload.
+- `.agents/skills` entries have previously been discovered (visible in
+  Settings and the `/` menu) but **omitted from the system-prompt skill
+  catalog**, so the model could not auto-invoke them. Symlink discovery has
+  also regressed across Cursor releases. After a Cursor update, sanity-check
+  by asking the agent "what skills are available?".
+- **Cursor subagents get no skills at all.** For a background/sub agent that
+  must follow a skill, embed the SKILL.md's absolute path in the task prompt
+  and tell it to read the file.
+- Auto-triggering is **best-effort** everywhere (passive descriptions measure
+  roughly 20–50% activation). For behavior that must always hold, use an
+  always-on rule or explicit `/skill-name` — see
+  `placement-and-conflicts.md`.
 
 ## Claude Code profile
 
@@ -95,4 +147,8 @@ root, plus user/admin/system locations, and follows symlinked skill folders.
 - https://agentskills.io/specification
 - https://cursor.com/docs/skills
 - https://code.claude.com/docs/en/skills
-- https://learn.chatgpt.com/docs/build-skills
+- https://developers.openai.com/codex/skills
+- Cursor 80-char truncation and gotchas (staff-confirmed):
+  https://forum.cursor.com/t/skill-descriptions-are-truncated-in-initial-agent-context/163761,
+  https://forum.cursor.com/t/local-skill-loading-is-inconsistent-or-non-existent/163768,
+  https://forum.cursor.com/t/cursor-agent-skills-in-agents-skills/161142
