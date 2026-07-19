@@ -28,6 +28,9 @@ description: {description}
 
 <!-- TODO: One sentence stating the capability and its important boundary. -->
 
+If `LEARNINGS.md` next to this SKILL.md has entries, read them first — they
+override the instructions below.
+
 ## Workflow
 
 <!-- TODO: Imperative steps. Put deterministic work in scripts, stable detail
@@ -50,9 +53,8 @@ description: {description}
 
 ## Improving this skill
 
-Before executing, read `LEARNINGS.md` in this skill's folder — entries there
-override the instructions above. After use, if the user corrected you or the
-outcome surprised you, append one dated line to `LEARNINGS.md`:
+After use, if the user corrected you or the outcome surprised you, append one
+dated line to `LEARNINGS.md` next to this SKILL.md:
 `- YYYY-MM-DD: <what happened> → <what to do instead>`. Do not edit SKILL.md
 directly; lessons are folded in deliberately, not on the fly.
 """
@@ -69,15 +71,17 @@ Format: `- YYYY-MM-DD: <what happened> → <what to do instead>`
 """
 
 DEFAULT_DESCRIPTION = (
-    "TODO: write as a trigger, not a summary: what it does, then "
-    "'Use when ...' with the concrete phrases a user would type. "
-    "Front-load everything important into the first 250 characters."
+    "TODO: write as a directive trigger, not a summary. First sentence "
+    "(~80 chars) names the capability and top keywords; then 'Use when "
+    "the user ...' with concrete phrases, an 'even if ...' clause, and an "
+    "anti-trigger if the domain is high-frequency. Keep under 250 chars."
 )
 
-CODEX_EXPLICIT_POLICY = """\
-policy:
-  allow_implicit_invocation: false
-"""
+def codex_sidecar(title: str, explicit_only: bool) -> str:
+    lines = ["interface:", f"  display_name: {title}"]
+    if explicit_only:
+        lines += ["policy:", "  allow_implicit_invocation: false"]
+    return "\n".join(lines) + "\n"
 
 
 def main() -> int:
@@ -143,10 +147,12 @@ def main() -> int:
         encoding="utf-8",
     )
     (skill_dir / "LEARNINGS.md").write_text(LEARNINGS_TEMPLATE, encoding="utf-8")
-    if args.codex and args.explicit_only:
+    if args.codex:
         agents_dir = skill_dir / "agents"
         agents_dir.mkdir()
-        (agents_dir / "openai.yaml").write_text(CODEX_EXPLICIT_POLICY, encoding="utf-8")
+        (agents_dir / "openai.yaml").write_text(
+            codex_sidecar(title, args.explicit_only), encoding="utf-8"
+        )
 
     print(f"created {skill_dir}/")
     print("  SKILL.md      — fill in the TODO sections, keep the body under 300 lines")
@@ -158,8 +164,13 @@ def main() -> int:
     else:
         invocation = "automatic (model-invocable; house default)"
     print(f"  invocation    — {invocation}")
-    if args.codex and args.explicit_only:
-        print("  openai.yaml   — Codex implicit invocation disabled")
+    if args.codex:
+        codex_state = (
+            "Codex implicit invocation disabled"
+            if args.explicit_only
+            else "Codex implicit invocation enabled (default)"
+        )
+        print(f"  openai.yaml   — {codex_state}")
     print("next: draft, then validate with scripts/validate_skill.py")
     return 0
 

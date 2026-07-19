@@ -19,6 +19,10 @@ from pathlib import Path
 import yaml
 
 NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+XML_TAG_RE = re.compile(r"</?[a-zA-Z][^>]*>")
+TOC_HEADING_RE = re.compile(r"^#+\s*(contents|table of contents)\b", re.IGNORECASE)
+# Reserved on Anthropic platform surfaces; other clients are undocumented.
+RESERVED_NAME_WORDS = ("anthropic", "claude")
 # Lookbehind excludes qualified paths (~/repo/scripts/x, host/scripts/x,
 # ./scripts/x) — only bare scripts/, references/, assets/ paths are treated
 # as references to files bundled with the skill.
@@ -61,6 +65,10 @@ BODY_MAX_LINES = 500
 DESCRIPTION_MAX = 1024
 COMPATIBILITY_MAX = 500
 ROUTER_VISIBLE_CHARS = 250
+# Cursor injects only ~80 description chars in cloud sessions and trims
+# variably locally, so the first sentence must route on its own.
+CURSOR_VISIBLE_CHARS = 80
+REFERENCE_TOC_LINES = 100
 
 
 def parse_frontmatter(text: str) -> tuple[dict | None, str, str | None]:
@@ -254,13 +262,50 @@ def validate_python_header(path: Path, skill_dir: Path) -> str | None:
     return None
 
 
+def validate_references(skill_dir: Path) -> list[str]:
+    """House checks on references/: TOC for long files, no reference chains."""
+    warnings: list[str] = []
+    references_dir = skill_dir / "references"
+    if not references_dir.is_dir():
+        return warnings
+    for ref_file in sorted(references_dir.glob("*.md")):
+        text = ref_file.read_text(encoding="utf-8")
+        rel = ref_file.relative_to(skill_dir)
+        lines = text.splitlines()
+        if len(lines) > REFERENCE_TOC_LINES and not any(
+            TOC_HEADING_RE.match(line) for line in lines[:30]
+        ):
+            warnings.append(
+                f"{rel} is {len(lines)} lines with no Contents heading in the "
+                f"first 30 — references over {REFERENCE_TOC_LINES} lines need a "
+                "table of contents (agents preview with partial reads)"
+            )
+        for match in sorted(set(LOCAL_REF_RE.findall(strip_fenced_code(text)))):
+            if match.startswith("references/"):
+                warnings.append(
+                    f"{rel} links {match} — reference-to-reference chains break "
+                    "one-level-deep loading; link it from SKILL.md instead"
+                )
+    return warnings
+
+
 def validate(skill_dir: Path, profile: str = "house") -> tuple[list[str], list[str]]:
     errors: list[str] = []
     warnings: list[str] = []
 
-    skill_md = skill_dir / "SKILL.md"
-    if not skill_md.is_file():
+    if not skill_dir.is_dir():
         return [f"no SKILL.md in {skill_dir}"], []
+    actual_name = next(
+        (p.name for p in skill_dir.iterdir() if p.name.lower() == "skill.md"), None
+    )
+    if actual_name is None:
+        return [f"no SKILL.md in {skill_dir}"], []
+    if actual_name != "SKILL.md":
+        return [
+            f"skill file is named {actual_name!r} — must be exactly 'SKILL.md' "
+            "(case-sensitive filesystems will not load it)"
+        ], []
+    skill_md = skill_dir / "SKILL.md"
 
     fm, body, fm_error = parse_frontmatter(skill_md.read_text(encoding="utf-8"))
     if fm_error:
@@ -276,6 +321,13 @@ def validate(skill_dir: Path, profile: str = "house") -> tuple[list[str], list[s
         )
     elif name != skill_dir.name:
         errors.append(f"name {name!r} does not match folder name {skill_dir.name!r}")
+    if isinstance(name, str):
+        for word in RESERVED_NAME_WORDS:
+            if word in name:
+                warnings.append(
+                    f"name contains reserved word {word!r} — rejected on "
+                    "Anthropic platform surfaces"
+                )
 
     desc = fm.get("description")
     if not isinstance(desc, str) or not desc.strip():
@@ -285,6 +337,8 @@ def validate(skill_dir: Path, profile: str = "house") -> tuple[list[str], list[s
             errors.append(f"description is {len(desc)} chars (max {DESCRIPTION_MAX})")
         if desc.lstrip().startswith("TODO:"):
             errors.append("description still contains the scaffold TODO")
+        if XML_TAG_RE.search(desc):
+            errors.append("description must not contain XML tags")
         if len(desc) < 60:
             warnings.append("description under 60 chars — likely too thin to route on")
         use_when = desc.lower().find("use when")
@@ -295,6 +349,16 @@ def validate(skill_dir: Path, profile: str = "house") -> tuple[list[str], list[s
         elif use_when >= ROUTER_VISIBLE_CHARS:
             warnings.append(
                 f"'Use when' starts at char {use_when}; house routing budget is {ROUTER_VISIBLE_CHARS} chars"
+            )
+        first_period = desc.find(". ")
+        first_sentence_len = (
+            first_period + 1 if first_period != -1 else len(desc.rstrip())
+        )
+        if first_sentence_len > CURSOR_VISIBLE_CHARS:
+            warnings.append(
+                f"first sentence ends at char {first_sentence_len}; Cursor shows "
+                f"only ~{CURSOR_VISIBLE_CHARS} — put the capability and top "
+                "trigger keywords there"
             )
 
     allowed_fields = PROFILE_FIELDS[profile]
@@ -399,6 +463,8 @@ def validate(skill_dir: Path, profile: str = "house") -> tuple[list[str], list[s
         warnings.append(
             "body never mentions LEARNINGS.md — agents will not read or update it"
         )
+
+    warnings.extend(validate_references(skill_dir))
 
     codex_errors, codex_warnings = validate_openai_yaml(
         skill_dir, name if isinstance(name, str) else None

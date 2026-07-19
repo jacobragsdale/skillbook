@@ -111,11 +111,15 @@ class SkillToolTests(unittest.TestCase):
             (skill_dir / "agents" / "openai.yaml").read_text(encoding="utf-8"),
         )
 
-    def test_codex_without_explicit_only_writes_no_sidecar(self) -> None:
+    def test_codex_without_explicit_only_writes_sidecar_without_policy(self) -> None:
         self.assertEqual(
             self.run_init("open", "--dir", str(self.root), "--codex"), 0
         )
-        self.assertFalse((self.root / "open" / "agents").exists())
+        sidecar = (self.root / "open" / "agents" / "openai.yaml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("interface:", sidecar)
+        self.assertNotIn("allow_implicit_invocation", sidecar)
 
     def test_completed_skill_passes_house_profile(self) -> None:
         errors, warnings = validate_skill.validate(self.write_skill())
@@ -202,9 +206,58 @@ Read LEARNINGS.md before executing.
         )
 
     def test_use_when_must_fit_250_character_budget(self) -> None:
-        description = "A" * 251 + " Use when this should route."
+        description = "A. " + "A" * 248 + " Use when this should route."
         _, warnings = validate_skill.validate(self.write_skill(description=description))
         self.assertTrue(any("250" in warning for warning in warnings), warnings)
+
+    def test_long_first_sentence_warns_for_cursor_window(self) -> None:
+        description = (
+            "This first sentence rambles on for far too long to survive the "
+            "Cursor cloud truncation cut. Use when the user asks for routing."
+        )
+        _, warnings = validate_skill.validate(self.write_skill(description=description))
+        self.assertTrue(any("Cursor" in warning for warning in warnings), warnings)
+
+    def test_wrong_case_skill_file_is_an_error(self) -> None:
+        skill_dir = self.root / "wrong-case"
+        skill_dir.mkdir()
+        (skill_dir / "skill.md").write_text(
+            "---\nname: wrong-case\ndescription: x\n---\nbody\n", encoding="utf-8"
+        )
+        errors, _ = validate_skill.validate(skill_dir)
+        self.assertTrue(any("exactly 'SKILL.md'" in error for error in errors), errors)
+
+    def test_xml_tags_in_description_are_an_error(self) -> None:
+        description = (
+            "Create a verified test artifact. Use when <trigger>asked</trigger>."
+        )
+        errors, _ = validate_skill.validate(self.write_skill(description=description))
+        self.assertTrue(any("XML tags" in error for error in errors), errors)
+
+    def test_reserved_word_in_name_warns(self) -> None:
+        _, warnings = validate_skill.validate(self.write_skill(name="claude-helper"))
+        self.assertTrue(any("reserved word" in warning for warning in warnings))
+
+    def test_long_reference_without_toc_warns(self) -> None:
+        skill_dir = self.write_skill()
+        references = skill_dir / "references"
+        references.mkdir()
+        (references / "big.md").write_text(
+            "# Big\n" + "line\n" * 120, encoding="utf-8"
+        )
+        _, warnings = validate_skill.validate(skill_dir)
+        self.assertTrue(any("table of contents" in warning for warning in warnings))
+
+    def test_reference_chain_warns(self) -> None:
+        skill_dir = self.write_skill()
+        references = skill_dir / "references"
+        references.mkdir()
+        (references / "a.md").write_text(
+            "# A\n\nRead references/b.md for more.\n", encoding="utf-8"
+        )
+        (references / "b.md").write_text("# B\n\ndetail\n", encoding="utf-8")
+        _, warnings = validate_skill.validate(skill_dir)
+        self.assertTrue(any("reference-to-reference" in warning for warning in warnings))
 
 
 if __name__ == "__main__":
