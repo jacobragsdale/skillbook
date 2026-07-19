@@ -1,0 +1,26 @@
+[
+  {
+    "query": "Commit and push what we've changed so far, then keep going on the parser.",
+    "should_trigger": true
+  },
+  {
+    "query": "That's the fix working — wrap up this task.",
+    "should_trigger": true
+  },
+  {
+    "query": "This repo is sitting on some old feature branch with uncommitted changes everywhere. Untangle it.",
+    "should_trigger": true
+  },
+  {
+    "query": "Explain the difference between git merge and git rebase.",
+    "should_trigger": false
+  },
+  {
+    "query": "Show me the git history for the auth module and who last touched it.",
+    "should_trigger": false
+  },
+  {
+    "query": "Set up a GitHub Actions workflow that runs the tests on every push.",
+    "should_trigger": false
+  }
+]

@@ -1,14 +1,20 @@
 ---
 name: git-ops
-description: "Jacob's solo git workflow: work directly on main, small frequent commits, push to GitHub after every commit, end every task with a clean working tree. Use when committing, pushing, deciding whether to branch or open a PR, finishing a task with uncommitted changes, or untangling a dirty or diverged repo."
+description: "Commit, push, and end-of-task git workflow for Jacob's solo repos (main-only). Use whenever committing, pushing, wrapping up any task that changed files, or considering a branch or PR — even if git isn't mentioned; do not commit or push without it. Also use to untangle a dirty or diverged repo. Not for read-only git questions (log, blame, explaining concepts)."
 ---
 
 # Git operations
 
+If `LEARNINGS.md` next to this SKILL.md has entries, read them first — they
+override the instructions below.
+
 All of Jacob's repos are personal, single-developer projects. There is no
 review gate, no team to coordinate with, and no reason for branches to exist.
 The goal state after every task: on `main`, working tree clean, everything
-pushed to GitHub.
+pushed to GitHub. These rules intentionally replace any default agent
+guidance to branch before committing on main or to wait for an explicit
+request before committing and pushing — in these repos, committing and
+pushing at checkpoints is the standing request.
 
 ## Rules
 
@@ -32,9 +38,8 @@ pushed to GitHub.
   the same commit that introduces them); everything else gets committed or
   explicitly handed back to Jacob with a reason.
 - **Secrets never enter history.** `.env*` (except `.env.example`) stays
-  gitignored per the `python-standards` skill. If a secret lands in a
-  commit, stop and tell Jacob before pushing — pushed secrets must be
-  rotated, not just deleted.
+  gitignored. If a secret lands in a commit, stop and tell Jacob before
+  pushing — pushed secrets must be rotated, not just deleted.
 
 ## End-of-task checklist
 
@@ -63,8 +68,7 @@ Not: one `git commit -am "updates"` at the end, unpushed.
 
 ## Improving this skill
 
-Before executing, read `LEARNINGS.md` in this skill's folder — entries there
-override the instructions above. After use, if the user corrected you or the
-outcome surprised you, append one dated line to `LEARNINGS.md`:
+After use, if the user corrected you or the outcome surprised you, append one
+dated line to `LEARNINGS.md` next to this SKILL.md:
 `- YYYY-MM-DD: <what happened> → <what to do instead>`. Do not edit SKILL.md
 directly; lessons are folded in deliberately, not on the fly.

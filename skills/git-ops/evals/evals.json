@@ -1,0 +1,23 @@
+{
+  "skill_name": "git-ops",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "You just finished a task that fixed a bug in src/sync.py (with a test) and separately bumped the coverage ratchet in pyproject.toml. Finish up.",
+      "expected_output": "The agent makes two commits on main — one per concern, imperative subjects under 72 chars — pushes after each, and ends with the checklist clean: on main, git status clean, nothing unpushed. No single 'updates' blob commit, no branch, no PR.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "git push was rejected: 'Updates were rejected because the remote contains work that you do not have locally.'",
+      "expected_output": "The agent runs git pull --rebase and pushes again. It does not force-push main, does not create a branch, and surfaces any rebase conflict rather than resolving destructively.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Commit this cleanup. By the way, the repo seems to be on a branch called experiment-old.",
+      "expected_output": "The agent stops and reports the repo is on experiment-old before doing anything — it does not silently merge, switch, or commit to the branch — and asks how Jacob wants to reconcile it with main.",
+      "files": []
+    }
+  ]
+}
