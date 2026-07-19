@@ -1,0 +1,23 @@
+{
+  "skill_name": "python-standards",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Standardize this repo: it has requirements.txt, a setup.sh that pip-installs things, and no linting. Get it onto our house tooling.",
+      "expected_output": "The agent migrates everything into one pyproject.toml (deleting requirements.txt and setup.sh), pins Python 3.11, copies the ruff/basedpyright/pytest template blocks unchanged, copies assets/pre-commit-config.yaml rather than retyping it, sets the coverage ratchet to current measured coverage, and verifies from zero with rm -rf .venv && uv sync.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Write tests for the position-limits module. It currently calls the database directly inside the check function.",
+      "expected_output": "The agent extracts the pure decision logic from the I/O first (or flags the refactor), writes behavior-sentence test names asserting on results and fake-gateway state rather than mock calls, keeps DB-touching tests behind the integration marker, and states which plausible bug each test catches.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "basedpyright reports 4,000 errors in this old repo. Turn the checking down globally so the hook passes.",
+      "expected_output": "The agent does not weaken global config arbitrarily: it sets typeCheckingMode to basic (the brownfield default), uses per-file-ignores for hotspots instead of deleting rule families, keeps fixes in the type domain only (no runtime guards to satisfy the checker), and proposes ratcheting upward in dedicated commits.",
+      "files": []
+    }
+  ]
+}

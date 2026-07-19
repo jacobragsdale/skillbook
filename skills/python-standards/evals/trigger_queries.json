@@ -1,0 +1,26 @@
+[
+  {
+    "query": "Write tests for the order-matching module and make sure they run in pre-commit.",
+    "should_trigger": true
+  },
+  {
+    "query": "Set up a fresh Python project here with linting, type checking, and a test suite.",
+    "should_trigger": true
+  },
+  {
+    "query": "This repo has requirements.txt, setup.py, and a venv script — standardize it to our usual tooling.",
+    "should_trigger": true
+  },
+  {
+    "query": "Debug this Python traceback from last night's ETL run.",
+    "should_trigger": false
+  },
+  {
+    "query": "Write a Python script that parses this CSV and uploads the rows to Postgres.",
+    "should_trigger": false
+  },
+  {
+    "query": "Explain how pytest fixtures differ from setUp/tearDown.",
+    "should_trigger": false
+  }
+]

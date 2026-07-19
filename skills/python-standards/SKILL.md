@@ -1,14 +1,15 @@
 ---
 name: python-standards
-description: "Jacob's house standard for Python repos: uv-managed single pyproject.toml, ruff, basedpyright, pytest with a coverage ratchet, pre-commit hooks, and the .env convention. Use when setting up or standardizing a Python repo, adding lint/type-check/test tooling, wiring pre-commit, writing or reviewing tests, or deciding how a Python project should be configured."
+description: "Use when writing or reviewing Python tests or setting up a Python repo. Also use when configuring uv, ruff, basedpyright, pytest, coverage, or pre-commit, or standardizing project tooling — even if the user doesn't mention standards. Jacob's house standard: single pyproject.toml, coverage ratchet, .env convention. Not for ordinary Python coding or debugging that touches neither tests nor project config."
 ---
 
 # Python house standard
 
-Every Python repo lands on the same setup: uv-managed, one `pyproject.toml`
-holding all dependencies and tool config, ruff + basedpyright + pytest gated
-by pre-commit, zero custom setup steps. This skill is the reference for that
-standard — copy the templates, don't improvise variants.
+If `LEARNINGS.md` next to this SKILL.md has entries, read them first — they
+override the instructions below.
+
+This skill is the reference standard for every Python repo — copy the
+templates, don't improvise variants.
 
 ## Target state (definition of done)
 
@@ -131,51 +132,13 @@ percentage. ~85% is a healthy plateau; 100% is not a goal.
 
 ## Pre-commit
 
-Basedpyright and pytest run as **local** hooks via `uv run` — published
-type-checker hooks run in an isolated environment without the project's
-dependencies and produce bogus import errors. Cheap checks first. The `rev:`
-pins go stale — run `uv run pre-commit autoupdate` right after copying.
-
-```yaml
-repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: check-yaml
-      - id: check-toml
-      - id: check-added-large-files
-      - id: check-merge-conflict
-      - id: detect-private-key
-
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.5
-    hooks:
-      - id: ruff-check
-        args: [--fix]
-      - id: ruff-format
-
-  - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.8.4
-    hooks:
-      - id: uv-lock   # fails the commit if pyproject.toml changed without uv.lock
-
-  - repo: local
-    hooks:
-      - id: basedpyright
-        name: basedpyright
-        entry: uv run basedpyright
-        language: system
-        types: [python]
-        pass_filenames: false
-      - id: pytest
-        name: pytest (unit, with coverage ratchet)
-        entry: uv run pytest -m "not integration" --cov -q
-        language: system
-        pass_filenames: false
-        types: [python]
-```
+Copy `assets/pre-commit-config.yaml` from this skill's directory to the repo
+root as `.pre-commit-config.yaml` — copy the file, do not retype it. Its
+non-negotiable shape: basedpyright and pytest run as **local** hooks via
+`uv run` (published type-checker hooks run in an isolated environment without
+the project's dependencies and produce bogus import errors), and cheap checks
+run first. The `rev:` pins go stale — run `uv run pre-commit autoupdate`
+right after copying.
 
 Install:
 
@@ -236,10 +199,26 @@ If logic and I/O are tangled (SQL/HTTP mid-function), extract pure functions
 and push I/O to a gateway at the edge before testing — most tests should
 need no test doubles at all.
 
+### Canonical example
+
+The shape every rule above points at (same `decide`/`apply_actions`
+vocabulary as the entrypoint standard):
+
+```python
+def test_order_exceeding_max_qty_is_rejected_not_sent():
+    broker = FakeBroker()                    # hand-written fake of our gateway
+    order = make_order(qty=10_000)
+
+    actions = decide([order], limits=Limits(max_qty=1_000))
+    apply_actions(actions, broker)
+
+    assert actions == [Reject(order.id, rule="max_qty")]
+    assert broker.sent == []                 # fake's state, not assert_called_with
+```
+
 ## Improving this skill
 
-Before executing, read `LEARNINGS.md` in this skill's folder — entries there
-override the instructions above. After use, if the user corrected you or the
-outcome surprised you, append one dated line to `LEARNINGS.md`:
+After use, if the user corrected you or the outcome surprised you, append one
+dated line to `LEARNINGS.md` next to this SKILL.md:
 `- YYYY-MM-DD: <what happened> → <what to do instead>`. Do not edit SKILL.md
 directly; lessons are folded in deliberately, not on the fly.
