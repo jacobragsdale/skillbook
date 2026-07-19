@@ -54,9 +54,20 @@ remain interactive or in a local uncommitted file.
 - Read `scripts/vm.sh`, `stacks/windows/compose.yaml`, and the Windows row in
   `docs/services.md`. The `.on-demand` marker intentionally excludes it from
   deploy-all, maintenance refresh, drift failures, and health paging.
-- Use `scripts/vm.sh on|off|logs|console` for normal control. Compose may expand
-  required Windows credentials even for `ps`; run status through the stack's
-  SOPS environment or use `docker ps` for a read-only container check.
+- Use `scripts/vm.sh on|off|logs|console` for normal control. Compose expands
+  required Windows credentials for every subcommand, including `off` and `ps`;
+  run all `vm.sh` Compose subcommands through the stack's SOPS environment, or
+  use `docker ps` for a read-only container check.
+- After enabling Windows features (Hyper-V, WSL), in-guest restarts can hang
+  at the UEFI boot-manager screen; recover with a graceful container
+  stop/start (full VM power cycle) instead, and verify SSH before continuing.
+- Docker Desktop inside the guest needs an interactive-session start, bounded
+  `docker info` polling, and console-context pulls of public base images —
+  its credential helper fails over SSH.
+- Elevated Windows accounts read `administrators_authorized_keys`, not the
+  per-user file; provision both key locations before demoting a temporary
+  admin. Write guest SCP destinations with forward slashes; keep PowerShell
+  paths native.
 - `scripts/vm.sh destroy` deletes the VM disk and requires explicit approval.
   Do not equate “turn it off,” “reset a service,” or “remove a temporary user”
   with permission to destroy the VM.

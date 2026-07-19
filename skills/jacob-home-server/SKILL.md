@@ -1,6 +1,6 @@
 ---
 name: jacob-home-server
-description: "Operates Jacob's declarative home server safely. Use when checking status/drift, debugging Docker/networking, changing stacks/services or SOPS secrets, deploying host config, handling backups, media, router/Tailscale, Windows VM, or rebuilds."
+description: "Operates Jacob's home server: Docker stacks, SOPS secrets, deploys, backups. Use whenever a task touches the home server or its repo — status or drift checks, debugging its services or networking, changing stacks or secrets, host config, media, router/DNS, Tailscale, Windows VM, restores, rebuilds — even if the user doesn't name the server. Do not SSH to it or edit the home-server repo without this skill. Not for Docker questions unrelated to Jacob's server."
 ---
 
 # Jacob's home server
@@ -12,8 +12,9 @@ GitHub; a verified commit and push are the configuration backup.
 
 ## Start every task
 
-1. Read `LEARNINGS.md`, then work from the Mac repository. Check the worktree
-   with `git status --short` before editing and preserve unrelated changes.
+1. Read `LEARNINGS.md` next to this SKILL.md — its entries override this
+   file. Then work from the Mac repository. Check the worktree with
+   `git status --short` before editing and preserve unrelated changes.
 2. Read `README.md`, `docs/services.md`, and the files that own the requested
    behavior. Do not trust a service list copied into this skill: this repo
    changes quickly.
@@ -85,8 +86,7 @@ or server was not changed.
 
 ## Improving this skill
 
-Before executing, read `LEARNINGS.md` in this skill's folder — entries there
-override the instructions above. After use, if the user corrected you or the
-outcome surprised you, append one dated line to `LEARNINGS.md`:
+After use, if the user corrected you or the outcome surprised you, append one
+dated line to `LEARNINGS.md` next to this SKILL.md:
 `- YYYY-MM-DD: <what happened> → <what to do instead>`. Do not edit SKILL.md
 directly; lessons are folded in deliberately, not on the fly.

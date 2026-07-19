@@ -7,7 +7,8 @@ service facts in the home-server repo rather than copying them here.
 
 - Diagnose from intent to symptom
 - Change an existing stack
-- Add or remove a stack/service
+- Add a stack or service
+- Remove a stack or service
 - Change host state
 - Change secrets or credentials
 - App-owned and external state
@@ -61,7 +62,10 @@ service facts in the home-server repo rather than copying them here.
 ## Remove a stack or service
 
 1. Inventory ingress, DNS, health probes, notifications, integrations, backup
-   paths, credentials, and app data. Ask separately about deleting data.
+   paths, credentials, and app data. Ask separately about deleting data. Bind
+   data often contains root-owned files, so a plain user `rm` cleans it only
+   partially — during an explicitly approved full removal, inspect ownership
+   first and use `sudo` on the exact app-owned paths.
 2. While the deployed compose definition still exists, stop/remove the compose
    project with `docker compose down` through its SOPS environment. Do not add
    `--volumes` unless Jacob explicitly approved volume deletion.
