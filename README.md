@@ -1,4 +1,4 @@
-# jacob-agent-skills
+# skillbook
 
 Personal library of [Agent Skills](https://agentskills.io) — portable
 SKILL.md folders that work in Cursor, Claude Code, and any agent implementing
