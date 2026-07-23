@@ -76,17 +76,6 @@ model_config = ConfigDict(
   Make rounding explicit and reject non-finite boundary values.
 - Normalize external timestamps at the boundary to timezone-aware UTC.
 
-## Performance and concurrency
-
-- Treat Ruff `PERF` findings as inexpensive micro-optimization leads, not
-  evidence that a hot path became faster. Measure representative end-to-end
-  P50/P99/P99.9 latency, throughput, and allocations before and after a change.
-- Profile before changing representations or adding concurrency. Optimize the
-  measured bottleneck and include warm-up, realistic batch sizes, and production
-  I/O behavior in the benchmark.
-- For latency-sensitive dataframe work, compare pandas, NumPy, and specialized
-  representations with realistic data and include conversion and copy costs.
-
 ## Environment and tools
 
 - Pin Python 3.11 in `.python-version` and set `requires-python = ">=3.11"`.

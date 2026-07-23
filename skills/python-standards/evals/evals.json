@@ -33,8 +33,8 @@
     },
     {
       "id": 6,
-      "prompt": "Standardize Ruff for a Python 3.11 trading service that uses pandas, FastAPI, and asyncio. Turn on every pandas and async opinion rule, and say the linter proves the order path is faster.",
-      "expected_output": "The agent copies the standard Ruff asset; enables PERF, FAST, stable ASYNC rules except ASYNC109, and the full stable PD pandas-vet family; does not enable S; keeps unsafe fixes disabled; and treats linter findings as leads that require representative P50/P99/P99.9 latency, throughput, and allocation benchmarks rather than proof of performance.",
+      "prompt": "Standardize Ruff for a Python 3.11 trading service that uses pandas, FastAPI, and asyncio, while keeping timeout parameters valid in its public async APIs.",
+      "expected_output": "The agent copies the standard Ruff asset; enables PERF, FAST, stable ASYNC rules except ASYNC109, and the full stable PD pandas-vet family; does not enable S; and keeps unsafe fixes disabled.",
       "files": []
     }
   ]
