@@ -91,6 +91,10 @@ model_config = ConfigDict(
   `assets/pre-commit-config.yaml`; do not retype them. Then run
   `uv add --dev ruff basedpyright pre-commit`,
   `uv run pre-commit autoupdate`, and `uv run pre-commit install`.
+- When pre-commit is already configured for a repo, resolve the active hook
+  path with `git rev-parse --git-path hooks/pre-commit`. If that file is
+  absent, run `uv run pre-commit install`; configuration alone does not
+  install the repo-local Git hook.
 - Expose each entry point as one `uv run` command with no prerequisite shell
   state.
 
