@@ -3,6 +3,10 @@
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+required-version = ">=0.15.22"
+force-exclude = true
+show-fixes = true
+unsafe-fixes = false
 
 [tool.ruff.lint]
 select = [
@@ -14,7 +18,43 @@ select = [
     "SIM",
     "C4",
     "RUF",
+
+    # Complete function signatures without banning Any inside adapters.
+    "ANN001", "ANN002", "ANN003",
+    "ANN201", "ANN202", "ANN204", "ANN205", "ANN206",
+
+    # Correctness and operational behavior.
+    "BLE",
+    "DTZ",
+    "LOG",
+    "G",
+    "ARG",
+    "PIE",
+    "PGH",
+    "RSE",
+    "RET502", "RET503",
+    "TRY004", "TRY201", "TRY203", "TRY401",
+    "PLW",
+    "C90",
+
+    # Performance and commonly used stacks. These are no-ops when the
+    # corresponding language or library constructs are absent.
+    "PERF",
+    "ASYNC",
+    "FAST",
+    "PD002", "PD007", "PD011", "PD101",
 ]
+ignore = [
+    # Highly opinionated structured-concurrency API rule. Timeout parameters
+    # are sometimes part of a deliberate public interface.
+    "ASYNC109",
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+[tool.ruff.format]
+docstring-code-format = true
 
 [tool.basedpyright]
 pythonVersion = "3.11"

@@ -30,6 +30,12 @@
       "prompt": "This uv-managed Python repo already has pre-commit configured, but a fresh clone does not run hooks when I commit. Finish the setup.",
       "expected_output": "The agent resolves the active pre-commit hook path with git rev-parse --git-path hooks/pre-commit and, when the hook file is absent, runs uv run pre-commit install rather than assuming project configuration installed the repo-local Git hook.",
       "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "Standardize Ruff for a Python 3.11 trading service that uses pandas, FastAPI, and asyncio. Turn on every pandas and async opinion rule, and say the linter proves the order path is faster.",
+      "expected_output": "The agent copies the standard Ruff asset; enables PERF, FAST, stable ASYNC rules except ASYNC109, and the curated PD002, PD007, PD011, and PD101 pandas checks; does not enable S or the latency-hostile or stylistic pandas-vet rules; keeps unsafe fixes disabled; and treats linter findings as leads that require representative P50/P99/P99.9 latency, throughput, and allocation benchmarks rather than proof of performance.",
+      "files": []
     }
   ]
 }

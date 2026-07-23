@@ -8,7 +8,7 @@
     "should_trigger": true
   },
   {
-    "query": "Review this risk-calculation module for unsafe Optional values and implicit float assumptions.",
+    "query": "Tighten Ruff checks for this latency-sensitive pandas and FastAPI service without blocking its async event loop.",
     "should_trigger": true
   },
   {

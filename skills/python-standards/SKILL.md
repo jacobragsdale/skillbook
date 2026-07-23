@@ -1,6 +1,6 @@
 ---
 name: python-standards
-description: "Write high-integrity production Python with strict types and validated I/O. Use when coding, reviewing, refactoring, debugging, or configuring Python, uv, Ruff, basedpyright, Pydantic, or dependencies — even if unrequested. Not for test design."
+description: "Enforce high-integrity Python types, I/O, performance, and tooling. Use when coding, reviewing, profiling, or configuring Python, uv, Ruff, basedpyright, Pydantic, pandas, FastAPI, asyncio, or dependencies — even if unrequested. Not for test design."
 ---
 
 # Python house standard
@@ -77,6 +77,20 @@ model_config = ConfigDict(
   Make rounding explicit and reject non-finite boundary values.
 - Normalize external timestamps at the boundary to timezone-aware UTC.
 
+## Performance and concurrency
+
+- Treat Ruff `PERF` findings as inexpensive micro-optimization leads, not
+  evidence that a hot path became faster. Measure representative end-to-end
+  P50/P99/P99.9 latency, throughput, and allocations before and after a change.
+- Profile before changing representations or adding concurrency. Optimize the
+  measured bottleneck and include warm-up, realistic batch sizes, and production
+  I/O behavior in the benchmark.
+- Never block an event loop with synchronous HTTP, file, subprocess, sleep, or
+  input calls. Use an async implementation or explicitly offload blocking work.
+- In pandas paths, make mutation and array conversion explicit. Avoid
+  `inplace=True` and ambiguous `.values`; for latency-sensitive operations,
+  compare pandas, NumPy, and specialized representations with realistic data.
+
 ## Environment and tools
 
 - Pin Python 3.11 in `.python-version` and set `requires-python = ">=3.11"`.
@@ -91,6 +105,10 @@ model_config = ConfigDict(
   `assets/pre-commit-config.yaml`; do not retype them. Then run
   `uv add --dev ruff basedpyright pre-commit`,
   `uv run pre-commit autoupdate`, and `uv run pre-commit install`.
+- Keep the asset's `PERF`, `ASYNC`, `FAST`, and curated pandas-vet rules enabled
+  in every repo. They remain inactive when the matching constructs are absent;
+  do not generate dependency-specific Ruff configurations. `ASYNC109` stays
+  ignored because timeout parameters can be deliberate API design.
 - When pre-commit is already configured for a repo, resolve the active hook
   path with `git rev-parse --git-path hooks/pre-commit`. If that file is
   absent, run `uv run pre-commit install`; configuration alone does not
