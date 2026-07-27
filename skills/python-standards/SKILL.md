@@ -94,6 +94,16 @@ model_config = ConfigDict(
   enabled in every repo. They remain inactive when the matching constructs are
   absent; do not generate dependency-specific Ruff configurations. `ASYNC109`
   stays ignored because timeout parameters can be deliberate API design.
+- The asset uses `extend-select`, so Ruff's own defaults stay on and the list
+  adds to them. Never convert it to `select`, which would replace them. Ruff
+  0.16 or newer is required for that default set; keep `required-version`
+  aligned with the pre-commit `rev`.
+- `ruff format` also formats Python inside Markdown code blocks. Expect
+  `ruff format --check .` to flag documentation on the first run in an
+  existing repo; reformat it rather than excluding Markdown.
+- Suppress a Ruff diagnostic with a specific rule code and an adjacent reason.
+  Blanket `noqa` and blanket `type: ignore` are rejected by `PGH003`/`PGH004`,
+  and `RUF102`/`RUF103`/`RUF104` reject invalid or stale suppressions.
 - When pre-commit is already configured for a repo, resolve the active hook
   path with `git rev-parse --git-path hooks/pre-commit`. If that file is
   absent, run `uv run pre-commit install`; configuration alone does not

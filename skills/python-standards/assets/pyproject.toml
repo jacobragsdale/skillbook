@@ -3,13 +3,13 @@
 [tool.ruff]
 line-length = 200
 target-version = "py311"
-required-version = ">=0.15.22"
+required-version = ">=0.16.0"
 force-exclude = true
 show-fixes = true
 unsafe-fixes = false
 
 [tool.ruff.lint]
-select = [
+extend-select = [  # Ruff's own defaults stay on; these are additions to them.
     "E4",  # Keep imports valid and at the top level.
     "E7",  # Reject ambiguous statements and comparisons.
     "E9",  # Report fatal file-read errors.
@@ -20,6 +20,17 @@ select = [
     "SIM",  # Replace needlessly complex control flow.
     "C4",  # Remove wasteful collection constructions.
     "RUF",  # Apply additional correctness and modernization checks.
+    "S",  # Flag insecure calls, weak crypto, and unsafe subprocess use.
+    "PTH",  # Use pathlib instead of legacy os.path calls.
+    "TC",  # Keep type-only imports out of the runtime namespace.
+    "N",  # Enforce standard naming conventions.
+    "A",  # Prevent names from shadowing builtins.
+    "SLF",  # Reject access to another object's private members.
+    "T20",  # Reject print and pprint in favor of logging.
+    "INP",  # Require explicit packages instead of implicit namespaces.
+    "TID",  # Reject parent-relative imports.
+    "ERA",  # Remove commented-out code.
+    "EM",  # Bind exception messages before raising them.
     "ANN001",  # Require annotations for named function arguments.
     "ANN002",  # Require annotations for *args.
     "ANN003",  # Require annotations for **kwargs.
@@ -52,6 +63,15 @@ select = [
 ignore = [
     "ASYNC109",  # Allow deliberate timeout parameters in async APIs.
 ]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests may assert, reach into private members, and sit outside a package.
+"**/tests/**" = ["S101", "SLF001", "INP001"]
+"**/test_*.py" = ["S101", "SLF001", "INP001"]
+"**/conftest.py" = ["S101", "SLF001", "INP001"]
+
+[tool.ruff.lint.flake8-type-checking]
+runtime-evaluated-base-classes = ["pydantic.BaseModel"]  # Keep Pydantic field types importable at runtime.
 
 [tool.ruff.lint.isort]
 split-on-trailing-comma = false  # Do not preserve comma-forced import line breaks.
