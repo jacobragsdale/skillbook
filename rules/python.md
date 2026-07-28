@@ -2,7 +2,7 @@
 
 Always-on rules for Python work in these repos — mostly batch jobs, ETL
 pipelines, and trading systems that must never fail silently. Style and
-mechanical correctness are the linters' job: repos use ruff + basedpyright
+mechanical correctness are the linters' job: repos use ruff + pyrefly
 via pre-commit. Fix their findings; use per-file ignores for true
 exceptions; never weaken global lint/type config to silence one file.
 
@@ -77,7 +77,7 @@ if __name__ == "__main__":
   coverage, .env): use the `python-standards` skill and copy its templates
   instead of improvising config.
 - Python 3.11. One `pyproject.toml` per repo holds dependencies and all
-  tool config (ruff, basedpyright, pytest).
+  tool config (ruff, pyrefly, pytest).
 - Standalone scripts are single files with a PEP 723 `# /// script` header,
   runnable anywhere with `uv run script.py` and no environment setup.
 

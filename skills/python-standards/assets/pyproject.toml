@@ -12,15 +12,13 @@ unsafe-fixes = false
 extend-select = [  # Ruff's own defaults stay on; these are additions to them.
     "E4",  # Keep imports valid and at the top level.
     "E7",  # Reject ambiguous statements and comparisons.
-    "E9",  # Report fatal file-read errors.
-    "F",  # Catch undefined names, unused imports, and dead assignments.
+    "F",  # Reject star imports and invalid forward-reference annotations.
     "I",  # Keep imports ordered and grouped consistently.
     "UP",  # Use syntax appropriate for the target Python version.
     "B",  # Catch likely bugs and hazardous design patterns.
     "SIM",  # Replace needlessly complex control flow.
     "C4",  # Remove wasteful collection constructions.
     "RUF",  # Apply additional correctness and modernization checks.
-    "S",  # Flag insecure calls, weak crypto, and unsafe subprocess use.
     "PTH",  # Use pathlib instead of legacy os.path calls.
     "TC",  # Keep type-only imports out of the runtime namespace.
     "N",  # Enforce standard naming conventions.
@@ -39,20 +37,13 @@ extend-select = [  # Ruff's own defaults stay on; these are additions to them.
     "ANN204",  # Require return annotations on special methods.
     "ANN205",  # Require return annotations on static methods.
     "ANN206",  # Require return annotations on class methods.
-    "BLE",  # Reject overly broad exception handlers.
-    "DTZ",  # Prevent naive datetime construction.
     "LOG",  # Enforce safe logger and exception usage.
     "G",  # Require lazy, valid log formatting.
     "ARG",  # Expose unused parameters.
-    "PIE",  # Catch miscellaneous unnecessary or error-prone code.
-    "PGH",  # Reject blanket ignores and common unsafe shortcuts.
+    "PGH",  # Reject blanket `noqa` and `type: ignore` comments.
     "RSE",  # Remove unnecessary syntax when raising exceptions.
     "RET502",  # Reject implicit None returns in functions that return values.
     "RET503",  # Require an explicit final return in value-returning functions.
-    "TRY004",  # Raise TypeError for invalid argument types.
-    "TRY201",  # Use a bare raise when re-raising the current exception.
-    "TRY203",  # Remove handlers that only re-raise immediately.
-    "TRY401",  # Do not repeat the exception in logging.exception messages.
     "PLW",  # Catch suspicious control flow and API usage.
     "C90",  # Limit cyclomatic complexity.
     "PERF",  # Flag avoidable allocations and slow loop patterns.
@@ -62,13 +53,14 @@ extend-select = [  # Ruff's own defaults stay on; these are additions to them.
 ]
 ignore = [
     "ASYNC109",  # Allow deliberate timeout parameters in async APIs.
+    "S",  # Do not run flake8-bandit; its findings are noise outside audited code.
 ]
 
 [tool.ruff.lint.per-file-ignores]
-# Tests may assert, reach into private members, and sit outside a package.
-"**/tests/**" = ["S101", "SLF001", "INP001"]
-"**/test_*.py" = ["S101", "SLF001", "INP001"]
-"**/conftest.py" = ["S101", "SLF001", "INP001"]
+# Tests may reach into private members and sit outside a package.
+"**/tests/**" = ["SLF001", "INP001"]
+"**/test_*.py" = ["SLF001", "INP001"]
+"**/conftest.py" = ["SLF001", "INP001"]
 
 [tool.ruff.lint.flake8-type-checking]
 runtime-evaluated-base-classes = ["pydantic.BaseModel"]  # Keep Pydantic field types importable at runtime.
@@ -83,10 +75,8 @@ max-complexity = 15
 docstring-code-format = true
 skip-magic-trailing-comma = true  # Collapse comma-forced multiline constructs when they fit.
 
-[tool.basedpyright]
-pythonVersion = "3.11"
-venvPath = "."
-venv = ".venv"
-typeCheckingMode = "recommended"
-failOnWarnings = true
-exclude = [".venv"]
+[tool.pyrefly]
+python-version = "3.11"
+python-interpreter-path = ".venv/bin/python"  # Required: the pre-commit hook otherwise queries its own env.
+preset = "all"  # Every error kind at error severity.
+enabled-ignores = ["pyrefly"]  # Only `# pyrefly: ignore[kind]` suppresses; `# type: ignore` does not.

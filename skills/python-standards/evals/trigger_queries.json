@@ -4,11 +4,19 @@
     "should_trigger": true
   },
   {
-    "query": "Set up this Python repo with uv, Ruff, basedpyright, and pre-commit.",
+    "query": "Set up this Python repo with uv, Ruff, pyrefly, and pre-commit.",
     "should_trigger": true
   },
   {
     "query": "Tighten Ruff checks for this latency-sensitive pandas and FastAPI service without blocking its async event loop.",
+    "should_trigger": true
+  },
+  {
+    "query": "This nightly pandas job takes 40 minutes and duplicated rows after the last merge — make it faster and stop it silently fanning out.",
+    "should_trigger": true
+  },
+  {
+    "query": "Package this Python library and publish it to PyPI with uv.",
     "should_trigger": true
   },
   {
@@ -21,6 +29,14 @@
   },
   {
     "query": "Explain what Pydantic strict mode means without changing any code.",
+    "should_trigger": false
+  },
+  {
+    "query": "What is the difference between asyncio.gather and asyncio.TaskGroup?",
+    "should_trigger": false
+  },
+  {
+    "query": "Write a bash script that rotates the log files on the batch host.",
     "should_trigger": false
   }
 ]

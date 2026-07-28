@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -18,15 +18,11 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.8.4
+    rev: 0.11.32   # keep in sync with the uv version the repo is built with
     hooks:
       - id: uv-lock   # fails the commit if pyproject.toml changed without uv.lock
 
-  - repo: local
+  - repo: https://github.com/facebook/pyrefly-pre-commit
+    rev: 1.1.1   # keep in sync with the pinned pyrefly dev dependency
     hooks:
-      - id: basedpyright
-        name: basedpyright
-        entry: uv run basedpyright
-        language: system
-        types: [python]
-        pass_filenames: false
+      - id: pyrefly-check

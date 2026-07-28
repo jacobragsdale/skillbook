@@ -8,7 +8,8 @@ this machine; agent skill directories only ever hold symlinks into it.
 ## Skills
 
 - `python-standards` — high-integrity production Python: strict typing,
-  validated I/O, uv, ruff, basedpyright, pre-commit, and explicit config.
+  validated I/O, measured performance, pandas and async service rules, uv,
+  ruff, pyrefly, pre-commit, and explicit config.
 - `git-ops` — the solo git workflow: main only, frequent commits, push after
   every commit, clean tree at end of task.
 - `jacob-home-server` — operating the home server.
