@@ -19,6 +19,14 @@ uv run pre-commit install
 pinned `pyrefly` dev dependency with the `pyrefly-pre-commit` rev. Pyrefly has
 no `required-version` setting, so that pairing is manual.
 
+The asset intentionally sets neither Ruff's `target-version` nor Pyrefly's
+`python-version`. Ruff infers the minimum supported version from
+`project.requires-python`; Pyrefly queries the repo-local `.venv` interpreter.
+When that interpreter is newer than the supported floor, set Pyrefly's
+`python-version` to the floor explicitly. This is project configuration, not a
+house-wide Python pin. Preserve the project's declared compatibility range
+rather than replacing it.
+
 ## Hooks that do not run
 
 Configuration alone does not install the repo-local Git hook — a fresh clone

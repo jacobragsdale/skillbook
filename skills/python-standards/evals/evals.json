@@ -33,8 +33,8 @@
     },
     {
       "id": 6,
-      "prompt": "Standardize Ruff for a Python 3.11 trading service that uses pandas, FastAPI, and asyncio, while keeping timeout parameters valid in its public async APIs.",
-      "expected_output": "The agent copies the standard Ruff asset; enables PERF, FAST, stable ASYNC rules except ASYNC109, and the full stable PD pandas-vet family; does not enable S; and keeps unsafe fixes disabled.",
+      "prompt": "Standardize Ruff for a trading service whose supported Python range is already declared in pyproject.toml. It uses pandas, FastAPI, and asyncio, while keeping timeout parameters valid in its public async APIs.",
+      "expected_output": "The agent preserves the project's declared Python range and lets Ruff infer its target from project.requires-python; copies the standard Ruff asset; enables PERF, FAST, stable ASYNC rules except ASYNC109, and the full stable PD pandas-vet family; does not enable S; and keeps unsafe fixes disabled.",
       "files": []
     },
     {

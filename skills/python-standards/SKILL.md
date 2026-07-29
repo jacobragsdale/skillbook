@@ -30,9 +30,9 @@ then choose the simplest implementation that preserves them.
   `enabled-ignores`, so `# type: ignore` and `# pyright: ignore` no longer
   suppress anything. The `unused-ignore` kind rejects stale suppressions.
 - Decorate every method that overrides a base-class member with `@override`;
-  `missing-override-decorator` is an error. On the pinned Python 3.11 it comes
-  from `typing_extensions`, which is a direct dependency — `typing.override`
-  is 3.12 and later.
+  `missing-override-decorator` is an error. Import it from `typing` when every
+  supported Python version provides it; otherwise use `typing_extensions` as a
+  direct dependency.
 - Use `None` only when absence is a valid domain state. Do not use nullable
   fields for partial construction, missing required input, or error signaling;
   use complete objects or tagged state types instead.
@@ -175,8 +175,12 @@ model_config = ConfigDict(
 
 ## Environment and tools
 
-- Pin Python 3.11 in `.python-version` and set `requires-python = ">=3.11"`.
-  Do not upgrade it incidentally.
+- Preserve the project's declared Python compatibility range. Do not add,
+  remove, or raise its minimum version incidentally. For a new project, choose
+  the range from its deployment and dependency constraints, record it in
+  `project.requires-python`, configure tools against its floor, and test that
+  floor in CI. A `.python-version` selects a development interpreter; it does
+  not define the package's compatibility contract.
 - Keep dependencies, dev dependencies, and tool configuration in one
   `pyproject.toml`; commit `uv.lock`. Remove `requirements*.txt`, `setup.py`,
   `setup.cfg`, `Pipfile`, and setup scripts.

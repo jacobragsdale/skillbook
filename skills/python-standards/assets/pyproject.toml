@@ -2,7 +2,6 @@
 
 [tool.ruff]
 line-length = 200
-target-version = "py311"
 required-version = ">=0.16.0"
 force-exclude = true
 show-fixes = true
@@ -76,7 +75,6 @@ docstring-code-format = true
 skip-magic-trailing-comma = true  # Collapse comma-forced multiline constructs when they fit.
 
 [tool.pyrefly]
-python-version = "3.11"
 python-interpreter-path = ".venv/bin/python"  # Required: the pre-commit hook otherwise queries its own env.
 preset = "all"  # Every error kind at error severity.
 enabled-ignores = ["pyrefly"]  # Only `# pyrefly: ignore[kind]` suppresses; `# type: ignore` does not.
