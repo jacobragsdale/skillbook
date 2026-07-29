@@ -16,6 +16,10 @@
     "should_trigger": true
   },
   {
+    "query": "Validate Excel and SQL-loaded pandas frames with Pandera before they reach the reconciliation pipeline.",
+    "should_trigger": true
+  },
+  {
     "query": "Package this Python library and publish it to PyPI with uv.",
     "should_trigger": true
   },
@@ -29,6 +33,10 @@
   },
   {
     "query": "Explain what Pydantic strict mode means without changing any code.",
+    "should_trigger": false
+  },
+  {
+    "query": "Compare Pandera and Pydantic conceptually without changing any code.",
     "should_trigger": false
   },
   {

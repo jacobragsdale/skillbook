@@ -62,7 +62,10 @@ ignore = [
 "**/conftest.py" = ["SLF001", "INP001"]
 
 [tool.ruff.lint.flake8-type-checking]
-runtime-evaluated-base-classes = ["pydantic.BaseModel"]  # Keep Pydantic field types importable at runtime.
+runtime-evaluated-base-classes = [
+    "pydantic.BaseModel",
+    "pandera.pandas.DataFrameModel",
+]  # Keep model field types importable at runtime.
 
 [tool.ruff.lint.isort]
 split-on-trailing-comma = false  # Do not preserve comma-forced import line breaks.

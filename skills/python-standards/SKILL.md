@@ -1,6 +1,6 @@
 ---
 name: python-standards
-description: "Enforce high-integrity Python types, I/O, performance, and tooling. Use when coding, reviewing, profiling, or configuring Python, uv, Ruff, pyrefly, Pydantic, pandas, FastAPI, asyncio, or dependencies — even if unrequested. Not for test design."
+description: "Enforce high-integrity Python, Pydantic, Pandera, pandas, and performance. Use when coding, reviewing, profiling, or configuring Python, uv, Ruff, pyrefly, FastAPI, asyncio, tooling, or dependencies — even if unrequested. Not for test design."
 ---
 
 # Python house standard
@@ -42,9 +42,10 @@ then choose the simplest implementation that preserves them.
 ## Validate boundaries
 
 - Treat environment/configuration, network and queue messages, files, database
-  rows, CLI input, and outbound payloads as I/O boundaries. Validate them with
-  Pydantic before domain code consumes them or another system receives them.
-- Use strict boundary models by default:
+  rows, CLI input, DataFrames, and outbound payloads as I/O boundaries. Validate
+  record and object boundaries with Pydantic and tabular boundaries with Pandera
+  before domain code consumes them or another system receives them.
+- Use strict Pydantic boundary models by default:
 
 ```python
 model_config = ConfigDict(
@@ -121,15 +122,22 @@ model_config = ConfigDict(
   the `str` dtype, and `to_datetime` yields `datetime64[us]` unless the input
   needs nanoseconds. Install `pyarrow` so `str` columns use Arrow storage
   rather than the Python-object fallback.
+- Add `pandera[pandas]` as a runtime dependency when a repository ingests
+  external or correctness-critical DataFrames; do not add it to repositories
+  without such a boundary. Read `references/pandera.md` before implementing
+  the schema or choosing its API.
+- Validate each tabular boundary with a named Pandera `DataFrameSchema`. Default
+  to `strict=True`, `coerce=False`, `unique_column_names=True`, non-nullable
+  columns, explicit dtypes, and `lazy=True`; add value, composite-key, row-count,
+  and cross-column checks required by the domain.
 - Pass `validate=` to every `merge` and `join` — `"one_to_one"`,
   `"one_to_many"`, or `"many_to_one"`. Without it a duplicate key silently
   multiplies rows, and nothing downstream distinguishes that from real data.
+  A Pandera schema after the merge does not replace this cardinality check.
 - Declare dtypes at the boundary (`read_csv(dtype=...)`, an explicit `astype`
-  after a query). Inferred dtypes make a job's behavior depend on the values
-  that happened to arrive that day.
-- Assert the frame contract before the transform runs: required columns,
-  dtypes, key uniqueness (`df.index.is_unique`, `df[key].is_unique`), and
-  expected row count. Do this at the adapter boundary, like any other I/O.
+  after a query), then validate without coercion. Use Pandera coercion only when
+  conversion is an explicit adapter responsibility and invalid values still
+  fail; inferred or silently coerced dtypes hide producer drift.
 - Never rely on index alignment across differently indexed objects —
   arithmetic between them produces `NaN` instead of raising. Merge on an
   explicit key, or reindex deliberately.
