@@ -49,7 +49,8 @@ exceptions; never weaken global lint/type config to silence one file.
 - The exit code is the contract with the scheduler: nonzero on any
   failure. A job that logs an error and exits 0 has lied.
 - Fail fast at startup: missing or invalid required config raises
-  immediately; provide defaults only for genuinely optional settings.
+  immediately. No development fallback for a required setting — a default
+  only ever belongs on a genuinely optional one.
 - Expected domain outcomes (an order rejected by a risk rule) are values —
   one named predicate per rule, violations returned and logged with the
   rule's name. Exceptions are reserved for the unexpected.
@@ -58,7 +59,7 @@ The entrypoint shape that follows from all of the above:
 
 ```python
 def main() -> int:
-    config = Config.from_env()                 # parse once; raises if incomplete
+    config = Settings()                        # pydantic-settings; raises if incomplete
     orders = fetch_orders(config, config.run_date)   # gateway: I/O only
     actions = decide(orders, config.limits)          # pure core; unit-tested
     apply_actions(actions, config)                   # gateway: I/O only
@@ -71,15 +72,14 @@ if __name__ == "__main__":
 ## Toolchain
 
 - uv only: `uv add`, `uv run`, `uv sync`. Never `pip install`; never write
-  a setup shell script — every dependency and build fix lands in
-  `pyproject.toml`.
-- Setting up or standardizing a repo's tooling (pyproject config, pre-commit,
-  coverage, .env): use the `python-standards` skill and copy its templates
-  instead of improvising config.
-- Python 3.11. One `pyproject.toml` per repo holds dependencies and all
-  tool config (ruff, pyrefly, pytest).
-- Standalone scripts are single files with a PEP 723 `# /// script` header,
-  runnable anywhere with `uv run script.py` and no environment setup.
+  a setup shell script — every dependency and build fix lands in the one
+  `pyproject.toml`, which also holds all tool config (ruff, pyrefly, pytest).
+- Respect the Python range the repo declares in `project.requires-python`.
+  Do not raise or lower it incidentally; `.python-version` selects a dev
+  interpreter, it does not define the compatibility contract.
+- Anything beyond the above — tooling setup, typing, boundary validation,
+  pandas, async, packaging: the `python-standards` skill is the full standard.
+  Copy its templates instead of improvising config.
 
 ## Testing
 
@@ -87,4 +87,4 @@ if __name__ == "__main__":
   behavior sentences (`test_expired_token_is_rejected`). Prefer real
   objects and hand-written fakes of boundaries you own over
   `mock.patch` — if code needs patching to test, restructure it per the
-  rules above instead. Full standard: the `python-standards` skill.
+  rules above instead.
