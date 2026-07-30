@@ -88,3 +88,9 @@ if __name__ == "__main__":
   objects and hand-written fakes of boundaries you own over
   `mock.patch` — if code needs patching to test, restructure it per the
   rules above instead.
+- A test that needs the network, a real database, or the wall clock is
+  either misplaced or missing a seam. Such tests are marked
+  `integration` and excluded from the default run, so plain `pytest`
+  never depends on the outside world.
+- For test design, pytest setup, and DataFrame test data, use the
+  `python-testing` skill.

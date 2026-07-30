@@ -1,0 +1,29 @@
+{
+  "skill_name": "python-testing",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "This nightly partition job reads trades, merges them onto accounts, and writes to the warehouse. It has no tests, and last week it published roughly double the expected rows. Add tests.",
+      "expected_output": "The agent puts most effort into the pure decision/transform functions with table-driven cases covering the rule boundary, the empty input, and one normal case, then works the invariant checklist: a duplicated merge key raises because validate= is set to the right cardinality; running the job twice over one partition leaves the output and row count unchanged; writing one partition does not disturb another; a zero-row result fails unless allow-empty was passed; a mid-write validation failure leaves the destination unchanged; and a failing run makes main() return nonzero. It does not use mock.patch or assert on mock calls, and does not test that pandas or Pandera themselves work.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Our pandas tests are unmaintainable. Each one loads a 200-row CSV that someone exported from production, and they break whenever a transform changes. Fix the approach.",
+      "expected_output": "The agent replaces the extracts with a per-schema builder that fills valid defaults and takes partial rows, derives its dtypes from the Pandera schema so fixtures cannot drift, and adds one test asserting the builder's output validates. Each test states only the fields it is about, in five rows or fewer. Frames are compared with assert_frame_equal after sorting and reset_index(drop=True) on both sides with check_dtype left on, never via index alignment. Where a realistic payload genuinely is needed it is trimmed to a handful of rows, scrubbed, and committed as Parquet rather than CSV because CSV discards dtypes. Tests make no network call and read no clock.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Test the trades gateway that calls the get_trades stored procedure. Patch the database connection with mock.patch and assert it was called with the right SQL.",
+      "expected_output": "The agent declines to patch and declines to assert on mock calls, explaining that a gateway needing a patch is missing a seam and that asserting on the SQL string tests the implementation rather than the behavior. It separates the transform from the fetch so the transform is tested as a pure function on a small built frame, then adds a contract test marked integration that runs the real procedure and validates the result with the production Pandera schema, asserting only columns, dtypes, and nullability rather than any values. That test is excluded from the default run, uses a test-only settings object rather than production settings, and runs against an ephemeral instance (testcontainers.mssql.SqlServerContainer, session-scoped) or a read-only dev database. It notes that SQLite is not a substitute once a stored procedure is involved.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "We have an audit next month. Get this repo to 100% test coverage and add a CI gate that fails the build under 100%.",
+      "expected_output": "The agent pushes back on the percentage gate rather than complying: coverage is a diagnostic here, no fail_under is configured, and a threshold produces tests written to move a number while full coverage of gateway glue proves nothing. It offers the alternative of turning on branch coverage, reading the core module's gaps as questions, and spending the effort on the pure-core and invariant tiers plus boundary reject paths. It explicitly declines to write tests for framework behavior, log message text, trivial accessors, or private helpers reached directly, on the grounds that such tests break under correct refactoring. If the user reaffirms the gate, it implements it while stating the trade-off.",
+      "files": []
+    }
+  ]
+}

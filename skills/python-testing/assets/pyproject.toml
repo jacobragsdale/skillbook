@@ -1,0 +1,29 @@
+# Merge these sections into the repository's pyproject.toml.
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers --strict-config --import-mode=importlib -m 'not integration'"
+testpaths = ["tests"]
+xfail_strict = true  # An xfail that starts passing is a failure, not a silent pass.
+filterwarnings = [
+    "error",  # pandas 3 chained assignment only warns; the lost write is otherwise invisible.
+    # Add narrow, dated `ignore::` entries with a reason for third-party
+    # deprecations you do not control. Never widen this back to "default".
+]
+markers = [
+    "integration: needs a real database, container, or network; excluded from the default run",
+]
+# asyncio_mode = "auto"  # Uncomment in repositories with async code (needs pytest-asyncio).
+
+[tool.coverage.run]
+branch = true  # Statement coverage hides the untaken half of every condition.
+source = ["src"]  # Set to the package directory; coverage of tests/ is noise.
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "@overload",
+]
+# Deliberately no fail_under: coverage is a diagnostic here, not a CI gate.
