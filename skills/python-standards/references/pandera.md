@@ -60,16 +60,12 @@ input or secret-bearing rows.
 
 ## Preserve global invariants
 
-- Keep `validate=` on every pandas merge and join; a post-merge schema does not
-  explain which input violated the expected cardinality.
 - Validating SQL chunks checks each chunk independently. Composite uniqueness,
   total row counts, monotonic sequence, and reconciliation across chunks need a
   database guarantee or explicit cross-chunk state.
 - Validate at ingress and before publishing when the output contract differs.
   Do not validate after every pure transform unless measurement and risk justify
   it.
-- Pandera establishes local schema and value constraints, not freshness,
-  completeness relative to the source, provenance, or business risk limits.
 
 ## Class API and tool compatibility
 

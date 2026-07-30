@@ -17,22 +17,20 @@ then choose the simplest implementation that preserves them.
   `[tool.pyrefly.errors]` to clear a backlog. Offer a checked-in baseline
   only when the user explicitly chooses staged adoption over fixing the
   backlog; `references/tooling-setup.md` has the commands.
-- `preset = "all"` makes `explicit-any` an error, so `Any` cannot be written
-  at all. Model an unknown payload as `object` and narrow it, or type the
-  shape it actually has. Where a third-party signature leaves no alternative,
-  keep the single `# pyrefly: ignore[explicit-any]` in the adapter and let
-  nothing untyped past it.
-- Do not let `Any` or `Unknown` escape an untyped dependency adapter. Add a
-  stub, `Protocol`, or narrow validated wrapper instead.
+- `preset = "all"` makes `explicit-any` an error, so `Any` cannot be written at
+  all. Model an unknown payload as `object` and narrow it, or type the shape it
+  actually has. Contain an untyped dependency behind an adapter — a stub,
+  `Protocol`, or narrow validated wrapper — and let neither `Any` nor `Unknown`
+  past it; where a third-party signature leaves no alternative, keep the single
+  `# pyrefly: ignore[explicit-any]` there.
 - Keep type-checker fixes in the type domain. Do not add runtime branches or
   assertions solely to appease the checker. Write every necessary suppression
   as `# pyrefly: ignore[error-kind]` with an adjacent reason; the asset sets
-  `enabled-ignores`, so `# type: ignore` and `# pyright: ignore` no longer
-  suppress anything. The `unused-ignore` kind rejects stale suppressions.
-- Decorate every method that overrides a base-class member with `@override`;
-  `missing-override-decorator` is an error. Import it from `typing` when every
-  supported Python version provides it; otherwise use `typing_extensions` as a
-  direct dependency.
+  `enabled-ignores`, so `# type: ignore` and `# pyright: ignore` silently
+  suppress nothing.
+- Decorate every method that overrides a base-class member with `@override`.
+  Import it from `typing` when every supported Python version provides it;
+  otherwise use `typing_extensions` as a direct dependency.
 - Use `None` only when absence is a valid domain state. Do not use nullable
   fields for partial construction, missing required input, or error signaling;
   use complete objects or tagged state types instead.
@@ -62,8 +60,9 @@ model_config = ConfigDict(
   through the core. Do not use `model_construct()` or unvalidated
   `model_copy(update=...)` with boundary data.
 - Schema validation does not establish freshness, sequence continuity,
-  referential integrity, reconciliation, or risk limits. Enforce those
-  invariants explicitly and fail before acting when they are unknown.
+  referential integrity, completeness relative to the source, provenance,
+  reconciliation, or risk limits. Enforce those invariants explicitly and fail
+  before acting when they are unknown.
 - Keep validation at ingress even in latency-sensitive code. Move from
   Pydantic to an immutable dataclass or specialized hot-path representation
   only after measuring allocations and P50/P99/P99.9 latency.
@@ -113,7 +112,7 @@ model_config = ConfigDict(
   parsed config out of the loop, and precompute a `dict`/`set` for membership
   instead of rescanning a list.
 - Batch and bound I/O. One round trip per row is the usual cause of a slow
-  job. Every network and database call gets an explicit timeout.
+  job.
 - Optimize the measured path only; leave the rest at the simplest correct
   implementation.
 
@@ -129,18 +128,17 @@ model_config = ConfigDict(
   external or correctness-critical DataFrames; do not add it to repositories
   without such a boundary. Read `references/pandera.md` before implementing
   the schema or choosing its API.
-- Validate each tabular boundary with a named Pandera `DataFrameSchema`. Default
-  to `strict=True`, `coerce=False`, `unique_column_names=True`, non-nullable
-  columns, explicit dtypes, and `lazy=True`; add value, composite-key, row-count,
-  and cross-column checks required by the domain.
+- Validate each tabular boundary with a named Pandera `DataFrameSchema`, adding
+  the value, composite-key, row-count, and cross-column checks the domain
+  requires. `references/pandera.md` carries the schema defaults and the
+  reasoning behind them.
+- Declare dtypes at the read boundary (`read_csv(dtype=...)`, an explicit
+  `astype` after a query), then validate without coercion.
 - Pass `validate=` to every `merge` and `join` — `"one_to_one"`,
   `"one_to_many"`, or `"many_to_one"`. Without it a duplicate key silently
   multiplies rows, and nothing downstream distinguishes that from real data.
-  A Pandera schema after the merge does not replace this cardinality check.
-- Declare dtypes at the boundary (`read_csv(dtype=...)`, an explicit `astype`
-  after a query), then validate without coercion. Use Pandera coercion only when
-  conversion is an explicit adapter responsibility and invalid values still
-  fail; inferred or silently coerced dtypes hide producer drift.
+  A Pandera schema after the merge does not replace this cardinality check, and
+  no lint rule covers it.
 - Never rely on index alignment across differently indexed objects —
   arithmetic between them produces `NaN` instead of raising. Merge on an
   explicit key, or reindex deliberately.
@@ -160,14 +158,14 @@ model_config = ConfigDict(
 - Wrap an unavoidable blocking call in `asyncio.to_thread`. Keep CPU-bound
   work out of the API process entirely.
 - Structure concurrency with `asyncio.TaskGroup` so a failing child cancels
-  its siblings and the error propagates. A bare `asyncio.create_task` result
-  must be held in a strong reference; the loop keeps only a weak one, so an
-  unreferenced task can be garbage-collected mid-flight.
-- Put a deadline on every await that crosses the network — `asyncio.timeout`
-  or the client's own timeout. Bound fan-out with a semaphore and size
-  connection pools explicitly.
+  its siblings and the error propagates.
+- Put a deadline on every call that crosses the network, sync or async —
+  `asyncio.timeout` or the client's own timeout argument. Bound fan-out with a
+  semaphore and size connection pools explicitly.
 - Never swallow `CancelledError`. Clean up and re-raise; suppressing it breaks
   `TaskGroup` and `asyncio.timeout`, which drive shutdown through cancellation.
+  `SIM105` will offer `contextlib.suppress` here — that fix is wrong; take the
+  re-raise instead.
 - Build clients, pools, and sessions in the FastAPI `lifespan` handler, not at
   import time. Import-time I/O breaks startup ordering, hides failures from
   the health check, and makes the module unimportable in a test.
@@ -175,9 +173,9 @@ model_config = ConfigDict(
 ## Failure and diagnosis
 
 - Log through `logging` with lazy `%s` arguments and structured `extra=`
-  fields. `T20` rejects `print`, and `G004` rejects f-strings in log calls.
-  Put the identifiers that make an incident searchable — run or partition id,
-  request id, instrument, order id — in `extra`, not inside the message text.
+  fields, never `print` or an f-string message. Put the identifiers that make
+  an incident searchable — run or partition id, request id, instrument, order
+  id — in `extra`, not inside the message text.
 - Log the identifying context at the point of failure and re-raise. Catching
   an exception, logging it, and returning a default converts an outage into
   silently wrong output.
@@ -203,9 +201,8 @@ model_config = ConfigDict(
   migrating from mypy or pyright, or debugging a hook that disagrees with the
   local command — it covers the pre-commit and pyrefly gotchas that produce
   confusing failures.
-- Suppress a Ruff diagnostic with a specific rule code and an adjacent reason.
-  Blanket `noqa` and blanket `type: ignore` are rejected by `PGH003`/`PGH004`,
-  and `RUF102`/`RUF103`/`RUF104` reject invalid or stale suppressions.
+- Suppress a Ruff diagnostic with a specific rule code and an adjacent reason;
+  the asset rejects blanket, invalid, and stale suppressions outright.
 - Expose each entry point as one `uv run` command with no prerequisite shell
   state.
 - For a package published to others, read `references/packaging.md`: build
@@ -218,11 +215,16 @@ Before finishing Python work, run:
 
 ```text
 uv sync --locked
-uv run ruff format --check .
-uv run ruff check .
-uv run pyrefly check
 uv run pre-commit run --all-files
 ```
+
+The hooks are the gate: they run `ruff-format`, `ruff-check --fix`,
+`pyrefly-check`, and `uv-lock` over every file, so a separate `ruff check` pass
+is duplicate work. Because `ruff-check` fixes in place, review and stage what it
+changed rather than assuming a passing run left the tree alone. Reach for the
+individual commands — `uv run ruff check .`, `uv run pyrefly check` — only to
+read diagnostics without fixing them, or when a hook and the local command
+disagree (`references/tooling-setup.md`).
 
 After dependency or environment changes, also delete only the repo-local
 `.venv`, run `uv sync --locked`, and verify the program's imports or entry

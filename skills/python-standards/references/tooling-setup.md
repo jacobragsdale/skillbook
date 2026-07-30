@@ -5,8 +5,7 @@ debugging a hook that behaves differently from the local command.
 
 ## Standardize a repo
 
-Copy the Ruff and pyrefly sections from `assets/pyproject.toml` and copy
-`assets/pre-commit-config.yaml`; do not retype them. Then:
+After copying the assets in:
 
 ```bash
 uv add --dev ruff pyrefly pre-commit
@@ -23,9 +22,8 @@ The asset intentionally sets neither Ruff's `target-version` nor Pyrefly's
 `python-version`. Ruff infers the minimum supported version from
 `project.requires-python`; Pyrefly queries the repo-local `.venv` interpreter.
 When that interpreter is newer than the supported floor, set Pyrefly's
-`python-version` to the floor explicitly. This is project configuration, not a
-house-wide Python pin. Preserve the project's declared compatibility range
-rather than replacing it.
+`python-version` to the floor explicitly — project configuration, not a
+house-wide pin.
 
 ## Hooks that do not run
 
