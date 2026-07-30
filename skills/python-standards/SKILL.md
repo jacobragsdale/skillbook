@@ -70,11 +70,14 @@ model_config = ConfigDict(
 
 ## Configuration
 
-- Load configuration once at startup into a validated, immutable settings
-  object. Required environment variables have no defaults.
+- Load configuration with `pydantic-settings`: define a `BaseSettings`
+  subclass using `SettingsConfigDict` with the strict Pydantic options above,
+  then instantiate it once at startup. Never give an environment-backed field
+  a default, even when a development fallback is requested; missing or invalid
+  configuration stops startup.
 - Never use `os.getenv`, `os.environ.get`, or a configuration mapping's
-  `.get()` for required settings. Missing or invalid configuration stops
-  startup; ordinary mappings may use `.get()` when absence is meaningful.
+  `.get()` for required settings; ordinary mappings may use `.get()` when
+  absence is meaningful.
 - Commit `.env.example`; gitignore `.env` and `.env.*` with `!.env.example`;
   load the selected file explicitly with `uv run --env-file .env ...`. Do not
   call `load_dotenv()`.

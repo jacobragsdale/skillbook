@@ -24,6 +24,10 @@
     "should_trigger": true
   },
   {
+    "query": "Replace scattered os.getenv calls in this Python service with one validated settings object loaded from required environment variables.",
+    "should_trigger": true
+  },
+  {
     "query": "Write pytest tests for the Python order-matching module.",
     "should_trigger": false
   },

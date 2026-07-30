@@ -10,7 +10,7 @@
     {
       "id": 2,
       "prompt": "Build the service settings object. BROKER_URL, ACCOUNT_ID, and MAX_ORDER_QTY come from environment variables; use localhost and 100 as development fallbacks if they are absent.",
-      "expected_output": "The agent rejects the requested fallbacks, defines all three settings as required, validates them once at startup, does not use os.getenv, os.environ.get, or a configuration mapping .get(), and passes an immutable typed settings object into the application.",
+      "expected_output": "The agent rejects the requested fallbacks; defines all three settings as required fields on a pydantic-settings BaseSettings subclass whose SettingsConfigDict uses the strict, immutable Pydantic options; instantiates it once at startup so missing or invalid configuration fails startup; and does not use os.getenv, os.environ.get, or a configuration mapping .get().",
       "files": []
     },
     {
