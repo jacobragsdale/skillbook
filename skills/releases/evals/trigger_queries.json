@@ -1,0 +1,26 @@
+[
+  {
+    "query": "Use $releases to create a production release project for the August billing rollout.",
+    "should_trigger": true
+  },
+  {
+    "query": "/releases show me every active release and what is still blocking QA.",
+    "should_trigger": true
+  },
+  {
+    "query": "Invoke the releases skill and add Azure Repos PR 482 to Billing August.",
+    "should_trigger": true
+  },
+  {
+    "query": "Write customer-facing release notes for the billing application.",
+    "should_trigger": false
+  },
+  {
+    "query": "Deploy the billing service to production after its PR merges.",
+    "should_trigger": false
+  },
+  {
+    "query": "Show my assigned Azure Boards work items for this sprint.",
+    "should_trigger": false
+  }
+]
