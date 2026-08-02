@@ -1,0 +1,23 @@
+{
+  "skill_name": "mermaid",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create one diagram for executives and on-call engineers that shows our checkout system landscape, the exact payment request sequence, retry behavior, database cardinality, and the next-quarter migration dates. Make it beautiful and fit it on one slide.",
+      "expected_output": "The agent identifies that the request contains independent viewer questions and does not force them into one unreadable canvas. It proposes or creates a small linked set led by an executive system overview, with separate sequence, ER, or delivery detail only where the supplied facts justify them. It names each audience and question, uses the smallest suitable Mermaid types, keeps labels and boundaries readable at slide size, preserves canonical .mmd source, validates every render, and reports any unavailable facts rather than inventing retry rules, cardinality, or dates.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Draw a polished C4 context diagram for the order platform. We only know that customers use it. Add the usual payment provider, identity service, warehouse system, protocols, and ownership boundaries so the diagram looks complete.",
+      "expected_output": "The agent refuses to present plausible external systems, protocols, or ownership boundaries as verified facts. It inspects authoritative system sources or asks for the missing material choice, then diagrams only the customer and order platform if no further evidence is available. It labels any explicitly accepted inference, notes that Mermaid C4 is experimental and version-gates it, uses a portable flowchart fallback when target support is unknown, and does not confuse visual completeness with factual completeness.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Add a Mermaid architecture overview to our GitHub README. The README must render for repository visitors, but we do not know which Mermaid version GitHub currently uses. Include source and verify what you can locally.",
+      "expected_output": "The agent treats GitHub's target renderer as a compatibility constraint, defaults to a stable flowchart with meaningful subgraphs instead of beta architecture or experimental C4 syntax, and avoids version-sensitive presentation frontmatter unless confirmed supported. It derives components and edges from repository truth, adds a concise title and accessible text when supported, stores maintainable source according to local conventions, renders with the bundled or configured local renderer, visually inspects the result, embeds it in the README, and clearly distinguishes local Mermaid validation from unverified GitHub-host behavior.",
+      "files": []
+    }
+  ]
+}
