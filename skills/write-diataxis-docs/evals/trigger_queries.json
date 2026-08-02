@@ -1,0 +1,50 @@
+[
+  {
+    "query": "Our getting-started page is half beginner lesson, half CLI option dump, and half architecture essay. Rewrite the documentation so a new user can actually succeed.",
+    "should_trigger": true
+  },
+  {
+    "query": "Write a tutorial that takes a first-time contributor from a clean checkout to a verified local plugin install.",
+    "should_trigger": true
+  },
+  {
+    "query": "Turn these operator notes into a focused guide for rotating production credentials safely, including the rollback path.",
+    "should_trigger": true
+  },
+  {
+    "query": "Audit our API documentation. Facts, setup steps, and design rationale are mixed together and nobody can find anything.",
+    "should_trigger": true
+  },
+  {
+    "query": "Create authoritative reference documentation for this CLI from its parser definitions and command help.",
+    "should_trigger": true
+  },
+  {
+    "query": "Explain why the service uses an append-only event log, including the trade-offs and rejected alternatives, for engineers new to the architecture.",
+    "should_trigger": true
+  },
+  {
+    "query": "Fix the margins, heading styles, and page numbers in this documentation.docx without changing its wording or structure.",
+    "should_trigger": false
+  },
+  {
+    "query": "Copyedit this README for grammar and spelling, but preserve its organization and meaning exactly.",
+    "should_trigger": false
+  },
+  {
+    "query": "Add docstrings and type annotations to these six Python functions.",
+    "should_trigger": false
+  },
+  {
+    "query": "Summarize the attached research paper in two paragraphs for an executive audience.",
+    "should_trigger": false
+  },
+  {
+    "query": "Implement the new backup command and add comments around the tricky retry loop.",
+    "should_trigger": false
+  },
+  {
+    "query": "Commit the documentation changes already in the working tree and push them to main.",
+    "should_trigger": false
+  }
+]
