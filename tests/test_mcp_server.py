@@ -1,5 +1,3 @@
-"""MCP and FastAPI contract tests for the skill server."""
-
 import json
 from pathlib import Path
 
@@ -9,7 +7,7 @@ from mcp import Client
 from mcp.types import TextContent, TextResourceContents
 
 from skillbook_mcp.catalog import SkillCatalog, SkillDocument, SkillSummary
-from skillbook_mcp.server import HealthResponse, create_app, create_mcp_server
+from skillbook_mcp.server import create_app, create_mcp_server
 
 
 def _catalog(tmp_path: Path) -> SkillCatalog:
@@ -22,7 +20,7 @@ def _catalog(tmp_path: Path) -> SkillCatalog:
 
 
 @pytest.mark.asyncio
-async def test_mcp_exposes_skill_tools_and_structured_results(tmp_path: Path) -> None:
+async def test_mcp_exposes_tools_and_resources(tmp_path: Path) -> None:
     server = create_mcp_server(_catalog(tmp_path))
 
     async with Client(server, raise_exceptions=True) as client:
@@ -41,12 +39,6 @@ async def test_mcp_exposes_skill_tools_and_structured_results(tmp_path: Path) ->
         assert document.summary.description == "Use the demo skill."
         assert document.files == ("SKILL.md", "references/details.md")
 
-
-@pytest.mark.asyncio
-async def test_mcp_exposes_catalog_and_skill_resources(tmp_path: Path) -> None:
-    server = create_mcp_server(_catalog(tmp_path))
-
-    async with Client(server, raise_exceptions=True) as client:
         resources = await client.list_resources()
         assert [(resource.name, resource.uri) for resource in resources.resources] == [("skill_catalog", "skills://catalog")]
 
@@ -72,4 +64,4 @@ def test_fastapi_health_checks_the_live_catalog(tmp_path: Path) -> None:
         response = client.get("/health")
 
     assert response.status_code == 200
-    assert HealthResponse.model_validate_json(response.content, strict=True) == (HealthResponse(status="ok", skills=1))
+    assert response.json() == {"status": "ok", "skills": 1}

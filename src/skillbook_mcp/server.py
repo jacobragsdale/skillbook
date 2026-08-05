@@ -1,5 +1,3 @@
-"""FastAPI host and MCP v2 surface for the canonical skillbook."""
-
 import json
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
@@ -9,45 +7,24 @@ from typing import Annotated
 import uvicorn
 from fastapi import FastAPI
 from mcp.server import MCPServer
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
 
-from skillbook_mcp.catalog import SkillCatalog, SkillDocument, SkillFile, SkillSummary
+from skillbook_mcp.catalog import SkillCatalog, SkillDocument, SkillFile
 
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-_SKILLS_ROOT = _REPO_ROOT / "skills"
 _SKILL_NAME = Annotated[str, Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$", description="Exact skill name returned by list_skills.")]
 _SKILL_PATH = Annotated[str, Field(min_length=1, description="POSIX path relative to the skill directory.")]
 
 
-class HealthResponse(BaseModel):
-    """FastAPI health response."""
-
-    model_config = ConfigDict(strict=True, extra="forbid", frozen=True, validate_default=True, revalidate_instances="always", allow_inf_nan=False)
-
-    status: str
-    skills: int
-
-
-class SkillMCPServer(MCPServer[object]):
-    """Narrow typed boundary around the SDK server."""
-
-
-def create_mcp_server(catalog: SkillCatalog) -> SkillMCPServer:
-    """Build an MCP v2 server around an injected live catalog."""
-    server = SkillMCPServer(
+def create_mcp_server(catalog: SkillCatalog) -> MCPServer[object]:
+    server = MCPServer[object](
         name="skillbook",
         title="Skillbook",
         description="Jacob's canonical Agent Skills library.",
-        instructions=(
-            "Call list_skills to discover relevant trigger descriptions. Call read_skill before applying a relevant skill, then call read_skill_file for any supporting path referenced by SKILL.md."
-        ),
+        instructions="Call list_skills to discover relevant trigger descriptions. Call read_skill before applying a relevant skill, then call read_skill_file for any supporting path referenced by SKILL.md.",
         version="0.1.0",
     )
 
-    @server.tool()
-    def list_skills() -> list[SkillSummary]:
-        """List available skills and the trigger description for each one."""
-        return catalog.list_skills()
+    server.add_tool(catalog.list_skills, description="List available skills and the trigger description for each one.")
 
     @server.tool()
     def read_skill(name: _SKILL_NAME) -> SkillDocument:
@@ -74,10 +51,7 @@ def create_mcp_server(catalog: SkillCatalog) -> SkillMCPServer:
     return server
 
 
-def create_app(server: SkillMCPServer, catalog: SkillCatalog) -> FastAPI:
-    """Mount MCP Streamable HTTP in FastAPI with the required shared lifespan."""
-    mcp_app = server.streamable_http_app(json_response=True, stateless_http=True)
-
+def create_app(server: MCPServer[object], catalog: SkillCatalog) -> FastAPI:
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
         async with server.session_manager.run():
@@ -86,18 +60,16 @@ def create_app(server: SkillMCPServer, catalog: SkillCatalog) -> FastAPI:
     app = FastAPI(title="Skillbook MCP experiment", version="0.1.0", lifespan=lifespan)
 
     @app.get("/health")
-    def health() -> HealthResponse:
-        return HealthResponse(status="ok", skills=len(catalog.list_skills()))
+    def health() -> dict[str, str | int]:
+        return {"status": "ok", "skills": len(catalog.list_skills())}
 
-    app.mount("/", mcp_app)
+    app.mount("/", server.streamable_http_app(json_response=True, stateless_http=True))
     return app
 
 
-catalog = SkillCatalog(_SKILLS_ROOT)
-mcp = create_mcp_server(catalog)
-app = create_app(mcp, catalog)
+catalog = SkillCatalog(Path(__file__).resolve().parents[2] / "skills")
+app = create_app(create_mcp_server(catalog), catalog)
 
 
 def main() -> None:
-    """Run the local experiment on its documented address."""
     uvicorn.run(app, host="127.0.0.1", port=8000)

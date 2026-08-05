@@ -1,5 +1,3 @@
-"""Behavior tests for the live skill catalog."""
-
 from pathlib import Path
 
 import pytest
@@ -21,10 +19,7 @@ def test_catalog_lists_valid_skills_in_name_order(tmp_path: Path) -> None:
     summaries = SkillCatalog(tmp_path).list_skills()
 
     assert [summary.name for summary in summaries] == ["alpha", "zeta"]
-    assert summaries[0].compatibility == "Needs a demo runtime."
-    assert summaries[0].model_invocation_enabled is False
-    assert summaries[0].uri == "skill://alpha"
-    assert len(summaries[0].sha256) == 64
+    assert (summaries[0].compatibility, summaries[0].model_invocation_enabled, summaries[0].uri, len(summaries[0].sha256)) == ("Needs a demo runtime.", False, "skill://alpha", 64)
 
 
 def test_read_skill_returns_content_and_supporting_files(tmp_path: Path) -> None:
@@ -50,10 +45,7 @@ def test_read_file_returns_typed_utf8_content(tmp_path: Path) -> None:
 
     skill_file = SkillCatalog(tmp_path).read_file("demo", "references/details.md")
 
-    assert skill_file.skill == "demo"
-    assert skill_file.path == "references/details.md"
-    assert skill_file.media_type == "text/markdown"
-    assert skill_file.content == "# Details\n"
+    assert (skill_file.skill, skill_file.path, skill_file.media_type, skill_file.content) == ("demo", "references/details.md", "text/markdown", "# Details\n")
 
 
 @pytest.mark.parametrize("path", ["../secret.txt", "/etc/passwd", "..\\secret.txt"])
@@ -64,32 +56,22 @@ def test_read_file_rejects_paths_outside_the_skill(tmp_path: Path, path: str) ->
         _ = SkillCatalog(tmp_path).read_file("demo", path)
 
 
-def test_frontmatter_name_must_match_the_directory(tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    ("frontmatter", "match"), [("---\nname: another\ndescription: mismatch\n---\n", "does not match directory"), ("---\nname: demo\ndescription: 123\n---\n", r"invalid SKILL\.md frontmatter")]
+)
+def test_read_skill_rejects_invalid_frontmatter(tmp_path: Path, frontmatter: str, match: str) -> None:
     skill_dir = _write_skill(tmp_path, "demo")
-    _ = (skill_dir / "SKILL.md").write_text("---\nname: another\ndescription: mismatch\n---\n", encoding="utf-8")
+    _ = (skill_dir / "SKILL.md").write_text(frontmatter, encoding="utf-8")
 
-    with pytest.raises(CatalogError, match="does not match directory"):
+    with pytest.raises(CatalogError, match=match):
         _ = SkillCatalog(tmp_path).read_skill("demo")
 
 
-def test_frontmatter_uses_strict_field_types(tmp_path: Path) -> None:
+@pytest.mark.parametrize(("path", "content", "match"), [("binary.bin", b"\xff", "not UTF-8 text"), ("references/missing.md", None, "unknown skill file")])
+def test_read_file_reports_invalid_content(tmp_path: Path, path: str, content: bytes | None, match: str) -> None:
     skill_dir = _write_skill(tmp_path, "demo")
-    _ = (skill_dir / "SKILL.md").write_text("---\nname: demo\ndescription: 123\n---\n", encoding="utf-8")
+    if content is not None:
+        _ = (skill_dir / path).write_bytes(content)
 
-    with pytest.raises(CatalogError, match=r"invalid SKILL\.md frontmatter"):
-        _ = SkillCatalog(tmp_path).read_skill("demo")
-
-
-def test_read_file_rejects_non_utf8_assets(tmp_path: Path) -> None:
-    skill_dir = _write_skill(tmp_path, "demo")
-    _ = (skill_dir / "binary.bin").write_bytes(b"\xff")
-
-    with pytest.raises(CatalogError, match="not UTF-8 text"):
-        _ = SkillCatalog(tmp_path).read_file("demo", "binary.bin")
-
-
-def test_read_file_reports_an_unknown_supporting_file(tmp_path: Path) -> None:
-    _ = _write_skill(tmp_path, "demo")
-
-    with pytest.raises(CatalogError, match="unknown skill file"):
-        _ = SkillCatalog(tmp_path).read_file("demo", "references/missing.md")
+    with pytest.raises(CatalogError, match=match):
+        _ = SkillCatalog(tmp_path).read_file("demo", path)
