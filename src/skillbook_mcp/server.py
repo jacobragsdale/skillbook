@@ -7,12 +7,14 @@ from typing import Annotated
 import uvicorn
 from fastapi import FastAPI
 from mcp.server import MCPServer
+from mcp.types import ToolAnnotations
 from pydantic import Field
 
 from skillbook_mcp.catalog import SkillCatalog, SkillDocument, SkillFile
 
 _SKILL_NAME = Annotated[str, Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$", description="Exact skill name returned by list_skills.")]
 _SKILL_PATH = Annotated[str, Field(min_length=1, description="POSIX path relative to the skill directory.")]
+_READ_ONLY_TOOL = ToolAnnotations(read_only_hint=True, open_world_hint=False)
 
 
 def create_mcp_server(catalog: SkillCatalog) -> MCPServer[object]:
@@ -24,14 +26,14 @@ def create_mcp_server(catalog: SkillCatalog) -> MCPServer[object]:
         version="0.1.0",
     )
 
-    server.add_tool(catalog.list_skills, description="List available skills and the trigger description for each one.")
+    server.add_tool(catalog.list_skills, title="List skills", description="List available skills and the trigger description for each one.", annotations=_READ_ONLY_TOOL)
 
-    @server.tool()
+    @server.tool(title="Read skill", annotations=_READ_ONLY_TOOL)
     def read_skill(name: _SKILL_NAME) -> SkillDocument:
         """Read a selected skill's complete SKILL.md and supporting file names."""
         return catalog.read_skill(name)
 
-    @server.tool()
+    @server.tool(title="Read skill file", annotations=_READ_ONLY_TOOL)
     def read_skill_file(name: _SKILL_NAME, path: _SKILL_PATH) -> SkillFile:
         """Read a UTF-8 supporting file referenced by a selected skill."""
         return catalog.read_file(name, path)
