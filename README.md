@@ -5,6 +5,59 @@ Personal library of [Agent Skills](https://agentskills.io/) in the portable
 skills installed on this machine: edit `skills/<name>/`, never an installed
 copy.
 
+## Run the MCP v2 experiment
+
+This branch includes a local FastAPI application that serves the canonical
+`skills/` directory through version 2 of the official MCP Python SDK. It reads
+the files on every request, so edits become available without restarting the
+server. The service is read-only and does not install, modify, or execute a
+skill.
+
+Requires Python 3.11 or newer and [uv](https://docs.astral.sh/uv/). Start the
+server from the repository root:
+
+```bash
+uv sync --locked
+uv run skillbook-mcp
+```
+
+The server listens only on `127.0.0.1:8000`. Connect an MCP client to
+`http://127.0.0.1:8000/mcp`. Check the live catalog through FastAPI:
+
+```bash
+curl http://127.0.0.1:8000/health
+```
+
+The response reports `status: ok` and the current number of skills. FastAPI's
+OpenAPI UI is available at `http://127.0.0.1:8000/docs`.
+
+### MCP surface
+
+| Kind | Name or URI | Result |
+| --- | --- | --- |
+| Tool | `list_skills` | Names, trigger descriptions, content hashes, compatibility, and invocation policy for every skill. |
+| Tool | `read_skill` | One complete `SKILL.md` plus its available supporting file paths. |
+| Tool | `read_skill_file` | One UTF-8 supporting file, constrained to its skill directory. |
+| Resource | `skills://catalog` | JSON form of the live catalog. |
+| Resource template | `skill://{name}` | Complete `SKILL.md` for a named skill. |
+| Resource template | `skill-file://{name}/{+path}` | A supporting text file within a named skill. |
+
+The server rejects path traversal and non-UTF-8 assets. Cache directories and
+compiled Python files are not included in the file list. A skill with
+`disable-model-invocation: true` remains readable but is reported with
+`model_invocation_enabled: false`; the MCP client remains responsible for
+honoring that policy.
+
+This is intentionally a local experiment: it has no authentication, public
+host allowlist, or browser CORS policy. Add those before exposing it beyond
+localhost.
+
+Run the focused contract tests with:
+
+```bash
+uv run pytest tests/test_mcp_catalog.py tests/test_mcp_server.py
+```
+
 ## Skills
 
 Each skill is a folder under [`skills/`](skills/) whose name matches the
