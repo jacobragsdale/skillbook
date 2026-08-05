@@ -1,0 +1,12 @@
+.git
+.github
+.venv
+.coverage
+.DS_Store
+**/__pycache__
+**/*.pyc
+**/.ruff_cache
+tests
+rules
+install.py
+AGENTS.md

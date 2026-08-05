@@ -1,4 +1,5 @@
 import json
+import logging
 from pathlib import Path
 
 import pytest
@@ -6,7 +7,7 @@ from fastapi.testclient import TestClient
 from mcp import Client
 from mcp.types import DiscoverResult, JSONRPCError, TextContent, TextResourceContents, ToolAnnotations
 
-from skillbook_mcp.catalog import SkillCatalog, SkillDocument, SkillSummary
+from skillbook_mcp.catalog import SkillCatalog, SkillDocument, SkillFile, SkillSummary
 from skillbook_mcp.server import create_app, create_mcp_server
 
 
@@ -30,7 +31,8 @@ def _discover_request() -> dict[str, object]:
 
 
 @pytest.mark.asyncio
-async def test_mcp_exposes_tools_and_resources(tmp_path: Path) -> None:
+async def test_mcp_exposes_tools_and_resources(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
+    caplog.set_level(logging.INFO, logger="skillbook_mcp.usage")
     server = create_mcp_server(_catalog(tmp_path))
 
     async with Client(server, raise_exceptions=True) as client:
@@ -56,6 +58,10 @@ async def test_mcp_exposes_tools_and_resources(tmp_path: Path) -> None:
         assert document.summary.description == "Use the demo skill."
         assert document.files == ("SKILL.md", "references/details.md")
 
+        read_file = await client.call_tool("read_skill_file", {"name": "demo", "path": "references/details.md"})
+        tool_file = SkillFile.model_validate_json(json.dumps(read_file.structured_content), strict=True)
+        assert tool_file.content == "# Details\n"
+
         resources = await client.list_resources()
         assert [(resource.name, resource.uri) for resource in resources.resources] == [("skill_catalog", "skills://catalog")]
         assert (resources.result_type, resources.ttl_ms, resources.cache_scope) == ("complete", 0, "private")
@@ -68,6 +74,11 @@ async def test_mcp_exposes_tools_and_resources(tmp_path: Path) -> None:
         assert prompts.prompts == []
         assert (prompts.result_type, prompts.ttl_ms, prompts.cache_scope) == ("complete", 0, "private")
 
+        catalog_result = await client.read_resource("skills://catalog")
+        catalog_resource = catalog_result.contents[0]
+        assert isinstance(catalog_resource, TextResourceContents)
+        assert json.loads(catalog_resource.text)[0]["name"] == "demo"
+
         document_result = await client.read_resource("skill://demo")
         document = document_result.contents[0]
         assert isinstance(document, TextResourceContents)
@@ -77,6 +88,20 @@ async def test_mcp_exposes_tools_and_resources(tmp_path: Path) -> None:
         skill_file = file_result.contents[0]
         assert isinstance(skill_file, TextResourceContents)
         assert skill_file.text == "# Details\n"
+
+    usage_events = [
+        (record.__dict__.get("interface"), record.__dict__.get("operation"), record.__dict__.get("skill"), record.__dict__.get("path"))
+        for record in caplog.records
+        if record.name == "skillbook_mcp.usage"
+    ]
+    assert usage_events == [
+        ("tool", "list_skills", "-", "-"),
+        ("tool", "read_skill", "demo", "-"),
+        ("tool", "read_skill_file", "demo", "references/details.md"),
+        ("resource", "skill_catalog_resource", "-", "-"),
+        ("resource", "skill_document_resource", "demo", "-"),
+        ("resource", "skill_file_resource", "demo", "references/details.md"),
+    ]
 
 
 def test_streamable_http_exposes_modern_discovery_contract(tmp_path: Path) -> None:

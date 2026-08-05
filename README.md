@@ -153,6 +153,51 @@ Keep that process running, then register the URL as a Streamable HTTP server in
 your MCP host. Configuration syntax is host-specific; the connection needs only
 the URL because this local experiment has no authentication.
 
+### Run the server with Docker
+
+Build the image from the repository root:
+
+```bash
+docker build -t skillbook-mcp .
+```
+
+Run it with the published port restricted to the host's loopback interface:
+
+```bash
+docker run --rm --name skillbook-mcp -p 127.0.0.1:8000:8000 skillbook-mcp
+```
+
+The container serves the same MCP endpoint at
+<http://127.0.0.1:8000/mcp>. It includes the repository's `skills/` directory
+at build time, runs as an unprivileged user, and has a health check against
+`/health`. Rebuild the image after changing a skill.
+
+### Monitor function usage
+
+Every successful or failed entry into a registered tool or resource function
+emits one line to stdout. Local runs display those lines in the terminal. For a
+running container, follow them with:
+
+```bash
+docker logs --follow skillbook-mcp
+```
+
+Example output:
+
+```text
+2026-08-04T18:42:11+0000 level=INFO event=function_called interface=tool operation=list_skills skill=- path=-
+2026-08-04T18:42:13+0000 level=INFO event=function_called interface=tool operation=read_skill skill=python-standards path=-
+2026-08-04T18:42:14+0000 level=INFO event=function_called interface=resource operation=skill_file_resource skill=python-standards path=references/pandera.md
+```
+
+The fields identify the MCP interface, function, selected skill, and supporting
+path. A hyphen means the field does not apply. Logs deliberately exclude skill
+contents, request bodies, prompts, and environment values. They are usage
+events only: they show that a function was entered, not whether a model used or
+followed the returned instructions. Docker retains logs according to the
+configured logging driver; this application does not write a log file or usage
+database.
+
 ### Verify the live catalog
 
 In another terminal:
@@ -267,8 +312,15 @@ the SDK enables localhost host and Origin checks to reduce DNS-rebinding risk.
 It has no authentication or browser CORS policy. Do not bind it to a LAN or
 public interface without adding an explicit deployment security design.
 
+The container listens on all of its own interfaces so Docker port publishing
+works. The documented `docker run` command publishes that port only on the
+host's `127.0.0.1`; do not change the host binding to an unrestricted address
+without adding authentication and transport security.
+
 The registered tool inputs contain only a skill name and optional file path.
-This implementation has no prompt input, telemetry, or usage database.
+This implementation has no prompt input, persistent telemetry, or usage
+database. Its stdout usage log records the function name and the optional skill
+and relative supporting-file path.
 
 ## Current skills
 
@@ -377,6 +429,7 @@ skills/<name>/assets/        # optional reusable templates or files
 rules/                       # always-on rules referenced by repo instructions
 tests/                       # regression and MCP contract tests
 install.py                   # installs and prunes per-skill symlinks
+Dockerfile                   # locked, unprivileged MCP container image
 AGENTS.md                    # repository workflow and maintenance rules
 ```
 
