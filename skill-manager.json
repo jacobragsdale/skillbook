@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jacobragsdale/skill-manager/main/schemas/v1/source-manifest.schema.json",
+  "version": 1,
+  "source": {
+    "id": "skillbook",
+    "name": "Skillbook",
+    "description": "Jacob's canonical library of portable Agent Skills."
+  },
+  "agentSkills": [
+    {
+      "include": ["skills/*"],
+      "destinations": [{ "anchor": "home", "path": ".agents/skills/${skill.name}" }]
+    }
+  ]
+}
