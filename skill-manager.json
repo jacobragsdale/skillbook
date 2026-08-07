@@ -1,15 +1,55 @@
 {
-  "$schema": "https://raw.githubusercontent.com/jacobragsdale/skill-manager/main/schemas/v1/source-manifest.schema.json",
   "version": 1,
   "source": {
     "id": "skillbook",
     "name": "Skillbook",
     "description": "Jacob's canonical library of portable Agent Skills."
   },
-  "agentSkills": [
+  "installs": [
     {
-      "include": ["skills/*"],
-      "destinations": [{ "anchor": "home", "path": ".agents/skills/${skill.name}" }]
+      "id": "git-ops",
+      "source": "skills/git-ops",
+      "destination": { "anchor": "home", "path": ".agents/skills/skillbook-git-ops" }
+    },
+    {
+      "id": "jacob-create-skill",
+      "source": "skills/jacob-create-skill",
+      "destination": { "anchor": "home", "path": ".agents/skills/skillbook-jacob-create-skill" }
+    },
+    {
+      "id": "jacob-home-server",
+      "source": "skills/jacob-home-server",
+      "destination": { "anchor": "home", "path": ".agents/skills/skillbook-jacob-home-server" }
+    },
+    {
+      "id": "mermaid",
+      "source": "skills/mermaid",
+      "destination": { "anchor": "home", "path": ".agents/skills/skillbook-mermaid" }
+    },
+    {
+      "id": "python-standards",
+      "source": "skills/python-standards",
+      "destination": { "anchor": "home", "path": ".agents/skills/skillbook-python-standards" }
+    },
+    {
+      "id": "python-testing",
+      "source": "skills/python-testing",
+      "destination": { "anchor": "home", "path": ".agents/skills/skillbook-python-testing" }
+    },
+    {
+      "id": "releases",
+      "source": "skills/releases",
+      "destination": { "anchor": "home", "path": ".agents/skills/skillbook-releases" }
+    },
+    {
+      "id": "typescript-standards",
+      "source": "skills/typescript-standards",
+      "destination": { "anchor": "home", "path": ".agents/skills/skillbook-typescript-standards" }
+    },
+    {
+      "id": "write-diataxis-docs",
+      "source": "skills/write-diataxis-docs",
+      "destination": { "anchor": "home", "path": ".agents/skills/skillbook-write-diataxis-docs" }
     }
   ]
 }
