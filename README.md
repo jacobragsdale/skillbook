@@ -329,6 +329,7 @@ Each skill is a folder under [`skills/`](skills/) whose name matches the
 
 | Skill | Purpose |
 | --- | --- |
+| [`capture-app-context`](skills/capture-app-context/SKILL.md) | Discover surrounding application operations and create source-attributed repo-scoped context skills. |
 | [`git-ops`](skills/git-ops/SKILL.md) | Keep solo repositories on `main`, commit at working checkpoints, push after each commit, and finish clean. |
 | [`jacob-create-skill`](skills/jacob-create-skill/SKILL.md) | Create, improve, and validate skills, including scaffolding, trigger tests, and forward tests. |
 | [`jacob-home-server`](skills/jacob-home-server/SKILL.md) | Operate the home server: Docker stacks, SOPS secrets, deployments, backups, media, networking, and recovery. |
