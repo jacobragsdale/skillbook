@@ -8,22 +8,20 @@ debugging a hook that behaves differently from the local command.
 After copying the assets in:
 
 ```bash
-uv add --dev ruff pyrefly pre-commit
+uv add --dev ruff ty pre-commit
 uv run pre-commit autoupdate
 uv run pre-commit install
 ```
 
 `pre-commit autoupdate` moves the `rev` pins. After it runs, re-align
 `required-version` in `[tool.ruff]` with the `ruff-pre-commit` rev, and the
-pinned `pyrefly` dev dependency with the `pyrefly-pre-commit` rev. Pyrefly has
-no `required-version` setting, so that pairing is manual.
+pinned `ty` dev dependency with the `ty-pre-commit` rev. ty has no
+`required-version` setting, so that pairing is manual.
 
-The asset intentionally sets neither Ruff's `target-version` nor Pyrefly's
-`python-version`. Ruff infers the minimum supported version from
-`project.requires-python`; Pyrefly queries the repo-local `.venv` interpreter.
-When that interpreter is newer than the supported floor, set Pyrefly's
-`python-version` to the floor explicitly — project configuration, not a
-house-wide pin.
+The asset intentionally sets neither Ruff's `target-version` nor ty's
+`environment.python-version`. Both infer the minimum supported version from
+`project.requires-python`; when a project cannot declare that field, set ty's
+version explicitly — project configuration, not a house-wide pin.
 
 ## Hooks that do not run
 
@@ -32,36 +30,31 @@ has `.pre-commit-config.yaml` but no hook. Resolve the active path with
 `git rev-parse --git-path hooks/pre-commit`; if the file is absent, run
 `uv run pre-commit install`.
 
-## pyrefly resolves the wrong environment
+## ty resolves the wrong environment
 
-Keep `python-interpreter-path = ".venv/bin/python"` in `[tool.pyrefly]`. The
-`pyrefly-check` hook runs inside pre-commit's own virtualenv, so without it
-pyrefly resolves imports and the standard library against that environment and
-reports `missing-import` for every real dependency — while the bare
-`uv run pyrefly check` passes.
+Run `uv sync --locked` first. Locally, ty uses the active environment or a
+project-root `.venv`; use `uv run ty check -v` to inspect its search paths. The
+official pre-commit hook resolves dependencies from the project's
+`pyproject.toml` through uv and does not use `additional_dependencies`. If the
+hook and `uv run ty check` disagree, compare the pinned ty versions and the uv
+groups selected by the hook before changing import rules.
 
-## Migrating from mypy or pyright
+## Migrating from another type checker
 
-`uv run pyrefly init` converts an existing mypy or pyright config in place.
-Replace the translated result with the asset's `[tool.pyrefly]` section rather
-than keeping the migrated severities, which reproduce the old checker's
-weaker defaults.
+Remove the old checker, its config, hook, and suppressions in the same change.
+Copy the asset's `[tool.ty]` tables, then run `uv run ty check`. Translate only
+genuine exceptions to a specific `# ty: ignore[rule]` with an adjacent reason;
+do not mechanically preserve disabled diagnostics from the previous checker.
 
-## Staged adoption with a baseline
+## Staged adoption
 
 Only when the user explicitly chooses staged adoption over fixing the backlog.
-A baseline keeps `preset = "all"` active: it suppresses only the recorded
-diagnostics, tolerates line drift, and still fails on new ones.
-
-```bash
-uv run pyrefly check --baseline pyrefly-baseline.json --update-baseline
-```
-
-`--update-baseline` requires the explicit `--baseline` flag even when the
-`baseline` config key is set. Set `baseline` in `[tool.pyrefly]` so the bare
-`pyrefly check` in the hook reads it. Pyrefly does not prune entries as they
-are fixed, so re-run the update command periodically; otherwise the baseline
-hides regressions instead of shrinking.
+ty has no checked-in diagnostic baseline. Prefer migrating one owned package or
+directory at a time and keep new or migrated code under the standard config.
+When that split is impossible, use the narrowest file-pattern override or
+specific suppression available, record why it exists, and remove it as the
+backlog shrinks. Never turn off a rule for the whole project merely to make the
+first run pass.
 
 ## Ruff notes
 

@@ -15,8 +15,8 @@
     },
     {
       "id": 3,
-      "prompt": "pyrefly reports 4,000 errors in this old repo. Turn the checking down globally so the hook passes.",
-      "expected_output": "The agent keeps preset = \"all\" across owned code, does not switch to the strict, default, legacy, or basic preset or disable error kinds in [tool.pyrefly.errors], does not introduce Any or runtime branches to appease the checker, and offers a checked-in baseline only if the user explicitly chooses staged adoption. It knows preset = \"all\" makes explicit-any an error, so unknown payloads become object plus narrowing rather than Any. Third-party typing gaps are contained with stubs, Protocols, or narrow adapters.",
+      "prompt": "ty reports 4,000 diagnostics in this old repo. Disable its rules globally so the hook passes.",
+      "expected_output": "The agent keeps ty's enabled defaults plus the standard high-signal opt-in rules, does not set all = \"error\" or disable rules globally, and does not add runtime branches solely to appease the checker. Unknown payloads become object plus narrowing rather than Any, and third-party typing gaps are contained with stubs, Protocols, or narrow adapters. If the user explicitly chooses staged adoption, the agent uses package-by-package migration or narrow tracked overrides because ty has no checked-in diagnostic baseline.",
       "files": []
     },
     {
@@ -46,7 +46,7 @@
     {
       "id": 8,
       "prompt": "This nightly reconciliation job builds a positions frame by iterating rows with iterrows, merges it against the trades frame on account_id, then writes the result. It is slow and last week it published roughly double the expected rows.",
-      "expected_output": "The agent identifies the unvalidated merge as the row-multiplication cause and passes validate= (one_to_one or many_to_one) so a duplicate key raises instead of silently fanning out; replaces iterrows with vectorized operations; declares dtypes at the read boundary; validates the external and published frames with strict, non-coercing Pandera schemas covering required columns, dtypes, composite-key uniqueness, and expected row count; and does not rely on index alignment, which yields NaN rather than raising.",
+      "expected_output": "The agent identifies the unvalidated merge as the row-multiplication cause and passes validate= (one_to_one or many_to_one) so a duplicate key raises instead of silently fanning out; replaces iterrows with vectorized operations; declares dtypes at the read boundary; validates required columns, nullability, values, composite-key uniqueness, and expected row count at the tabular boundaries; and does not rely on index alignment, which yields NaN instead of raising.",
       "files": []
     },
     {
@@ -65,12 +65,6 @@
       "id": 11,
       "prompt": "Publish this internal Python library to PyPI so other teams can install it. Add a PyPI token to the CI secrets.",
       "expected_output": "The agent reads references/packaging.md; configures the uv_build backend for pure Python; ships a py.typed marker and declares the public surface with __all__; prefers PyPI Trusted Publishing with id-token: write over a stored token and notes that the missing permission causes an unauthenticated upload that appears to succeed; builds with uv build --no-sources; and verifies the published artifact with uv run --with <package> --no-project.",
-      "files": []
-    },
-    {
-      "id": 12,
-      "prompt": "Build one pandas ingestion adapter for either an Excel Trades sheet or a SQL trades query. Convert the whole frame to Pydantic row models, accept numeric strings, and process SQL in chunks because the table is large.",
-      "expected_output": "The agent reads references/pandera.md; uses pandas for I/O and a named Pandera DataFrameSchema for the tabular boundary instead of allocating Pydantic models per row; adds pandera[pandas] as a runtime dependency; declares reader dtypes; defaults to strict=True, coerce=False, unique_column_names=True, non-nullable fields, composite trade-key uniqueness, domain checks, and lazy=True; allows coercion only if parsing is an explicit adapter responsibility; and states that per-chunk validation cannot prove global uniqueness, total row count, sequence continuity, or reconciliation.",
       "files": []
     }
   ]

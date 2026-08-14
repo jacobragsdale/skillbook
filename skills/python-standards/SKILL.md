@@ -1,6 +1,6 @@
 ---
 name: python-standards
-description: "Enforce high-integrity Python, Pydantic, Pandera, pandas, and performance. Use when coding, reviewing, profiling, or configuring Python, uv, Ruff, pyrefly, FastAPI, asyncio, tooling, or dependencies — even if unrequested. Not for test design."
+description: "Enforce high-integrity Python implementation and tooling; exclude test design. Use when coding, reviewing, profiling, or configuring Python, Pydantic, performance, uv, Ruff, ty, FastAPI, asyncio, tooling, or dependencies — even if unrequested."
 ---
 
 # Python house standard
@@ -11,23 +11,21 @@ then choose the simplest implementation that preserves them.
 ## Types and state
 
 - Rely on inference only for locals whose resulting type remains precise.
-- Run pyrefly with `preset = "all"` over all owned code and require zero
-  diagnostics. Do not fall back to the `strict`, `default`, `legacy`, or
-  `basic` preset for brownfield code, and do not disable error kinds in
-  `[tool.pyrefly.errors]` to clear a backlog. Offer a checked-in baseline
-  only when the user explicitly chooses staged adoption over fixing the
-  backlog; `references/tooling-setup.md` has the commands.
-- `preset = "all"` makes `explicit-any` an error, so `Any` cannot be written at
-  all. Model an unknown payload as `object` and narrow it, or type the shape it
-  actually has. Contain an untyped dependency behind an adapter — a stub,
-  `Protocol`, or narrow validated wrapper — and let neither `Any` nor `Unknown`
-  past it; where a third-party signature leaves no alternative, keep the single
-  `# pyrefly: ignore[explicit-any]` there.
+- Run `ty check` over all owned code with the checked-in strict configuration
+  and require zero diagnostics. Keep ty's enabled defaults and the asset's
+  selected high-signal opt-in rules; do not set `all = "error"`, which Astral
+  does not recommend, or disable rules globally to clear a backlog. Allow
+  staged adoption only when the user explicitly chooses it; keep every
+  temporary relaxation narrow and tracked for removal.
+- Do not write `Any` in first-party interfaces. Model an unknown payload as
+  `object` and narrow it, or type the shape it actually has. Contain an untyped
+  dependency behind an adapter — a stub, `Protocol`, or narrow validated wrapper
+  — and let neither `Any` nor ty's inferred `Unknown` pass it.
 - Keep type-checker fixes in the type domain. Do not add runtime branches or
   assertions solely to appease the checker. Write every necessary suppression
-  as `# pyrefly: ignore[error-kind]` with an adjacent reason; the asset sets
-  `enabled-ignores`, so `# type: ignore` and `# pyright: ignore` silently
-  suppress nothing.
+  as `# ty: ignore[rule]` with an adjacent reason. The asset rejects blanket
+  suppressions and disables `# type: ignore`, so only a named ty rule can hide
+  a diagnostic.
 - Decorate every method that overrides a base-class member with `@override`.
   Import it from `typing` when every supported Python version provides it;
   otherwise use `typing_extensions` as a direct dependency.
@@ -40,9 +38,9 @@ then choose the simplest implementation that preserves them.
 ## Validate boundaries
 
 - Treat environment/configuration, network and queue messages, files, database
-  rows, CLI input, DataFrames, and outbound payloads as I/O boundaries. Validate
-  record and object boundaries with Pydantic and tabular boundaries with Pandera
-  before domain code consumes them or another system receives them.
+  rows, CLI input, tabular data, and outbound payloads as I/O boundaries.
+  Validate them before domain code consumes them or another system receives
+  them; use Pydantic for record and object boundaries.
 - Use strict Pydantic boundary models by default:
 
 ```python
@@ -118,27 +116,13 @@ model_config = ConfigDict(
 
 ## pandas
 
-- Write for pandas 3 semantics. Copy-on-Write is the default, so chained
-  assignment (`df[mask]["col"] = x`) silently updates a temporary and loses
-  the write — assign through a single `.loc`/`.iloc` call. Strings infer to
-  the `str` dtype, and `to_datetime` yields `datetime64[us]` unless the input
-  needs nanoseconds. Install `pyarrow` so `str` columns use Arrow storage
-  rather than the Python-object fallback.
-- Add `pandera[pandas]` as a runtime dependency when a repository ingests
-  external or correctness-critical DataFrames; do not add it to repositories
-  without such a boundary. Read `references/pandera.md` before implementing
-  the schema or choosing its API.
-- Validate each tabular boundary with a named Pandera `DataFrameSchema`, adding
-  the value, composite-key, row-count, and cross-column checks the domain
-  requires. `references/pandera.md` carries the schema defaults and the
-  reasoning behind them.
 - Declare dtypes at the read boundary (`read_csv(dtype=...)`, an explicit
-  `astype` after a query), then validate without coercion.
+  `astype` after a query), and validate required columns, nullability, values,
+  uniqueness, and cross-column invariants before domain code consumes the data.
 - Pass `validate=` to every `merge` and `join` — `"one_to_one"`,
   `"one_to_many"`, or `"many_to_one"`. Without it a duplicate key silently
-  multiplies rows, and nothing downstream distinguishes that from real data.
-  A Pandera schema after the merge does not replace this cardinality check, and
-  no lint rule covers it.
+  multiplies rows, and nothing downstream distinguishes that from real data;
+  no schema check or lint rule replaces this cardinality assertion.
 - Never rely on index alignment across differently indexed objects —
   arithmetic between them produces `NaN` instead of raising. Merge on an
   explicit key, or reindex deliberately.
@@ -195,12 +179,11 @@ model_config = ConfigDict(
   `setup.cfg`, `Pipfile`, and setup scripts.
 - Use `uv add`, `uv remove`, `uv sync`, and `uv run`; never `pip install`.
   Standalone scripts use a PEP 723 header and run with `uv run script.py`.
-- Copy the Ruff and pyrefly sections from `assets/pyproject.toml` and copy
+- Copy the Ruff and ty sections from `assets/pyproject.toml` and copy
   `assets/pre-commit-config.yaml` verbatim; never retype or improvise them.
   Read `references/tooling-setup.md` before standardizing a repo's tooling,
-  migrating from mypy or pyright, or debugging a hook that disagrees with the
-  local command — it covers the pre-commit and pyrefly gotchas that produce
-  confusing failures.
+  migrating from another type checker, or debugging a hook that disagrees with
+  the local command — it covers ty's environment and pre-commit behavior.
 - Suppress a Ruff diagnostic with a specific rule code and an adjacent reason;
   the asset rejects blanket, invalid, and stale suppressions outright.
 - Expose each entry point as one `uv run` command with no prerequisite shell
@@ -218,13 +201,13 @@ uv sync --locked
 uv run pre-commit run --all-files
 ```
 
-The hooks are the gate: they run `ruff-format`, `ruff-check --fix`,
-`pyrefly-check`, and `uv-lock` over every file, so a separate `ruff check` pass
-is duplicate work. Because `ruff-check` fixes in place, review and stage what it
-changed rather than assuming a passing run left the tree alone. Reach for the
-individual commands — `uv run ruff check .`, `uv run pyrefly check` — only to
-read diagnostics without fixing them, or when a hook and the local command
-disagree (`references/tooling-setup.md`).
+The hooks are the gate: they run `ruff-format`, `ruff-check --fix`, `ty`, and
+`uv-lock` over the project, so a separate `ruff check` pass is duplicate work.
+Because `ruff-check` fixes in place, review and stage what it changed rather
+than assuming a passing run left the tree alone. Reach for the individual
+commands — `uv run ruff check .`, `uv run ty check` — only to read diagnostics
+without fixing them, or when a hook and the local command disagree
+(`references/tooling-setup.md`).
 
 After dependency or environment changes, also delete only the repo-local
 `.venv`, run `uv sync --locked`, and verify the program's imports or entry

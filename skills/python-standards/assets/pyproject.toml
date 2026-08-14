@@ -64,7 +64,6 @@ ignore = [
 [tool.ruff.lint.flake8-type-checking]
 runtime-evaluated-base-classes = [
     "pydantic.BaseModel",
-    "pandera.pandas.DataFrameModel",
 ]  # Keep model field types importable at runtime.
 
 [tool.ruff.lint.isort]
@@ -77,7 +76,18 @@ max-complexity = 15
 docstring-code-format = true
 skip-magic-trailing-comma = true  # Collapse comma-forced multiline constructs when they fit.
 
-[tool.pyrefly]
-python-interpreter-path = ".venv/bin/python"  # Required: the pre-commit hook otherwise queries its own env.
-preset = "all"  # Every error kind at error severity.
-enabled-ignores = ["pyrefly"]  # Only `# pyrefly: ignore[kind]` suppresses; `# type: ignore` does not.
+[tool.ty.rules]
+blanket-ignore-comment = "error"
+missing-override-decorator = "error"
+missing-type-argument = "error"
+possibly-unresolved-reference = "warn"
+unsound-return-statement = "error"
+unsound-yield = "error"
+unsupported-dynamic-base = "warn"
+
+[tool.ty.analysis]
+respect-type-ignore-comments = false  # Require a specific `# ty: ignore[rule]` suppression.
+strict-generic-narrowing = true
+
+[tool.ty.terminal]
+error-on-warning = true

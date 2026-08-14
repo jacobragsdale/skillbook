@@ -4,7 +4,7 @@
     "should_trigger": true
   },
   {
-    "query": "Set up this Python repo with uv, Ruff, pyrefly, and pre-commit.",
+    "query": "Set up this Python repo with uv, Ruff, ty, and pre-commit.",
     "should_trigger": true
   },
   {
@@ -16,7 +16,7 @@
     "should_trigger": true
   },
   {
-    "query": "Validate Excel and SQL-loaded pandas frames with Pandera before they reach the reconciliation pipeline.",
+    "query": "Harden this Python service with strict type checking and validated configuration before deployment.",
     "should_trigger": true
   },
   {
@@ -40,7 +40,7 @@
     "should_trigger": false
   },
   {
-    "query": "Compare Pandera and Pydantic conceptually without changing any code.",
+    "query": "Compare ty and Pyright conceptually without changing any code.",
     "should_trigger": false
   },
   {

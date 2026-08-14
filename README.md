@@ -89,7 +89,7 @@ list_skills()
 read_skill(name="python-standards")
   -> complete SKILL.md + available file paths
 
-read_skill_file(name="python-standards", path="references/pandera.md")
+read_skill_file(name="python-standards", path="references/tooling-setup.md")
   -> that file's text, media type, and hash
 ```
 
@@ -187,7 +187,7 @@ Example output:
 ```text
 2026-08-04T18:42:11+0000 level=INFO event=function_called interface=tool operation=list_skills skill=- path=-
 2026-08-04T18:42:13+0000 level=INFO event=function_called interface=tool operation=read_skill skill=python-standards path=-
-2026-08-04T18:42:14+0000 level=INFO event=function_called interface=resource operation=skill_file_resource skill=python-standards path=references/pandera.md
+2026-08-04T18:42:14+0000 level=INFO event=function_called interface=resource operation=skill_file_resource skill=python-standards path=references/tooling-setup.md
 ```
 
 The fields identify the MCP interface, function, selected skill, and supporting
@@ -334,7 +334,7 @@ Each skill is a folder under [`skills/`](skills/) whose name matches the
 | [`jacob-create-skill`](skills/jacob-create-skill/SKILL.md) | Create, improve, and validate skills, including scaffolding, trigger tests, and forward tests. |
 | [`jacob-home-server`](skills/jacob-home-server/SKILL.md) | Operate the home server: Docker stacks, SOPS secrets, deployments, backups, media, networking, and recovery. |
 | [`mermaid`](skills/mermaid/SKILL.md) | Create and render viewer-focused Mermaid engineering diagrams. |
-| [`python-standards`](skills/python-standards/SKILL.md) | Apply high-integrity Python, Pydantic, Pandera, pandas, async, performance, uv, Ruff, and Pyrefly standards. |
+| [`python-standards`](skills/python-standards/SKILL.md) | Apply high-integrity Python, Pydantic, typing, pandas, async, performance, uv, Ruff, and ty standards. |
 | [`python-testing`](skills/python-testing/SKILL.md) | Design and review pytest tests, fixtures, and pandas/Pandera test data. |
 | [`releases`](skills/releases/SKILL.md) | Maintain local release records backed by live Azure Repos evidence. This skill is explicit-only. |
 | [`typescript-standards`](skills/typescript-standards/SKILL.md) | Apply strict TypeScript, Angular, ESLint, template, API, async, and runtime-validation standards. |
