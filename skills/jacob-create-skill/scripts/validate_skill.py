@@ -12,7 +12,6 @@ Usage: validate_skill.py [--profile house|core|cursor|claude|codex] <skill-dir> 
 """
 
 import argparse
-import json
 import re
 from pathlib import Path
 
@@ -166,83 +165,6 @@ def codex_implicit_invocation_disabled(skill_dir: Path) -> bool:
         and isinstance(data.get("policy"), dict)
         and data["policy"].get("allow_implicit_invocation") is False
     )
-
-
-def validate_evals(
-    skill_dir: Path, skill_name: str | None
-) -> tuple[list[str], list[str]]:
-    """Validate the lightweight eval manifest when a skill includes one."""
-    path = skill_dir / "evals" / "evals.json"
-    if not path.exists():
-        return [], []
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        return [f"evals/evals.json is not valid JSON: {exc}"], []
-    if not isinstance(data, dict):
-        return ["evals/evals.json must be a JSON object"], []
-
-    errors: list[str] = []
-    warnings: list[str] = []
-    if skill_name and data.get("skill_name") != skill_name:
-        errors.append("evals/evals.json skill_name must match SKILL.md name")
-    evals = data.get("evals")
-    if not isinstance(evals, list) or not evals:
-        return errors + ["evals/evals.json evals must be a non-empty list"], warnings
-    if len(evals) < 2:
-        warnings.append("evals/evals.json has fewer than two task cases")
-    for index, case in enumerate(evals, start=1):
-        label = f"evals/evals.json case {index}"
-        if not isinstance(case, dict):
-            errors.append(f"{label} must be an object")
-            continue
-        if not isinstance(case.get("id"), (str, int)):
-            errors.append(f"{label} needs a string or integer id")
-        for field in ("prompt", "expected_output"):
-            if not isinstance(case.get(field), str) or not case[field].strip():
-                errors.append(f"{label} needs a non-empty {field} string")
-        files = case.get("files")
-        if files is not None and not (
-            isinstance(files, list) and all(isinstance(item, str) for item in files)
-        ):
-            errors.append(f"{label} files must be a list of strings")
-    return errors, warnings
-
-
-def validate_trigger_queries(skill_dir: Path) -> tuple[list[str], list[str]]:
-    """Validate the six-message routing manifest when present."""
-    path = skill_dir / "evals" / "trigger_queries.json"
-    if not path.exists():
-        return [], []
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        return [f"evals/trigger_queries.json is not valid JSON: {exc}"], []
-    if not isinstance(data, list):
-        return ["evals/trigger_queries.json must be a JSON list"], []
-
-    errors: list[str] = []
-    positives = 0
-    negatives = 0
-    for index, case in enumerate(data, start=1):
-        label = f"evals/trigger_queries.json case {index}"
-        if not isinstance(case, dict):
-            errors.append(f"{label} must be an object")
-            continue
-        if not isinstance(case.get("query"), str) or not case["query"].strip():
-            errors.append(f"{label} needs a non-empty query string")
-        should_trigger = case.get("should_trigger")
-        if not isinstance(should_trigger, bool):
-            errors.append(f"{label} should_trigger must be boolean")
-        elif should_trigger:
-            positives += 1
-        else:
-            negatives += 1
-    if positives < 3 or negatives < 3:
-        errors.append(
-            "evals/trigger_queries.json needs at least three should-trigger and three near-miss cases"
-        )
-    return errors, []
 
 
 def validate_python_header(path: Path, skill_dir: Path) -> str | None:
@@ -466,14 +388,6 @@ def validate(skill_dir: Path, profile: str = "house") -> tuple[list[str], list[s
     )
     errors.extend(codex_errors)
     warnings.extend(codex_warnings)
-    eval_errors, eval_warnings = validate_evals(
-        skill_dir, name if isinstance(name, str) else None
-    )
-    errors.extend(eval_errors)
-    warnings.extend(eval_warnings)
-    trigger_errors, trigger_warnings = validate_trigger_queries(skill_dir)
-    errors.extend(trigger_errors)
-    warnings.extend(trigger_warnings)
     return errors, warnings
 
 

@@ -15,8 +15,7 @@ Rules:
   immediately; Cursor discovers skills at startup, so mention that a reload
   is needed when you change frontmatter.
 - **Creating or changing a skill?** Follow `skills/jacob-create-skill/SKILL.md`
-  — it is the house process (clarify → scaffold → draft → validate → trigger
-  test → forward test).
+  — it is the house process (clarify → scaffold → draft → validate).
 - Every skill must pass
   `uv run skills/jacob-create-skill/scripts/validate_skill.py skills/<name>`
   before commit. Treat warnings as decisions, not noise.

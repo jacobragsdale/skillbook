@@ -165,5 +165,3 @@ sequenceDiagram
   engineering-manager views.
 - `scripts/render_mermaid.py` — **run** to validate and render local `.mmd`
   source with an installed CLI or the pinned fallback.
-- `evals/trigger_queries.json` — **read** when testing automatic routing.
-- `evals/evals.json` — **read** when forward-testing output quality.

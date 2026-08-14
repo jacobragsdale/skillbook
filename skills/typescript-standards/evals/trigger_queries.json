@@ -1,8 +1,0 @@
-[
-  { "query": "Tighten this Angular trading dashboard so API payloads are runtime-validated and every template and Promise is checked.", "should_trigger": true },
-  { "query": "Replace this workspace's old TSLint setup with the strictest practical typed ESLint configuration.", "should_trigger": true },
-  { "query": "Review this TypeScript adapter: it uses any, JSON.parse, non-null assertions, and fire-and-forget async calls.", "should_trigger": true },
-  { "query": "Design Vitest unit-test cases for a TypeScript order-entry component.", "should_trigger": false },
-  { "query": "Explain covariance and contravariance in TypeScript without changing a project.", "should_trigger": false },
-  { "query": "Format this plain JavaScript snippet for a blog post.", "should_trigger": false }
-]

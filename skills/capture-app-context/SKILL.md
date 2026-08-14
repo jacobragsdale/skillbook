@@ -125,5 +125,3 @@ as timestamped observations.
 - `references/context-skill-contract.md` — **read** before creating or updating
   the target repo-scoped skill; it defines placement, reference fields, script
   requirements, and safety boundaries.
-- `evals/trigger_queries.json` — **read** when testing automatic routing.
-- `evals/evals.json` — **read** when forward-testing output quality.

@@ -331,7 +331,7 @@ Each skill is a folder under [`skills/`](skills/) whose name matches the
 | --- | --- |
 | [`capture-app-context`](skills/capture-app-context/SKILL.md) | Discover surrounding application operations and create source-attributed repo-scoped context skills. |
 | [`git-ops`](skills/git-ops/SKILL.md) | Keep solo repositories on `main`, commit at working checkpoints, push after each commit, and finish clean. |
-| [`jacob-create-skill`](skills/jacob-create-skill/SKILL.md) | Create, improve, and validate skills, including scaffolding, trigger tests, and forward tests. |
+| [`jacob-create-skill`](skills/jacob-create-skill/SKILL.md) | Create, improve, scaffold, and validate reusable agent skills. |
 | [`jacob-home-server`](skills/jacob-home-server/SKILL.md) | Operate the home server: Docker stacks, SOPS secrets, deployments, backups, media, networking, and recovery. |
 | [`mermaid`](skills/mermaid/SKILL.md) | Create and render viewer-focused Mermaid engineering diagrams. |
 | [`python-standards`](skills/python-standards/SKILL.md) | Apply high-integrity Python, Pydantic, typing, pandas, async, performance, uv, Ruff, and ty standards. |
@@ -374,8 +374,7 @@ new skill or frontmatter change.
 ## Create or update a skill
 
 Use [`jacob-create-skill`](skills/jacob-create-skill/SKILL.md) as the house
-process: clarify the intent and boundary, scaffold, draft, validate, test
-triggers, and forward-test the result.
+process: clarify the intent and boundary, scaffold, draft, and validate.
 
 To scaffold a new skill:
 

@@ -25,7 +25,7 @@ user the completed brief for confirmation before scaffolding:
    useful independent lives; the word "and" alone does not require a split.
 2. **Evidence.** Ground the skill in at least one successful task transcript or
    demonstration, recurring correction or failure, authoritative project
-   artifact (runbook, schema, issue, review, patch), or baseline task run. If
+   artifact (runbook, schema, issue, review, patch), or successful task run. If
    none exists, do the task once without a skill and capture the useful pattern.
 3. **Targets and scope.** Record the intended clients, personal or project
    location, and explicit or automatic invocation. This repo defaults to
@@ -99,8 +99,7 @@ House rules, and why:
   user- or project-specific choice, a harness conflict, or a fragile operation;
   state the smallest delta needed to change the behavior.
 - **Imperative voice, one excellent worked example.** "Run X, then check Y"
-  beats "the agent should…". Keep one compact input→output example in the body;
-  keep behavioral test cases outside it.
+  beats "the agent should…". Keep one compact input→output example in the body.
 - **Replace vague nuance with decision rules.** Avoid "unless it matters."
   State the default, the observable condition that changes it, and the allowed
   alternative. Explain why when the task needs contextual judgment.
@@ -109,7 +108,7 @@ House rules, and why:
   with REQUIRED fields, not a prohibition list. Agent forgets things → a
   checklist, not prose reminders.
 - **Default automatic invocation.** Skills in this repo are model-invocable:
-  the description is the router, so it must earn the trigger (Step 5). Add
+  the description is the router, so it must earn the trigger. Add
   `disable-model-invocation: true` only when a skill must never fire on its
   own — an orchestrator sub-step or a destructive operation — and say why in
   the brief.
@@ -171,69 +170,25 @@ reject unfinished scaffold placeholders, verify target-specific frontmatter
 types, resolve real local references, and check bundled Python headers. Then run
 the scripts and tool-specific checks from Step 3; static lint is not execution.
 
-## Step 5 — Trigger test
-
-Write six realistic user messages: three that should trigger the skill (varied
-phrasing, explicitness, and detail) and three near-misses that share vocabulary
-but need something else. Judge each twice: against **only the name and first
-sentence** (~80 chars — what Cursor shows the model), then against **the first
-250 characters** (other clients). Show message → expected → verdict and revise
-by general category, not by copying failed-query keywords. Record the final
-set in the skill's `evals/trigger_queries.json` so the validator checks it on
-every revision.
-
-For an explicit-only skill, treat this as catalog and future-auto-trigger
-quality; do not claim automatic invocation was tested. For an auto-triggered
-skill, run the messages through the target client and inspect whether it loaded
-`SKILL.md`. Agents often skip skills for tasks they can trivially handle
-alone, so a non-trigger on a trivial one-step ask is expected behavior, not a
-description failure — make most should-trigger messages substantive while
-still varying complexity. For high-value or distributed skills, expand to
-roughly 20 balanced queries, run each three times, and keep a held-out
-validation split.
-
-## Step 6 — Forward-test output quality
-
-Triggering and correctness are separate. Create two or three realistic task
-cases with prompts, input files when needed, and a human-readable expected
-output. Include at least one boundary or ambiguous case. Record the cases in
-`evals/evals.json` (`{skill_name, evals: [{id, prompt, expected_output,
-files}]}`) so the validator checks them on every revision.
-
-Run each case in a clean context with the skill and against a baseline: no skill
-for a new skill, or a snapshot of the previous version when improving one.
-After the first outputs, add objective assertions only for mechanically
-verifiable qualities; use human review for style, usefulness, and visual quality.
-Compare final artifacts and execution traces. Remove instructions that cause
-wasted paths, and iterate until the skill materially improves the baseline.
-
-For low-risk personal skills, one run per case is enough initially. For
-auto-triggered, high-stakes, side-effecting, or broadly distributed skills,
-repeat runs, record time/tokens when available, and check coexistence with the
-other skills likely to be installed.
-
 ## Improving an existing skill
 
 When asked to improve a skill:
 
 1. Read its `SKILL.md` and inspect the evidence behind the requested change.
-2. Snapshot the current skill outside its folder for the Step 6 baseline.
-3. Preserve the existing directory name, `name`, invocation policy, and other
+2. Preserve the existing directory name, `name`, invocation policy, and other
    frontmatter unless the user explicitly asked to change them. Edit in place.
-4. Apply confirmed corrections in the section where the behavior occurs;
+3. Apply confirmed corrections in the section where the behavior occurs;
    remove stale or speculative instructions that lack evidence.
-5. Cut body lines that aren't pulling weight; skills accrete.
-6. Re-run Steps 4–6 before finishing.
+4. Cut body lines that aren't pulling weight; skills accrete.
+5. Re-run Step 4 before finishing.
 
 ## Bundled resources
 
 - `scripts/init_skill.py` — **run** to scaffold a new skill folder.
 - `scripts/validate_skill.py` — **run** to lint core or target-specific
   frontmatter plus these house rules.
-- `evals/evals.json` and `evals/trigger_queries.json` — **read** when testing
-  this skill; they cover output behavior and the six-message routing minimum.
 - `references/best-practices.md` — **read** when unsure about a design choice
-  (evidence, scope, control, evaluation, token budgets, sources).
+  (evidence, scope, control, token budgets, sources).
 - `references/frontmatter.md` — **read** before using any frontmatter field
   beyond `name`/`description` or adding Codex metadata, and for per-client
   routing windows and Cursor reliability gotchas.

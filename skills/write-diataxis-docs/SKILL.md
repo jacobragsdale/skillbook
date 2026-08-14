@@ -109,5 +109,3 @@ interrupting its learning flow.
 
 - `references/framework.md` — **read** before writing or auditing; use the
   compass, mode playbooks, boundary tests, output patterns, and quality checks.
-- `evals/trigger_queries.json` — **read** when testing automatic routing.
-- `evals/evals.json` — **read** when forward-testing output quality.

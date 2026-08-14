@@ -11,7 +11,6 @@ house policy rather than attributed to the open specification.
 - Descriptions and the 250-character budget
 - Calibrating control
 - Scripts and resources
-- Evaluation layers
 - Target portability
 - Maintenance
 - Primary sources
@@ -24,7 +23,7 @@ Create a skill from evidence that a capable agent would otherwise lack:
 - recurring corrections, failures, or wasted execution paths;
 - project artifacts such as runbooks, schemas, issue history, code review,
   patches, or incident reports; or
-- a representative baseline run without the skill.
+- a representative successful task run completed without the skill.
 
 Do not make the user restate evidence already present in the conversation or
 repository. Extract an intent brief, propose answers, and ask only about gaps.
@@ -37,8 +36,8 @@ The presence of "and" does not prove a split is needed: querying a database and
 formatting the result may be one useful workflow. Split when parts have distinct
 triggers, outputs, dependencies, owners, or useful independent lives.
 
-Start narrow and consolidate only after task evaluations show that a broader
-skill performs at least as well as its focused predecessors.
+Start narrow and consolidate only after observed task evidence shows that a
+broader skill preserves the focused capabilities.
 
 A skill is the wrong vehicle for a policy that must hold in every session —
 auto-triggering is best-effort. See `placement-and-conflicts.md` for the
@@ -73,23 +72,8 @@ inconsistent point of view breaks discovery. Phrase it as a directive trigger �
 measurably outperforms passive summaries (roughly 20–50% activation for
 passive descriptions vs ~100% for directive ones in published measurements).
 For high-frequency domains, add an anti-trigger sentence ("Not for …") so the
-skill doesn't fire on adjacent work. Only the description drives triggering:
+skill doesn't fire on adjacent work. Only the description drives triggering;
 keywords added to the body have zero measured effect.
-
-Separate description evaluation from task evaluation:
-
-- Minimum: three should-trigger messages and three near-misses, judged twice —
-  against the name and first sentence only, then against the first 250
-  characters. Persist the set in `evals/trigger_queries.json`.
-- Auto-triggered skill: run those prompts through each target client and inspect
-  whether it actually loads `SKILL.md`. A non-trigger on a trivially handled
-  one-step ask is expected behavior, not a description failure.
-- High-value auto-triggered skill: use roughly 20 balanced queries, three runs
-  per query, and a fixed 60/40 train/validation split.
-
-Real prompts vary in formality, explicitness, detail, typos, and whether the
-relevant task is buried inside a longer workflow. Negative cases should share
-vocabulary but need a different capability.
 
 ## Calibrating control
 
@@ -124,29 +108,6 @@ For this repository, Python scripts use `uv` plus PEP 723. Outside this
 repository, follow the target project's runtime conventions and declare
 non-obvious requirements in `compatibility`.
 
-## Evaluation layers
-
-Test four different things rather than treating validation as one gate:
-
-1. **Structure:** frontmatter schema, naming, placeholder removal, local
-   references, script packaging, and target metadata.
-2. **Triggering:** should-trigger and near-miss prompts for auto invocation.
-3. **Task output:** two or three realistic cases with expected outputs and at
-   least one edge case, run in fresh contexts with the skill and a baseline.
-4. **Human quality:** usefulness, clarity, visual quality, and unexpected
-   behavior that mechanical assertions cannot capture.
-
-For a new skill, the baseline is no skill. For an improved skill, snapshot and
-run the previous version. Add objective assertions after inspecting the first
-outputs so they are observable rather than hypothetical. Read execution traces,
-not only final artifacts: a correct result reached through wasteful exploration
-still reveals a skill problem.
-
-Use one run per case initially for a low-risk personal skill. Repeat runs and
-track pass rate, time, and tokens for high-stakes, side-effecting, auto-triggered,
-or distributed skills. Test coexistence with the surrounding skill set when
-routing collisions are plausible.
-
 ## Target portability
 
 The agentskills.io core and vendor extensions are different profiles:
@@ -169,7 +130,6 @@ skills accrete.
 
 - https://agentskills.io/specification
 - https://agentskills.io/skill-creation/best-practices
-- https://agentskills.io/skill-creation/evaluating-skills
 - https://agentskills.io/skill-creation/optimizing-descriptions
 - https://cursor.com/docs/skills
 - https://code.claude.com/docs/en/skills
@@ -179,6 +139,4 @@ skills accrete.
 - https://developers.openai.com/codex/skills
 - Measured triggering evidence: directive vs passive descriptions (650-trial
   study, 20.6x odds ratio) —
-  https://medium.com/@ivan.seleznov1/why-claude-code-skills-dont-activate-and-how-to-fix-it-86f679409af1;
-  forced-eval hook 84% vs 20% baseline —
-  https://scottspence.com/posts/how-to-make-claude-code-skills-activate-reliably
+  https://medium.com/@ivan.seleznov1/why-claude-code-skills-dont-activate-and-how-to-fix-it-86f679409af1

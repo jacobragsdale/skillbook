@@ -171,27 +171,6 @@ Read `references/not-real.md` in an example skill.
         errors, _ = validate_skill.validate(skill_dir)
         self.assertIn("metadata must map string keys to string values", errors)
 
-    def test_invalid_eval_manifest_fails_validation(self) -> None:
-        skill_dir = self.write_skill()
-        evals_dir = skill_dir / "evals"
-        evals_dir.mkdir()
-        (evals_dir / "evals.json").write_text("{not json}", encoding="utf-8")
-        errors, _ = validate_skill.validate(skill_dir)
-        self.assertTrue(any("not valid JSON" in error for error in errors), errors)
-
-    def test_trigger_manifest_requires_balanced_cases(self) -> None:
-        skill_dir = self.write_skill()
-        evals_dir = skill_dir / "evals"
-        evals_dir.mkdir()
-        (evals_dir / "trigger_queries.json").write_text(
-            '[{"query": "make a skill", "should_trigger": true}]',
-            encoding="utf-8",
-        )
-        errors, _ = validate_skill.validate(skill_dir)
-        self.assertTrue(
-            any("three should-trigger" in error for error in errors), errors
-        )
-
     def test_use_when_must_fit_250_character_budget(self) -> None:
         description = "A. " + "A" * 248 + " Use when this should route."
         _, warnings = validate_skill.validate(self.write_skill(description=description))
