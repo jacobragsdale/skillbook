@@ -1,0 +1,6 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "data-engineer",
+  "version": "1.0.0",
+  "description": "Comprehensive data engineering toolkit: DuckDB analytics, PostgreSQL query runner, schema migration verification, and pipeline audit skills."
+}

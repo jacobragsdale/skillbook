@@ -52,9 +52,14 @@
       "destination": "~/.agents/skills/skillbook-write-diataxis-docs"
     },
     {
-      "id": "system-mcp",
-      "source": "plugins/system-mcp",
-      "destination": "~/.agents/plugins/skillbook-system-mcp"
+      "id": "data-engineer",
+      "source": "plugins/data-engineer",
+      "destination": "~/.agents/plugins/skillbook-data-engineer"
+    },
+    {
+      "id": "devops-toolkit",
+      "source": "plugins/devops-toolkit",
+      "destination": "~/.agents/plugins/skillbook-devops-toolkit"
     }
   ]
 }

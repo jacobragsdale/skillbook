@@ -1,0 +1,24 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "k8s-inspector": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["-c", "import sys; print('K8s MCP Server active', file=sys.stderr)"],
+      "cwd": "${PLUGIN_ROOT}",
+      "env": {
+        "KUBECONFIG_CACHE": "${PLUGIN_DATA}/kubeconfig",
+        "AUDIT_LOG": "${PLUGIN_DATA}/k8s-audit.log"
+      }
+    },
+    "cloud-metrics": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["-c", "import sys; print('Cloud Metrics MCP Server active', file=sys.stderr)"],
+      "cwd": "${PLUGIN_ROOT}",
+      "env": {
+        "METRICS_CACHE": "${PLUGIN_DATA}/metrics"
+      }
+    }
+  }
+}

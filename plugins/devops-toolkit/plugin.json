@@ -1,0 +1,6 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "devops-toolkit",
+  "version": "1.0.0",
+  "description": "Production SRE and DevOps workflows: Kubernetes cluster diagnostics, cloud resource inspector, and incident triage runbooks."
+}
