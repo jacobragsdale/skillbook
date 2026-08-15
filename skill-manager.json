@@ -50,6 +50,11 @@
       "id": "write-diataxis-docs",
       "source": "skills/write-diataxis-docs",
       "destination": "~/.agents/skills/skillbook-write-diataxis-docs"
+    },
+    {
+      "id": "system-mcp",
+      "source": "plugins/system-mcp",
+      "destination": "~/.agents/plugins/skillbook-system-mcp"
     }
   ]
 }

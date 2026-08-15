@@ -1,0 +1,6 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "system-mcp",
+  "version": "1.0.0",
+  "description": "System monitoring and inspection MCP tools for agents."
+}
