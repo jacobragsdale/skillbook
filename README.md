@@ -4,15 +4,17 @@
 [Agent Skills](https://agentskills.io/). Each skill is a `SKILL.md` instruction
 file with optional supporting text, scripts, references, and assets.
 
-The repository can deliver those skills in two ways:
+The repository can deliver those skills in three ways:
 
 | Delivery path | Intended use | What it does |
 | --- | --- | --- |
 | Per-skill symlinks | Local agents that discover installed skills | `install.py` links each canonical `skills/<name>/` directory into the agent-specific skill directories. |
 | MCP server | MCP hosts that should discover and load skills on demand | A local, read-only service exposes the catalog, complete `SKILL.md` files, and UTF-8 supporting files. |
+| Skill Manager packages | Agents enabled in Skill Manager | [`skill-manager.json`](skill-manager.json) publishes portable v2 packages. Skill Manager projects each package onto the agents a user enables. |
 
-In both cases, [`skills/`](skills/) remains the source of truth. Edit a
-canonical skill here, never an installed copy.
+[`skills/`](skills/) remains the source of truth for the canonical library.
+Plugin-layout skills live under `plugins/<name>/skills/`. Edit a canonical
+skill here, never an installed copy.
 
 ## How MCP skill delivery works
 
@@ -344,6 +346,31 @@ Skills are model-invocable by default through their descriptions. The
 `releases` skill is deliberately manual-only because it reads and writes local
 release records and requires an Azure DevOps preflight.
 
+## Skill Manager packages
+
+Skill Manager reads the root [`skill-manager.json`](skill-manager.json)
+manifest. Version 2 describes portable packages, not machine-specific
+destinations. A package is the atomic install unit and may contain one skill,
+one MCP server, several skills, several MCP servers, or a mix of both.
+
+| Package shape | What it publishes |
+| --- | --- |
+| Single skill | One `skill` component. Every `skills/<name>/` directory and every plugin skill is also available on its own. |
+| Single MCP server | One `mcpServer` component pointing at a document under [`mcp/`](mcp/). |
+| Skill bundle | Two or more `skill` components installed together. |
+| MCP bundle | Two or more `mcpServer` components installed together. |
+| Mixed bundle | Skills and MCP servers in one package. `data-engineer` and `devops-toolkit` replace the former generic plugin-directory installs. |
+
+The package list in the manifest is the source of truth. Identical skills or
+MCP servers that appear in both a standalone package and a bundle share the
+same installed name and coalesce when both are installed.
+
+MCP documents use the Agent Plugins 1.0.0 `mcp.json` shape. Stdio commands are
+bare executables on `PATH`. The `catalog` package is Streamable HTTP at
+`http://127.0.0.1:8000/mcp` and expects the Skillbook MCP server from this
+repository to be running. Plugin directories remain in the tree as skill
+sources; Skill Manager no longer copies them as generic plugin installs.
+
 ## Install skills locally
 
 Requires [uv](https://docs.astral.sh/uv/).
@@ -404,7 +431,7 @@ them.
 Run the MCP contract tests after changing the server or its catalog:
 
 ```bash
-uv run pytest tests/test_mcp_catalog.py tests/test_mcp_server.py
+uv run pytest tests/test_mcp_catalog.py tests/test_mcp_server.py tests/test_source_manifest.py
 ```
 
 Run every standalone tooling test after changing skills or skill tooling:
@@ -426,6 +453,9 @@ skills/<name>/SKILL.md       # canonical skill instructions
 skills/<name>/scripts/       # optional self-contained uv scripts
 skills/<name>/references/    # optional on-demand documentation
 skills/<name>/assets/        # optional reusable templates or files
+mcp/<name>.json              # portable MCP server documents
+plugins/                     # plugin-layout skills referenced by v2 packages
+skill-manager.json           # Skill Manager v2 source catalog
 rules/                       # always-on rules referenced by repo instructions
 tests/                       # regression and MCP contract tests
 install.py                   # installs and prunes per-skill symlinks

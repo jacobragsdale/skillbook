@@ -13,7 +13,13 @@ Rules:
   stay current (it also prunes links for removed skills). Editing an
   existing skill needs nothing for Claude Code — symlinks pick it up
   immediately; Cursor discovers skills at startup, so mention that a reload
-  is needed when you change frontmatter.
+  is needed when you change frontmatter. Update `skill-manager.json` in the
+  same change: every skill directory needs a standalone v2 skill package,
+  and any bundle that should include it must list that component.
+- **Added, renamed, or removed an MCP server?** Put a portable Agent
+  Plugins 1.0.0 document under `mcp/` (bare `PATH` command, no
+  `${PLUGIN_ROOT}` / `${PLUGIN_DATA}`), add a standalone `mcpServer`
+  package, and update any MCP or mixed bundle that should include it.
 - **Creating or changing a skill?** Follow `skills/jacob-create-skill/SKILL.md`
   — it is the house process (clarify → scaffold → draft → validate).
 - Every skill must pass

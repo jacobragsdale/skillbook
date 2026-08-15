@@ -1,0 +1,10 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "k8s-inspector": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["-c", "import sys; print('K8s MCP Server active', file=sys.stderr)"]
+    }
+  }
+}

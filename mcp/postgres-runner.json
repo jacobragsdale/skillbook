@@ -1,0 +1,13 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "postgres-runner": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["-c", "import sys; print('Postgres MCP Server active', file=sys.stderr)"],
+      "env": {
+        "QUERY_TIMEOUT": "30"
+      }
+    }
+  }
+}

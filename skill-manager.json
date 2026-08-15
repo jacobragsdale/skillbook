@@ -1,65 +1,200 @@
 {
-  "version": 1,
+  "version": 2,
   "source": {
     "id": "skillbook",
     "name": "Skillbook",
-    "description": "Jacob's canonical library of portable Agent Skills."
+    "description": "Jacob's canonical library of portable Agent Skills and MCP servers."
   },
-  "installs": [
+  "packages": [
+    {
+      "id": "capture-app-context",
+      "name": "Capture app context",
+      "description": "Discover surrounding application operations and create repo-scoped context skills.",
+      "components": [{ "kind": "skill", "path": "skills/capture-app-context" }]
+    },
     {
       "id": "git-ops",
-      "source": "skills/git-ops",
-      "destination": "~/.agents/skills/skillbook-git-ops"
+      "name": "Git operations",
+      "description": "Keep solo repositories on main, commit at working checkpoints, and finish clean.",
+      "components": [{ "kind": "skill", "path": "skills/git-ops" }]
     },
     {
       "id": "jacob-create-skill",
-      "source": "skills/jacob-create-skill",
-      "destination": "~/.agents/skills/skillbook-jacob-create-skill"
+      "name": "Create agent skills",
+      "description": "Create, improve, scaffold, and validate reusable agent skills.",
+      "components": [{ "kind": "skill", "path": "skills/jacob-create-skill" }]
     },
     {
       "id": "jacob-home-server",
-      "source": "skills/jacob-home-server",
-      "destination": "~/.agents/skills/skillbook-jacob-home-server"
+      "name": "Home server operations",
+      "description": "Operate the home server: Docker stacks, SOPS secrets, deployments, backups, and recovery.",
+      "components": [{ "kind": "skill", "path": "skills/jacob-home-server" }]
     },
     {
       "id": "mermaid",
-      "source": "skills/mermaid",
-      "destination": "~/.agents/skills/skillbook-mermaid"
+      "name": "Mermaid diagrams",
+      "description": "Create and render viewer-focused Mermaid engineering diagrams.",
+      "components": [{ "kind": "skill", "path": "skills/mermaid" }]
     },
     {
       "id": "python-standards",
-      "source": "skills/python-standards",
-      "destination": "~/.agents/skills/skillbook-python-standards"
+      "name": "Python standards",
+      "description": "Apply high-integrity Python, Pydantic, typing, pandas, async, uv, Ruff, and ty standards.",
+      "components": [{ "kind": "skill", "path": "skills/python-standards" }]
     },
     {
       "id": "python-testing",
-      "source": "skills/python-testing",
-      "destination": "~/.agents/skills/skillbook-python-testing"
+      "name": "Python testing",
+      "description": "Design and review pytest tests, fixtures, and pandas/Pandera test data.",
+      "components": [{ "kind": "skill", "path": "skills/python-testing" }]
     },
     {
       "id": "releases",
-      "source": "skills/releases",
-      "destination": "~/.agents/skills/skillbook-releases"
+      "name": "Releases",
+      "description": "Maintain local release records backed by live Azure Repos evidence.",
+      "components": [{ "kind": "skill", "path": "skills/releases" }]
     },
     {
       "id": "typescript-standards",
-      "source": "skills/typescript-standards",
-      "destination": "~/.agents/skills/skillbook-typescript-standards"
+      "name": "TypeScript standards",
+      "description": "Apply strict TypeScript, Angular, ESLint, template, API, async, and runtime-validation standards.",
+      "components": [{ "kind": "skill", "path": "skills/typescript-standards" }]
     },
     {
       "id": "write-diataxis-docs",
-      "source": "skills/write-diataxis-docs",
-      "destination": "~/.agents/skills/skillbook-write-diataxis-docs"
+      "name": "Write Diátaxis docs",
+      "description": "Write and audit technical documentation as tutorials, how-to guides, reference, or explanation.",
+      "components": [{ "kind": "skill", "path": "skills/write-diataxis-docs" }]
+    },
+    {
+      "id": "pipeline-audit",
+      "name": "Pipeline audit",
+      "description": "Audit data pipeline health, latency, record counts, and partition freshness.",
+      "components": [{ "kind": "skill", "path": "plugins/data-engineer/skills/pipeline-audit" }]
+    },
+    {
+      "id": "schema-migration",
+      "name": "Schema migration",
+      "description": "Verify backward compatibility for database schema migrations before execution.",
+      "components": [{ "kind": "skill", "path": "plugins/data-engineer/skills/schema-migration" }]
+    },
+    {
+      "id": "incident-response",
+      "name": "Incident response",
+      "description": "Guide SEV-1/2 incident triage, timeline recording, and communication.",
+      "components": [{ "kind": "skill", "path": "plugins/devops-toolkit/skills/incident-response" }]
+    },
+    {
+      "id": "k8s-diagnose",
+      "name": "Kubernetes diagnostics",
+      "description": "Inspect Kubernetes pods, events, restarts, and resource saturation.",
+      "components": [{ "kind": "skill", "path": "plugins/devops-toolkit/skills/k8s-diagnose" }]
+    },
+    {
+      "id": "catalog",
+      "name": "Skillbook catalog",
+      "description": "Read-only Skillbook catalog over Streamable HTTP on localhost.",
+      "components": [{ "kind": "mcpServer", "path": "mcp/catalog.json" }]
+    },
+    {
+      "id": "duckdb-engine",
+      "name": "DuckDB engine",
+      "description": "Stdio MCP server stub for DuckDB analytics.",
+      "components": [{ "kind": "mcpServer", "path": "mcp/duckdb-engine.json" }]
+    },
+    {
+      "id": "postgres-runner",
+      "name": "Postgres runner",
+      "description": "Stdio MCP server stub for PostgreSQL queries.",
+      "components": [{ "kind": "mcpServer", "path": "mcp/postgres-runner.json" }]
+    },
+    {
+      "id": "k8s-inspector",
+      "name": "Kubernetes inspector",
+      "description": "Stdio MCP server stub for cluster inspection.",
+      "components": [{ "kind": "mcpServer", "path": "mcp/k8s-inspector.json" }]
+    },
+    {
+      "id": "cloud-metrics",
+      "name": "Cloud metrics",
+      "description": "Stdio MCP server stub for cloud resource metrics.",
+      "components": [{ "kind": "mcpServer", "path": "mcp/cloud-metrics.json" }]
+    },
+    {
+      "id": "python",
+      "name": "Python house standard",
+      "description": "Python implementation standards and test design together.",
+      "components": [
+        { "kind": "skill", "id": "python-standards", "path": "skills/python-standards" },
+        { "kind": "skill", "id": "python-testing", "path": "skills/python-testing" }
+      ]
+    },
+    {
+      "id": "documentation",
+      "name": "Documentation",
+      "description": "Mermaid diagrams and Diátaxis documentation together.",
+      "components": [
+        { "kind": "skill", "id": "mermaid", "path": "skills/mermaid" },
+        { "kind": "skill", "id": "write-diataxis-docs", "path": "skills/write-diataxis-docs" }
+      ]
+    },
+    {
+      "id": "data-engineer-skills",
+      "name": "Data engineer skills",
+      "description": "Pipeline audit and schema-migration skills together.",
+      "components": [
+        { "kind": "skill", "id": "pipeline-audit", "path": "plugins/data-engineer/skills/pipeline-audit" },
+        { "kind": "skill", "id": "schema-migration", "path": "plugins/data-engineer/skills/schema-migration" }
+      ]
+    },
+    {
+      "id": "devops-skills",
+      "name": "DevOps skills",
+      "description": "Incident response and Kubernetes diagnostics together.",
+      "components": [
+        { "kind": "skill", "id": "incident-response", "path": "plugins/devops-toolkit/skills/incident-response" },
+        { "kind": "skill", "id": "k8s-diagnose", "path": "plugins/devops-toolkit/skills/k8s-diagnose" }
+      ]
+    },
+    {
+      "id": "data-mcp",
+      "name": "Data MCP servers",
+      "description": "DuckDB and Postgres MCP servers together.",
+      "components": [
+        { "kind": "mcpServer", "id": "duckdb-engine", "path": "mcp/duckdb-engine.json" },
+        { "kind": "mcpServer", "id": "postgres-runner", "path": "mcp/postgres-runner.json" }
+      ]
+    },
+    {
+      "id": "devops-mcp",
+      "name": "DevOps MCP servers",
+      "description": "Kubernetes inspector and cloud-metrics MCP servers together.",
+      "components": [
+        { "kind": "mcpServer", "id": "k8s-inspector", "path": "mcp/k8s-inspector.json" },
+        { "kind": "mcpServer", "id": "cloud-metrics", "path": "mcp/cloud-metrics.json" }
+      ]
     },
     {
       "id": "data-engineer",
-      "source": "plugins/data-engineer",
-      "destination": "~/.agents/plugins/skillbook-data-engineer"
+      "name": "Data engineer",
+      "description": "Pipeline and schema-migration skills with DuckDB and Postgres MCP servers.",
+      "components": [
+        { "kind": "skill", "id": "pipeline-audit", "path": "plugins/data-engineer/skills/pipeline-audit" },
+        { "kind": "skill", "id": "schema-migration", "path": "plugins/data-engineer/skills/schema-migration" },
+        { "kind": "mcpServer", "id": "duckdb-engine", "path": "mcp/duckdb-engine.json" },
+        { "kind": "mcpServer", "id": "postgres-runner", "path": "mcp/postgres-runner.json" }
+      ]
     },
     {
       "id": "devops-toolkit",
-      "source": "plugins/devops-toolkit",
-      "destination": "~/.agents/plugins/skillbook-devops-toolkit"
+      "name": "DevOps toolkit",
+      "description": "Incident and Kubernetes skills with inspector and metrics MCP servers.",
+      "components": [
+        { "kind": "skill", "id": "incident-response", "path": "plugins/devops-toolkit/skills/incident-response" },
+        { "kind": "skill", "id": "k8s-diagnose", "path": "plugins/devops-toolkit/skills/k8s-diagnose" },
+        { "kind": "mcpServer", "id": "k8s-inspector", "path": "mcp/k8s-inspector.json" },
+        { "kind": "mcpServer", "id": "cloud-metrics", "path": "mcp/cloud-metrics.json" }
+      ]
     }
   ]
 }
