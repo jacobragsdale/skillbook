@@ -67,30 +67,6 @@
       "components": [{ "kind": "skill", "path": "skills/write-diataxis-docs" }]
     },
     {
-      "id": "pipeline-audit",
-      "name": "Pipeline audit",
-      "description": "Audit data pipeline health, latency, record counts, and partition freshness.",
-      "components": [{ "kind": "skill", "path": "plugins/data-engineer/skills/pipeline-audit" }]
-    },
-    {
-      "id": "schema-migration",
-      "name": "Schema migration",
-      "description": "Verify backward compatibility for database schema migrations before execution.",
-      "components": [{ "kind": "skill", "path": "plugins/data-engineer/skills/schema-migration" }]
-    },
-    {
-      "id": "incident-response",
-      "name": "Incident response",
-      "description": "Guide SEV-1/2 incident triage, timeline recording, and communication.",
-      "components": [{ "kind": "skill", "path": "plugins/devops-toolkit/skills/incident-response" }]
-    },
-    {
-      "id": "k8s-diagnose",
-      "name": "Kubernetes diagnostics",
-      "description": "Inspect Kubernetes pods, events, restarts, and resource saturation.",
-      "components": [{ "kind": "skill", "path": "plugins/devops-toolkit/skills/k8s-diagnose" }]
-    },
-    {
       "id": "catalog",
       "name": "Skillbook catalog",
       "description": "Read-only Skillbook catalog over Streamable HTTP on localhost.",
@@ -136,24 +112,6 @@
       "components": [
         { "kind": "skill", "id": "mermaid", "path": "skills/mermaid" },
         { "kind": "skill", "id": "write-diataxis-docs", "path": "skills/write-diataxis-docs" }
-      ]
-    },
-    {
-      "id": "data-engineer-skills",
-      "name": "Data engineer skills",
-      "description": "Pipeline audit and schema-migration skills together.",
-      "components": [
-        { "kind": "skill", "id": "pipeline-audit", "path": "plugins/data-engineer/skills/pipeline-audit" },
-        { "kind": "skill", "id": "schema-migration", "path": "plugins/data-engineer/skills/schema-migration" }
-      ]
-    },
-    {
-      "id": "devops-skills",
-      "name": "DevOps skills",
-      "description": "Incident response and Kubernetes diagnostics together.",
-      "components": [
-        { "kind": "skill", "id": "incident-response", "path": "plugins/devops-toolkit/skills/incident-response" },
-        { "kind": "skill", "id": "k8s-diagnose", "path": "plugins/devops-toolkit/skills/k8s-diagnose" }
       ]
     },
     {

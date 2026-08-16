@@ -14,8 +14,11 @@ Rules:
   existing skill needs nothing for Claude Code — symlinks pick it up
   immediately; Cursor discovers skills at startup, so mention that a reload
   is needed when you change frontmatter. Update `skill-manager.json` in the
-  same change: every skill directory needs a standalone v2 skill package,
-  and any bundle that should include it must list that component.
+  same change: every `skills/<name>/` directory needs a standalone v2
+  skill package, and any optional bundle of those skills must list that
+  component. Plugin-layout skills under `plugins/<plugin>/skills/` appear
+  only in that plugin's mixed package — not as their own card and not in
+  an extra skills-only bundle.
 - **Added, renamed, or removed an MCP server?** Put a portable Agent
   Plugins 1.0.0 document under `mcp/` (bare `PATH` command, no
   `${PLUGIN_ROOT}` / `${PLUGIN_DATA}`), add a standalone `mcpServer`

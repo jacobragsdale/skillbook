@@ -53,10 +53,26 @@ def _component_paths(kind: ComponentKind) -> list[Path]:
     return sorted(paths)
 
 
-def _skill_directories() -> set[Path]:
-    skills = {path.parent for path in REPO.glob("skills/*/SKILL.md")}
-    plugin_skills = {path.parent for path in REPO.glob("plugins/*/skills/*/SKILL.md")}
-    return skills | plugin_skills
+def _canonical_skill_directories() -> set[Path]:
+    return {path.parent for path in REPO.glob("skills/*/SKILL.md")}
+
+
+def _plugin_skill_directories() -> set[Path]:
+    return {path.parent for path in REPO.glob("plugins/*/skills/*/SKILL.md")}
+
+
+def _packages_for_skill(skill_dir: Path) -> list[dict[str, object]]:
+    resolved = skill_dir.resolve()
+    homes: list[dict[str, object]] = []
+    for package in _packages(_load_manifest()):
+        for component in _components(package):
+            if _kind(component) != "skill":
+                continue
+            path = component.get("path")
+            if isinstance(path, str) and (REPO / path).resolve() == resolved:
+                homes.append(package)
+                break
+    return homes
 
 
 def _classify(package: dict[str, object]) -> str:
@@ -82,7 +98,7 @@ def test_manifest_is_v2_with_every_package_shape() -> None:
     assert shapes == {"skill", "mcp", "skill-bundle", "mcp-bundle", "mixed"}
 
 
-def test_every_skill_directory_has_a_standalone_package() -> None:
+def test_canonical_skills_have_a_standalone_package() -> None:
     standalone = set()
     for package in _packages(_load_manifest()):
         components = _components(package)
@@ -92,8 +108,17 @@ def test_every_skill_directory_has_a_standalone_package() -> None:
         if isinstance(path, str):
             standalone.add((REPO / path).resolve())
 
-    missing = sorted(path.relative_to(REPO).as_posix() for path in _skill_directories() if path.resolve() not in standalone)
+    missing = sorted(path.relative_to(REPO).as_posix() for path in _canonical_skill_directories() if path.resolve() not in standalone)
     assert missing == []
+
+
+def test_plugin_skills_appear_only_in_their_plugin_package() -> None:
+    for skill_dir in sorted(_plugin_skill_directories()):
+        homes = _packages_for_skill(skill_dir)
+        home_ids = [package.get("id") for package in homes]
+        assert len(homes) == 1, f"{skill_dir.relative_to(REPO).as_posix()} appears in {home_ids}"
+        components = _components(homes[0])
+        assert len(components) > 1, f"{home_ids[0]} must be the plugin package, not a standalone card"
 
 
 @pytest.mark.parametrize("path", list(_component_paths("mcpServer")))

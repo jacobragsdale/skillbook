@@ -355,15 +355,16 @@ one MCP server, several skills, several MCP servers, or a mix of both.
 
 | Package shape | What it publishes |
 | --- | --- |
-| Single skill | One `skill` component. Every `skills/<name>/` directory and every plugin skill is also available on its own. |
+| Single skill | One `skill` component. Every `skills/<name>/` directory is available on its own. Plugin-layout skills appear only in their plugin package. |
 | Single MCP server | One `mcpServer` component pointing at a document under [`mcp/`](mcp/). |
 | Skill bundle | Two or more `skill` components installed together. |
 | MCP bundle | Two or more `mcpServer` components installed together. |
-| Mixed bundle | Skills and MCP servers in one package. `data-engineer` and `devops-toolkit` replace the former generic plugin-directory installs. |
+| Mixed bundle | Skills and MCP servers in one package. `data-engineer` and `devops-toolkit` are the only Skill Manager listing for their plugin-layout skills. |
 
-The package list in the manifest is the source of truth. Identical skills or
-MCP servers that appear in both a standalone package and a bundle share the
-same installed name and coalesce when both are installed.
+The package list in the manifest is the source of truth. Canonical
+`skills/<name>/` entries may also appear in an optional bundle and share the
+same installed name. Plugin-layout skills are not published as standalone
+packages or extra skills-only bundles.
 
 MCP documents use the Agent Plugins 1.0.0 `mcp.json` shape. Stdio commands are
 bare executables on `PATH`. The `catalog` package is Streamable HTTP at
