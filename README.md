@@ -4,13 +4,12 @@
 [Agent Skills](https://agentskills.io/). Each skill is a `SKILL.md` instruction
 file with optional supporting text, scripts, references, and assets.
 
-The repository can deliver those skills in three ways:
+The repository can deliver those skills in two ways:
 
 | Delivery path | Intended use | What it does |
 | --- | --- | --- |
-| Per-skill symlinks | Local agents that discover installed skills | `install.py` links each canonical `skills/<name>/` directory into the agent-specific skill directories. |
+| Skill Manager packages | Agents enabled in Skill Manager | [`scripts/publish-source.sh`](scripts/publish-source.sh) uploads a zip of [`skill-manager.json`](skill-manager.json) and every referenced path to Nexus. Skill Manager installs those packages onto the agents you enable. |
 | MCP server | MCP hosts that should discover and load skills on demand | A local, read-only service exposes the catalog, complete `SKILL.md` files, and UTF-8 supporting files. |
-| Skill Manager packages | Agents enabled in Skill Manager | [`skill-manager.json`](skill-manager.json) publishes portable v2 packages. Skill Manager projects each package onto the agents a user enables. |
 
 [`skills/`](skills/) remains the source of truth for the canonical library.
 Plugin-layout skills live under `plugins/<name>/skills/`. Edit a canonical
@@ -372,32 +371,40 @@ bare executables on `PATH`. The `catalog` package is Streamable HTTP at
 repository to be running. Plugin directories remain in the tree as skill
 sources; Skill Manager no longer copies them as generic plugin installs.
 
-## Install skills locally
+## Publish the Skill Manager source
 
-Requires [uv](https://docs.astral.sh/uv/).
+Installed skills are namespaced copies (`skillbook-<name>`), not live links
+into this repository. Edit here, then publish, then refresh Skill Manager.
 
-```bash
-# Preview changes
-uv run install.py --dry-run
-
-# Install one symlink per skill
-uv run install.py
-```
-
-The installer links every canonical skill into both `~/.agents/skills` and
-`~/.claude/skills`. It also prunes links into this repository whose source
-skill has been removed. `--force` can replace a conflicting symlink; it does
-not delete a real file or directory. To remove this repository's installed
-links:
+Requires `python3`, `zip`, `curl`, and `shasum`. Upload uses the Nexus `admin`
+password from `NEXUS_PASSWORD`, the macOS keychain item `repo.ragsdale.dev`,
+or a curl prompt.
 
 ```bash
-uv run install.py --uninstall
+# Pack and validate without uploading
+./scripts/publish-source.sh --dry-run
+
+# Replace https://repo.ragsdale.dev/repository/files/sources/skillbook-latest.zip
+./scripts/publish-source.sh
 ```
 
-Run the installer after adding, renaming, or removing a skill. Editing an
-existing skill needs no reinstall because the installed entries are symlinks;
-Claude Code sees the change immediately, while Cursor needs a reload after a
-new skill or frontmatter change.
+The script zips `skill-manager.json` plus every component path it references.
+Nexus `files` rejects overwrite, so the script deletes the previous zip, then
+uploads the same path, then checks the anonymous download against the local
+checksum. It does not republish the catalog; that document already lists this
+URL.
+
+After a successful upload, refresh Skillbook in Skill Manager and Update
+already-installed packages. New packages still need an explicit Install.
+Cursor, Codex, OpenCode, Grok Build, and Copilot share
+`~/.agents/skills/skillbook-*`. Claude Code uses `~/.claude/skills/skillbook-*`.
+Reload the agent after a new skill or a frontmatter change.
+
+To store the password once:
+
+```bash
+security add-generic-password -a admin -s repo.ragsdale.dev -w
+```
 
 ## Create or update a skill
 
@@ -438,13 +445,13 @@ uv run pytest tests/test_mcp_catalog.py tests/test_mcp_server.py tests/test_sour
 Run every standalone tooling test after changing skills or skill tooling:
 
 ```bash
-uv run tests/test_install.py
 uv run tests/test_jacob_create_skill.py
 ```
 
 For a skill change, also run its validator. For a new, renamed, or removed
-skill, run `uv run install.py` and confirm the installed links are current.
-The repository workflow is documented in [`AGENTS.md`](AGENTS.md).
+skill, update `skill-manager.json` and run `./scripts/publish-source.sh` so
+Skill Manager can pick up the snapshot. The repository workflow is documented
+in [`AGENTS.md`](AGENTS.md).
 
 ## Repository layout
 
@@ -459,7 +466,7 @@ plugins/                     # plugin-layout skills referenced by v2 packages
 skill-manager.json           # Skill Manager v2 source catalog
 rules/                       # always-on rules referenced by repo instructions
 tests/                       # regression and MCP contract tests
-install.py                   # installs and prunes per-skill symlinks
+scripts/publish-source.sh    # packs the portable source and replaces the Nexus zip
 Dockerfile                   # locked, unprivileged MCP container image
 AGENTS.md                    # repository workflow and maintenance rules
 ```

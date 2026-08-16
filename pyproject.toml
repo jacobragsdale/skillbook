@@ -42,10 +42,8 @@ show-fixes = true
 unsafe-fixes = false
 extend-exclude = [
     # Standalone PEP 723 tooling is outside this experimental service project.
-    "install.py",
     "rules",
     "skills",
-    "tests/test_install.py",
     "tests/test_jacob_create_skill.py",
 ]
 

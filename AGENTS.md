@@ -2,23 +2,21 @@
 
 This is a library of Agent Skills (agentskills.io format) and the single
 source of truth for skills on this machine. The canonical source is
-`skills/<name>/`; agent-specific directories (`~/.agents/skills`,
-`~/.claude/skills`) receive per-skill symlinks via `install.py` — never edit
-skills there, edit them here.
+`skills/<name>/`. Skill Manager installs namespaced copies
+(`~/.agents/skills/skillbook-*`, `~/.claude/skills/skillbook-*`) from the
+Nexus zip — never edit those copies, edit them here.
 
 Rules:
 
-- **Added, renamed, or removed a skill?** Run `uv run install.py` before
-  finishing so the symlinks in `~/.agents/skills` and `~/.claude/skills`
-  stay current (it also prunes links for removed skills). Editing an
-  existing skill needs nothing for Claude Code — symlinks pick it up
-  immediately; Cursor discovers skills at startup, so mention that a reload
-  is needed when you change frontmatter. Update `skill-manager.json` in the
-  same change: every `skills/<name>/` directory needs a standalone v2
+- **Added, renamed, or removed a skill?** Update `skill-manager.json` in
+  the same change: every `skills/<name>/` directory needs a standalone v2
   skill package, and any optional bundle of those skills must list that
   component. Plugin-layout skills under `plugins/<plugin>/skills/` appear
   only in that plugin's mixed package — not as their own card and not in
-  an extra skills-only bundle.
+  an extra skills-only bundle. Then run `./scripts/publish-source.sh` and
+  refresh/update Skillbook in Skill Manager. Agents do not see an edit
+  until that snapshot is published and the app updates. Reload the agent
+  after a new skill or a frontmatter change.
 - **Added, renamed, or removed an MCP server?** Put a portable Agent
   Plugins 1.0.0 document under `mcp/` (bare `PATH` command, no
   `${PLUGIN_ROOT}` / `${PLUGIN_DATA}`), add a standalone `mcpServer`
