@@ -1,6 +1,0 @@
-interface:
-  display_name: "Schema migration"
-  short_description: "Verify schema migrations before execution"
-  default_prompt: "Use $schema-migration to verify a database schema change before it runs."
-policy:
-  allow_implicit_invocation: false

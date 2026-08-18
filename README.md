@@ -12,8 +12,7 @@ The repository can deliver those skills in two ways:
 | MCP server | MCP hosts that should discover and load skills on demand | A local, read-only service exposes the catalog, complete `SKILL.md` files, and UTF-8 supporting files. |
 
 [`skills/`](skills/) remains the source of truth for the canonical library.
-Plugin-layout skills live under `plugins/<name>/skills/`. Edit a canonical
-skill here, never an installed copy.
+Edit a canonical skill here, never an installed copy.
 
 ## How MCP skill delivery works
 
@@ -354,22 +353,19 @@ one MCP server, several skills, several MCP servers, or a mix of both.
 
 | Package shape | What it publishes |
 | --- | --- |
-| Single skill | One `skill` component. Every `skills/<name>/` directory is available on its own. Plugin-layout skills appear only in their plugin package. |
+| Single skill | One `skill` component. Every `skills/<name>/` directory is available on its own. |
 | Single MCP server | One `mcpServer` component pointing at a document under [`mcp/`](mcp/). |
 | Skill bundle | Two or more `skill` components installed together. |
-| MCP bundle | Two or more `mcpServer` components installed together. |
-| Mixed bundle | Skills and MCP servers in one package. `data-engineer` and `devops-toolkit` are the only Skill Manager listing for their plugin-layout skills. |
 
 The package list in the manifest is the source of truth. Canonical
 `skills/<name>/` entries may also appear in an optional bundle and share the
-same installed name. Plugin-layout skills are not published as standalone
-packages or extra skills-only bundles.
+same installed name.
 
 MCP documents use the Agent Plugins 1.0.0 `mcp.json` shape. Stdio commands are
 bare executables on `PATH`. The `catalog` package is Streamable HTTP at
 `http://127.0.0.1:8000/mcp` and expects the Skillbook MCP server from this
-repository to be running. Plugin directories remain in the tree as skill
-sources; Skill Manager no longer copies them as generic plugin installs.
+repository to be running. It is published as an optional package and is not
+installed on agents by default.
 
 ## Publish the Skill Manager source
 
@@ -462,7 +458,6 @@ skills/<name>/scripts/       # optional self-contained uv scripts
 skills/<name>/references/    # optional on-demand documentation
 skills/<name>/assets/        # optional reusable templates or files
 mcp/<name>.json              # portable MCP server documents
-plugins/                     # plugin-layout skills referenced by v2 packages
 skill-manager.json           # Skill Manager v2 source catalog
 rules/                       # always-on rules referenced by repo instructions
 tests/                       # regression and MCP contract tests

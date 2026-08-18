@@ -87,7 +87,7 @@ def _classify(package: dict[str, object]) -> str:
     return "unknown"
 
 
-def test_manifest_is_v2_with_every_package_shape() -> None:
+def test_manifest_is_v2_with_published_package_shapes() -> None:
     manifest = _load_manifest()
     source = manifest.get("source")
     assert manifest.get("version") == 2
@@ -95,7 +95,7 @@ def test_manifest_is_v2_with_every_package_shape() -> None:
     assert source.get("id") == "skillbook"
 
     shapes = {_classify(package) for package in _packages(manifest)}
-    assert shapes == {"skill", "mcp", "skill-bundle", "mcp-bundle", "mixed"}
+    assert shapes == {"skill", "mcp", "skill-bundle"}
 
 
 def test_canonical_skills_have_a_standalone_package() -> None:

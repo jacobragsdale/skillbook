@@ -73,30 +73,6 @@
       "components": [{ "kind": "mcpServer", "path": "mcp/catalog.json" }]
     },
     {
-      "id": "duckdb-engine",
-      "name": "DuckDB engine",
-      "description": "Stdio MCP server stub for DuckDB analytics.",
-      "components": [{ "kind": "mcpServer", "path": "mcp/duckdb-engine.json" }]
-    },
-    {
-      "id": "postgres-runner",
-      "name": "Postgres runner",
-      "description": "Stdio MCP server stub for PostgreSQL queries.",
-      "components": [{ "kind": "mcpServer", "path": "mcp/postgres-runner.json" }]
-    },
-    {
-      "id": "k8s-inspector",
-      "name": "Kubernetes inspector",
-      "description": "Stdio MCP server stub for cluster inspection.",
-      "components": [{ "kind": "mcpServer", "path": "mcp/k8s-inspector.json" }]
-    },
-    {
-      "id": "cloud-metrics",
-      "name": "Cloud metrics",
-      "description": "Stdio MCP server stub for cloud resource metrics.",
-      "components": [{ "kind": "mcpServer", "path": "mcp/cloud-metrics.json" }]
-    },
-    {
       "id": "python",
       "name": "Python house standard",
       "description": "Python implementation standards and test design together.",
@@ -112,46 +88,6 @@
       "components": [
         { "kind": "skill", "id": "mermaid", "path": "skills/mermaid" },
         { "kind": "skill", "id": "write-diataxis-docs", "path": "skills/write-diataxis-docs" }
-      ]
-    },
-    {
-      "id": "data-mcp",
-      "name": "Data MCP servers",
-      "description": "DuckDB and Postgres MCP servers together.",
-      "components": [
-        { "kind": "mcpServer", "id": "duckdb-engine", "path": "mcp/duckdb-engine.json" },
-        { "kind": "mcpServer", "id": "postgres-runner", "path": "mcp/postgres-runner.json" }
-      ]
-    },
-    {
-      "id": "devops-mcp",
-      "name": "DevOps MCP servers",
-      "description": "Kubernetes inspector and cloud-metrics MCP servers together.",
-      "components": [
-        { "kind": "mcpServer", "id": "k8s-inspector", "path": "mcp/k8s-inspector.json" },
-        { "kind": "mcpServer", "id": "cloud-metrics", "path": "mcp/cloud-metrics.json" }
-      ]
-    },
-    {
-      "id": "data-engineer",
-      "name": "Data engineer",
-      "description": "Pipeline and schema-migration skills with DuckDB and Postgres MCP servers.",
-      "components": [
-        { "kind": "skill", "id": "pipeline-audit", "path": "plugins/data-engineer/skills/pipeline-audit" },
-        { "kind": "skill", "id": "schema-migration", "path": "plugins/data-engineer/skills/schema-migration" },
-        { "kind": "mcpServer", "id": "duckdb-engine", "path": "mcp/duckdb-engine.json" },
-        { "kind": "mcpServer", "id": "postgres-runner", "path": "mcp/postgres-runner.json" }
-      ]
-    },
-    {
-      "id": "devops-toolkit",
-      "name": "DevOps toolkit",
-      "description": "Incident and Kubernetes skills with inspector and metrics MCP servers.",
-      "components": [
-        { "kind": "skill", "id": "incident-response", "path": "plugins/devops-toolkit/skills/incident-response" },
-        { "kind": "skill", "id": "k8s-diagnose", "path": "plugins/devops-toolkit/skills/k8s-diagnose" },
-        { "kind": "mcpServer", "id": "k8s-inspector", "path": "mcp/k8s-inspector.json" },
-        { "kind": "mcpServer", "id": "cloud-metrics", "path": "mcp/cloud-metrics.json" }
       ]
     }
   ]

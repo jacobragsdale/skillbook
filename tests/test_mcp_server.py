@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
-from mcp import Client
 from mcp.types import DiscoverResult, JSONRPCError, TextContent, TextResourceContents, ToolAnnotations
 
+from mcp import Client
 from skillbook_mcp.catalog import SkillCatalog, SkillDocument, SkillFile, SkillSummary
 from skillbook_mcp.server import create_app, create_mcp_server
 
