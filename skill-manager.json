@@ -3,7 +3,7 @@
   "source": {
     "id": "skillbook",
     "name": "Skillbook",
-    "description": "Jacob's canonical library of portable Agent Skills and MCP servers."
+    "description": "Jacob's canonical library of portable Agent Skills."
   },
   "packages": [
     {
@@ -65,12 +65,6 @@
       "name": "Write Diátaxis docs",
       "description": "Write and audit technical documentation as tutorials, how-to guides, reference, or explanation.",
       "components": [{ "kind": "skill", "path": "skills/write-diataxis-docs" }]
-    },
-    {
-      "id": "catalog",
-      "name": "Skillbook catalog",
-      "description": "Read-only Skillbook catalog over Streamable HTTP on localhost.",
-      "components": [{ "kind": "mcpServer", "path": "mcp/catalog.json" }]
     },
     {
       "id": "python",

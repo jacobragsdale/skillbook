@@ -2,325 +2,11 @@
 
 `skillbook` is Jacob's canonical library of portable
 [Agent Skills](https://agentskills.io/). Each skill is a `SKILL.md` instruction
-file with optional supporting text, scripts, references, and assets.
-
-The repository can deliver those skills in two ways:
-
-| Delivery path | Intended use | What it does |
-| --- | --- | --- |
-| Skill Manager packages | Agents enabled in Skill Manager | [`scripts/publish-source.sh`](scripts/publish-source.sh) uploads a zip of [`skill-manager.json`](skill-manager.json) and every referenced path to Nexus. Skill Manager installs those packages onto the agents you enable. |
-| MCP server | MCP hosts that should discover and load skills on demand | A local, read-only service exposes the catalog, complete `SKILL.md` files, and UTF-8 supporting files. |
-
-[`skills/`](skills/) remains the source of truth for the canonical library.
-Edit a canonical skill here, never an installed copy.
-
-## How MCP skill delivery works
-
-The MCP server is a thin read-only view over [`skills/`](skills/). It does not
-install, modify, or execute skills. It also does not preload the library into a
-model's context when the host discovers the server.
-
-### What the server serves
-
-The server exposes:
-
-- a summary for every directory matching `skills/<name>/SKILL.md`;
-- the complete `SKILL.md` for one selected skill; and
-- individual UTF-8 files inside that skill directory, including references and
-  text-based scripts or assets.
-
-Each summary contains the skill name, trigger description, `skill://` URI,
-SHA-256 content hash, optional compatibility statement, and whether model
-invocation is enabled. Catalog and file contents are read from disk on every
-request, so edits are visible without restarting the server.
-
-It does not expose `AGENTS.md`, `rules/`, tests, repository metadata, or files
-outside a selected skill directory. It also excludes cache files, compiled
-Python files, `.DS_Store`, and symlinks that escape the skill directory.
-
-### What a client and model receive
-
-The `2026-07-28` protocol is stateless. There is no `initialize` handshake and
-no protocol session. Every request carries its protocol version, client
-identity, and client capabilities. A client may call
-[`server/discover`](https://modelcontextprotocol.io/specification/2026-07-28/server/discover)
-before any other method, but discovery is optional; it can instead make a
-normal request and handle an unsupported-version error.
-
-Strictly speaking, the MCP host's client communicates with this service. The
-model does not open the HTTP connection, and the host decides what MCP metadata
-and results enter model context.
-
-With the locked `mcp==2.0.0` SDK, `server/discover` returns:
-
-| Item | Value |
-| --- | --- |
-| Protocol revision | `2026-07-28` |
-| Server identity | Name `skillbook`, title `Skillbook`, version `0.1.0`, description `Jacob's canonical Agent Skills library.` |
-| Capabilities | Tools, resources, prompts, list-change notifications, and resource subscriptions. No prompts are registered, so `prompts/list` is empty. |
-| Server instructions | `Call list_skills` to find trigger descriptions, then `read_skill`, then any referenced `read_skill_file`. |
-| Result metadata | `resultType: "complete"`, `ttlMs: 0`, `cacheScope: "private"`, and server identity in `_meta`. |
-| Skill contents | None. Catalog and skill bodies require subsequent requests. |
-
-The SDK advertises change notifications because it provides the
-`subscriptions/listen` method. This application does not watch the filesystem
-or proactively publish catalog changes. Its `ttlMs: 0` responses are
-immediately stale, so clients should re-fetch when they next need the catalog;
-every fetch reads the current files from disk.
-
-The normal model-facing sequence is:
-
-1. The host discovers three tool definitions, one fixed resource, and two
-   resource templates. It receives their names, descriptions, schemas, and
-   read-only safety hints—not the contents of all skills.
-2. The host exposes whichever tools it permits to the model. When a task appears
-   relevant, the model can call `list_skills` and receive all skill summaries.
-3. The model calls `read_skill` for the matching skill. Only then does that
-   complete `SKILL.md` enter the tool result.
-4. If the selected skill refers to another file, the model calls
-   `read_skill_file` for that specific path.
-
-For example, a Python task can produce this retrieval sequence:
-
-```text
-list_skills()
-  -> summaries for all skills
-
-read_skill(name="python-standards")
-  -> complete SKILL.md + available file paths
-
-read_skill_file(name="python-standards", path="references/tooling-setup.md")
-  -> that file's text, media type, and hash
-```
-
-The final file call uses a real path referenced by `python-standards`; the model
-should request only paths listed or referenced by the selected skill.
-
-### Tools and resources expose the same library differently
-
-The current specification distinguishes who controls retrieval:
-
-- [**Tools are model-controlled.**](https://modelcontextprotocol.io/specification/2026-07-28/server/tools)
-  A host can expose `list_skills`, `read_skill`, and `read_skill_file` to the
-  model so it can retrieve instructions as needed.
-- [**Resources are application-controlled.**](https://modelcontextprotocol.io/specification/2026-07-28/server/resources)
-  A host can read the catalog or a skill URI itself and attach that content to
-  context.
-
-The server provides both interfaces so different MCP hosts can use the same
-catalog. It registers no MCP prompts. Resources are not automatically injected
-into model context merely because the server advertises them.
-
-Retrieval is also not enforcement. A successful `read_skill` call proves that
-the server delivered the instructions; it does not prove that a host exposed
-them, that the model followed them, or that the result was correct. Likewise,
-`model_invocation_enabled: false` is advisory metadata that the client must
-honor; the underlying skill remains readable.
-
-### Standards status of skills over MCP
-
-The `2026-07-28` core specification defines tools, resources, and prompts; it
-does not define a finalized skill primitive. The MCP Skills Over MCP Working
-Group's resource-based
-[Skills Extension (SEP-2640)](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640)
-is still in review. This server therefore uses stable core tools and resources
-and does not advertise the draft extension. Revisit that choice when the
-extension is finalized and supported by target hosts.
-
-## Run the MCP server
-
-### Prerequisites
-
-- Python 3.11 or newer
-- [uv](https://docs.astral.sh/uv/)
-
-### Start the server
-
-From the repository root:
-
-```bash
-uv sync --locked
-uv run skillbook-mcp
-```
-
-The server listens on `127.0.0.1:8000` and exposes Streamable HTTP at:
-
-```text
-http://127.0.0.1:8000/mcp
-```
-
-Keep that process running, then register the URL as a Streamable HTTP server in
-your MCP host. Configuration syntax is host-specific; the connection needs only
-the URL because this local experiment has no authentication.
-
-### Run the server with Docker
-
-Build the image from the repository root:
-
-```bash
-docker build -t skillbook-mcp .
-```
-
-Run it with the published port restricted to the host's loopback interface:
-
-```bash
-docker run --rm --name skillbook-mcp -p 127.0.0.1:8000:8000 skillbook-mcp
-```
-
-The container serves the same MCP endpoint at
-<http://127.0.0.1:8000/mcp>. It includes the repository's `skills/` directory
-at build time, runs as an unprivileged user, and has a health check against
-`/health`. Rebuild the image after changing a skill.
-
-### Monitor function usage
-
-Every successful or failed entry into a registered tool or resource function
-emits one line to stdout. Local runs display those lines in the terminal. For a
-running container, follow them with:
-
-```bash
-docker logs --follow skillbook-mcp
-```
-
-Example output:
-
-```text
-2026-08-04T18:42:11+0000 level=INFO event=function_called interface=tool operation=list_skills skill=- path=-
-2026-08-04T18:42:13+0000 level=INFO event=function_called interface=tool operation=read_skill skill=python-standards path=-
-2026-08-04T18:42:14+0000 level=INFO event=function_called interface=resource operation=skill_file_resource skill=python-standards path=references/tooling-setup.md
-```
-
-The fields identify the MCP interface, function, selected skill, and supporting
-path. A hyphen means the field does not apply. Logs deliberately exclude skill
-contents, request bodies, prompts, and environment values. They are usage
-events only: they show that a function was entered, not whether a model used or
-followed the returned instructions. Docker retains logs according to the
-configured logging driver; this application does not write a log file or usage
-database.
-
-### Verify the live catalog
-
-In another terminal:
-
-```bash
-curl http://127.0.0.1:8000/health
-```
-
-The response contains `status: "ok"` and the number of currently valid skills:
-
-```json
-{"status":"ok","skills":9}
-```
-
-The count is computed from the live catalog and changes when skills are added or
-removed. FastAPI's OpenAPI UI for the health route is available at
-<http://127.0.0.1:8000/docs>.
-
-## MCP reference
-
-With the locked dependencies, the server uses
-[`mcp==2.0.0`](https://pypi.org/project/mcp/), the current stable official
-Python SDK for
-[MCP revision `2026-07-28`](https://modelcontextprotocol.io/specification/2026-07-28).
-The transport is stateless Streamable HTTP with one JSON-RPC request per HTTP
-`POST` and JSON responses.
-
-There is no initialization exchange or `Mcp-Session-Id`. `server/discover`
-reports the supported protocol revision, capabilities, server identity, and
-usage instructions. Every modern request repeats its protocol version and
-client capabilities; every result includes `resultType` and server identity.
-
-### Tools
-
-| Tool | Arguments | Result |
-| --- | --- | --- |
-| `list_skills` | None | All skill summaries, sorted by name. |
-| `read_skill` | `name` | The selected summary, complete `SKILL.md`, and all catalogued file paths under the skill directory. |
-| `read_skill_file` | `name`, `path` | One file's skill name, relative path, media type, SHA-256 hash, and UTF-8 content. |
-
-`name` must use lowercase letters, digits, and single hyphens. `path` must be a
-relative POSIX path inside the named skill directory. All three definitions
-include `readOnlyHint: true` and `openWorldHint: false`.
-
-### Resources
-
-| Kind | URI | Media type | Result |
-| --- | --- | --- | --- |
-| Resource | `skills://catalog` | `application/json` | JSON array containing the live skill summaries. |
-| Resource template | `skill://{name}` | `text/markdown` | Complete `SKILL.md` for one skill. |
-| Resource template | `skill-file://{name}/{+path}` | `text/plain` | Contents of one UTF-8 file inside a skill. |
-
-### Modern response metadata
-
-The SDK supplies the fields required by the `2026-07-28` specification:
-
-| Field | Value | Meaning |
-| --- | --- | --- |
-| `resultType` | `complete` | The request completed without a multi-round-trip input request. |
-| `ttlMs` | `0` on `server/discover`, list operations, and resource reads | The live filesystem result is immediately stale and may be re-fetched when needed. |
-| `cacheScope` | `private` on cacheable results | A cached response must not be reused across authorization contexts. |
-| `_meta.io.modelcontextprotocol/serverInfo` | Skillbook identity | Identifies the server on every result. |
-
-On Streamable HTTP, a conforming client also sends `MCP-Protocol-Version` and
-`Mcp-Method` headers on every request, plus `Mcp-Name` for tool calls and
-resource reads. The SDK validates those headers against the JSON-RPC body and
-returns HTTP 400 with error `-32020` when they do not match.
-
-### Response fields
-
-`SkillSummary`:
-
-| Field | Type | Meaning |
-| --- | --- | --- |
-| `name` | string | Exact skill name and directory name. |
-| `description` | string | Frontmatter description used as the skill's trigger. |
-| `uri` | string | `skill://<name>` resource URI. |
-| `sha256` | string | SHA-256 hash of the complete `SKILL.md` text. |
-| `compatibility` | string or null | Optional frontmatter compatibility statement. |
-| `model_invocation_enabled` | boolean | Inverse of `disable-model-invocation`; advisory to the client. |
-
-`read_skill` adds:
-
-| Field | Type | Meaning |
-| --- | --- | --- |
-| `summary` | `SkillSummary` | Metadata for the selected skill. |
-| `content` | string | Complete UTF-8 `SKILL.md`, including frontmatter. |
-| `files` | array of strings | Safe relative file paths catalogued under the skill directory. A listed binary file is not readable through this text-only server. |
-
-`read_skill_file` returns:
-
-| Field | Type | Meaning |
-| --- | --- | --- |
-| `skill` | string | Skill that owns the file. |
-| `path` | string | Relative POSIX path requested by the client. |
-| `media_type` | string | Type inferred from the filename extension, or `text/plain`. |
-| `sha256` | string | SHA-256 hash of the returned text. |
-| `content` | string | Complete UTF-8 file contents. |
-
-### Validation and errors
-
-The catalog rejects malformed frontmatter, a frontmatter name that differs from
-its directory, unknown skills or files, absolute paths, path traversal, Windows
-path separators, non-regular files, escaping symlinks, and non-UTF-8 content.
-Binary assets can appear in a skill directory but cannot be read through this
-text-only MCP surface.
-
-### Security boundary
-
-This server is intended only for the local machine. It binds to loopback, and
-the SDK enables localhost host and Origin checks to reduce DNS-rebinding risk.
-It has no authentication or browser CORS policy. Do not bind it to a LAN or
-public interface without adding an explicit deployment security design.
-
-The container listens on all of its own interfaces so Docker port publishing
-works. The documented `docker run` command publishes that port only on the
-host's `127.0.0.1`; do not change the host binding to an unrestricted address
-without adding authentication and transport security.
-
-The registered tool inputs contain only a skill name and optional file path.
-This implementation has no prompt input, persistent telemetry, or usage
-database. Its stdout usage log records the function name and the optional skill
-and relative supporting-file path.
+file with optional scripts, references, assets, and client metadata.
+
+[`skills/`](skills/) is the source of truth. Edit a canonical skill here, never
+an installed copy. The repository contains no skill-serving service or other
+runtime: agents receive ordinary skill directories through Skill Manager.
 
 ## Current skills
 
@@ -344,37 +30,17 @@ Skills are model-invocable by default through their descriptions. The
 `releases` skill is deliberately manual-only because it reads and writes local
 release records and requires an Azure DevOps preflight.
 
-## Skill Manager packages
+## Publish the skills
 
-Skill Manager reads the root [`skill-manager.json`](skill-manager.json)
-manifest. Version 2 describes portable packages, not machine-specific
-destinations. A package is the atomic install unit and may contain one skill,
-one MCP server, several skills, several MCP servers, or a mix of both.
-
-| Package shape | What it publishes |
-| --- | --- |
-| Single skill | One `skill` component. Every `skills/<name>/` directory is available on its own. |
-| Single MCP server | One `mcpServer` component pointing at a document under [`mcp/`](mcp/). |
-| Skill bundle | Two or more `skill` components installed together. |
-
-The package list in the manifest is the source of truth. Canonical
-`skills/<name>/` entries may also appear in an optional bundle and share the
-same installed name.
-
-MCP documents use the Agent Plugins 1.0.0 `mcp.json` shape. Stdio commands are
-bare executables on `PATH`. The `catalog` package is Streamable HTTP at
-`http://127.0.0.1:8000/mcp` and expects the Skillbook MCP server from this
-repository to be running. It is published as an optional package and is not
-installed on agents by default.
-
-## Publish the Skill Manager source
-
-Installed skills are namespaced copies (`skillbook-<name>`), not live links
-into this repository. Edit here, then publish, then refresh Skill Manager.
+Skill Manager reads [`skill-manager.json`](skill-manager.json), whose packages
+contain only `skill` components under `skills/`. Every skill is available as a
+standalone package; related skills may also appear together in an optional
+bundle. Installed skills are namespaced copies (`skillbook-<name>`), not live
+links into this repository.
 
 Requires `python3`, `zip`, `curl`, and `shasum`. Upload uses the Nexus `admin`
-password from `NEXUS_PASSWORD`, the macOS keychain item `repo.ragsdale.dev`,
-or a curl prompt.
+password from `NEXUS_PASSWORD`, the macOS keychain item `repo.ragsdale.dev`, or
+a curl prompt.
 
 ```bash
 # Pack and validate without uploading
@@ -384,38 +50,19 @@ or a curl prompt.
 ./scripts/publish-source.sh
 ```
 
-The script zips `skill-manager.json` plus every component path it references.
-Nexus `files` rejects overwrite, so the script deletes the previous zip, then
-uploads the same path, then checks the anonymous download against the local
-checksum. It does not republish the catalog; that document already lists this
-URL.
-
-After a successful upload, refresh Skillbook in Skill Manager and Update
-already-installed packages. New packages still need an explicit Install.
-Cursor, Codex, OpenCode, Grok Build, and Copilot share
-`~/.agents/skills/skillbook-*`. Claude Code uses `~/.claude/skills/skillbook-*`.
-Reload the agent after a new skill or a frontmatter change.
-
-To store the password once:
-
-```bash
-security add-generic-password -a admin -s repo.ragsdale.dev -w
-```
+The script rejects non-skill components, zips the manifest and referenced skill
+directories, replaces the existing Nexus artifact, and verifies the anonymous
+download against the local SHA-256 checksum. After publishing, refresh
+Skillbook in Skill Manager and update already-installed packages. Reload an
+agent after adding a skill or changing frontmatter.
 
 ## Create or update a skill
 
 Use [`jacob-create-skill`](skills/jacob-create-skill/SKILL.md) as the house
 process: clarify the intent and boundary, scaffold, draft, and validate.
 
-To scaffold a new skill:
-
 ```bash
 uv run skills/jacob-create-skill/scripts/init_skill.py my-skill --dir skills
-```
-
-Then edit the canonical `skills/my-skill/SKILL.md` and validate it:
-
-```bash
 uv run skills/jacob-create-skill/scripts/validate_skill.py skills/my-skill
 ```
 
@@ -426,43 +73,32 @@ the first sentence, then describe when the skill should be used and include an
 `disable-model-invocation: true` only when a skill must never run implicitly.
 
 Bundled Python is self-contained: each script has a PEP 723 header and runs
-with `uv run`, without a repository environment setup. Put stable supporting
-material in `references/` and reusable files in `assets/` when a skill needs
-them.
+with `uv run`, without repository environment setup. Put stable supporting
+material in `references/` and reusable files in `assets/`.
 
 ## Verify changes
 
-Run the MCP contract tests after changing the server or its catalog:
+Run every test file after changing skills or tooling:
 
 ```bash
-uv run pytest tests/test_mcp_catalog.py tests/test_mcp_server.py tests/test_source_manifest.py
-```
-
-Run every standalone tooling test after changing skills or skill tooling:
-
-```bash
-uv run tests/test_jacob_create_skill.py
+for test_file in tests/*.py; do uv run "$test_file"; done
 ```
 
 For a skill change, also run its validator. For a new, renamed, or removed
-skill, update `skill-manager.json` and run `./scripts/publish-source.sh` so
-Skill Manager can pick up the snapshot. The repository workflow is documented
-in [`AGENTS.md`](AGENTS.md).
+skill, update `skill-manager.json` and publish the refreshed artifact. The full
+workflow is documented in [`AGENTS.md`](AGENTS.md).
 
 ## Repository layout
 
 ```text
-src/skillbook_mcp/           # read-only catalog and MCP/FastAPI server
 skills/<name>/SKILL.md       # canonical skill instructions
 skills/<name>/scripts/       # optional self-contained uv scripts
 skills/<name>/references/    # optional on-demand documentation
 skills/<name>/assets/        # optional reusable templates or files
-mcp/<name>.json              # portable MCP server documents
-skill-manager.json           # Skill Manager v2 source catalog
+skill-manager.json           # skills-only artifact manifest
+scripts/publish-source.sh    # packs the skills and replaces the Nexus artifact
+tests/                       # skill and packaging regression tests
 rules/                       # always-on rules referenced by repo instructions
-tests/                       # regression and MCP contract tests
-scripts/publish-source.sh    # packs the portable source and replaces the Nexus zip
-Dockerfile                   # locked, unprivileged MCP container image
 AGENTS.md                    # repository workflow and maintenance rules
 ```
 

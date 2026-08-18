@@ -1,34 +1,18 @@
 [project]
-name = "skillbook-mcp"
+name = "skillbook"
 version = "0.1.0"
-description = "Experimental FastAPI server for serving the skillbook over MCP v2"
+description = "Jacob's canonical library of portable Agent Skills"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = [
-    "fastapi>=0.141.1,<1",
-    "mcp>=2.0.0,<3",
-    "pydantic>=2.12,<3",
-    "pyyaml>=6.0.3,<7",
-    "uvicorn>=0.52.1,<1",
-]
+dependencies = ["pyyaml>=6.0.3,<7"]
 
-[project.scripts]
-skillbook-mcp = "skillbook_mcp.server:main"
-
-[build-system]
-requires = ["hatchling>=1.27,<2"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/skillbook_mcp"]
+[tool.uv]
+package = false
 
 [dependency-groups]
 dev = [
     "pre-commit>=4.6.0,<5",
-    "pyrefly==1.2.0",
     "pytest>=9.1.1,<10",
-    "pytest-asyncio>=1.4.0,<2",
-    "pytest-cov>=7,<8",
     "pytest-randomly>=4,<5",
     "ruff==0.16.1",
     "types-pyyaml>=6.0.12.20250915",
@@ -41,113 +25,68 @@ force-exclude = true
 show-fixes = true
 unsafe-fixes = false
 extend-exclude = [
-    # Standalone PEP 723 tooling is outside this experimental service project.
+    # Bundled scripts are standalone PEP 723 tools with their own dependencies.
     "rules",
     "skills",
     "tests/test_jacob_create_skill.py",
 ]
 
 [tool.ruff.lint]
-extend-select = [  # Ruff's own defaults stay on; these are additions to them.
-    "E4",  # Keep imports valid and at the top level.
-    "E7",  # Reject ambiguous statements and comparisons.
-    "F",  # Reject star imports and invalid forward-reference annotations.
-    "I",  # Keep imports ordered and grouped consistently.
-    "UP",  # Use syntax appropriate for the target Python version.
-    "B",  # Catch likely bugs and hazardous design patterns.
-    "SIM",  # Replace needlessly complex control flow.
-    "C4",  # Remove wasteful collection constructions.
-    "RUF",  # Apply additional correctness and modernization checks.
-    "PTH",  # Use pathlib instead of legacy os.path calls.
-    "TC",  # Keep type-only imports out of the runtime namespace.
-    "N",  # Enforce standard naming conventions.
-    "A",  # Prevent names from shadowing builtins.
-    "SLF",  # Reject access to another object's private members.
-    "T20",  # Reject print and pprint in favor of logging.
-    "INP",  # Require explicit packages instead of implicit namespaces.
-    "TID",  # Reject parent-relative imports.
-    "ERA",  # Remove commented-out code.
-    "EM",  # Bind exception messages before raising them.
-    "ANN001",  # Require annotations for named function arguments.
-    "ANN002",  # Require annotations for *args.
-    "ANN003",  # Require annotations for **kwargs.
-    "ANN201",  # Require return annotations on public functions.
-    "ANN202",  # Require return annotations on private functions.
-    "ANN204",  # Require return annotations on special methods.
-    "ANN205",  # Require return annotations on static methods.
-    "ANN206",  # Require return annotations on class methods.
-    "LOG",  # Enforce safe logger and exception usage.
-    "G",  # Require lazy, valid log formatting.
-    "ARG",  # Expose unused parameters.
-    "PGH",  # Reject blanket `noqa` and `type: ignore` comments.
-    "RSE",  # Remove unnecessary syntax when raising exceptions.
-    "RET502",  # Reject implicit None returns in functions that return values.
-    "RET503",  # Require an explicit final return in value-returning functions.
-    "PLW",  # Catch suspicious control flow and API usage.
-    "C90",  # Limit cyclomatic complexity.
-    "PERF",  # Flag avoidable allocations and slow loop patterns.
-    "ASYNC",  # Catch blocking calls and async misuse.
-    "FAST",  # Validate route declarations and dependency annotations.
-    "PD",  # Enforce safer and more efficient dataframe idioms.
+extend-select = [
+    "E4",
+    "E7",
+    "F",
+    "I",
+    "UP",
+    "B",
+    "SIM",
+    "C4",
+    "RUF",
+    "PTH",
+    "TC",
+    "N",
+    "A",
+    "T20",
+    "INP",
+    "TID",
+    "ERA",
+    "EM",
+    "ANN001",
+    "ANN002",
+    "ANN003",
+    "ANN201",
+    "ANN202",
+    "ANN204",
+    "ANN205",
+    "ANN206",
+    "ARG",
+    "PGH",
+    "RSE",
+    "RET502",
+    "RET503",
+    "PLW",
+    "C90",
+    "PERF",
 ]
-ignore = [
-    "ASYNC109",  # Allow deliberate timeout parameters in async APIs.
-    "S",  # Do not run flake8-bandit; its findings are noise outside audited code.
-]
+ignore = ["S"]
 
 [tool.ruff.lint.per-file-ignores]
-# Tests may reach into private members and sit outside a package.
-"**/tests/**" = ["SLF001", "INP001"]
-"**/test_*.py" = ["SLF001", "INP001"]
-"**/conftest.py" = ["SLF001", "INP001"]
-
-[tool.ruff.lint.flake8-type-checking]
-runtime-evaluated-base-classes = [
-    "pydantic.BaseModel",
-    "pandera.pandas.DataFrameModel",
-]  # Keep model field types importable at runtime.
+"**/tests/**" = ["INP001"]
+"**/test_*.py" = ["INP001"]
+"**/conftest.py" = ["INP001"]
 
 [tool.ruff.lint.isort]
-split-on-trailing-comma = false  # Do not preserve comma-forced import line breaks.
+split-on-trailing-comma = false
 
 [tool.ruff.lint.mccabe]
 max-complexity = 15
 
 [tool.ruff.format]
 docstring-code-format = true
-skip-magic-trailing-comma = true  # Collapse comma-forced multiline constructs when they fit.
-
-[tool.pyrefly]
-python-interpreter-path = ".venv/bin/python"  # Required: the pre-commit hook otherwise queries its own env.
-python-version = "3.11"
-project-includes = ["src", "tests/test_mcp_catalog.py", "tests/test_mcp_server.py"]
-preset = "all"  # Every error kind at error severity.
-enabled-ignores = ["pyrefly"]  # Only `# pyrefly: ignore[kind]` suppresses; `# type: ignore` does not.
+skip-magic-trailing-comma = true
 
 [tool.pytest.ini_options]
-addopts = "-ra --strict-markers --strict-config --import-mode=importlib -m 'not integration'"
+addopts = "-ra --strict-markers --strict-config --import-mode=importlib"
 testpaths = ["tests"]
-xfail_strict = true  # An xfail that starts passing is a failure, not a silent pass.
-filterwarnings = [
-    "error",  # pandas 3 chained assignment only warns; the lost write is otherwise invisible.
-    # Add narrow, dated `ignore::` entries with a reason for third-party
-    # deprecations you do not control. Never widen this back to "default".
-]
-markers = [
-    "integration: needs a real database, container, or network; excluded from the default run",
-]
-asyncio_mode = "auto"
-
-[tool.coverage.run]
-branch = true  # Statement coverage hides the untaken half of every condition.
-source = ["src"]  # Set to the package directory; coverage of tests/ is noise.
-
-[tool.coverage.report]
-show_missing = true
-skip_covered = true
-exclude_also = [
-    "if TYPE_CHECKING:",
-    "raise NotImplementedError",
-    "@overload",
-]
-# Deliberately no fail_under: coverage is a diagnostic here, not a CI gate.
+xfail_strict = true
+filterwarnings = ["error"]

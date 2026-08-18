@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Pack Skillbook's portable Skill Manager source and replace the Nexus zip.
+# Pack Skillbook's portable Agent Skills and replace the Nexus zip.
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -16,8 +16,8 @@ usage() {
   cat <<'EOF'
 Usage: publish-source.sh [--dry-run] [--require-validate] [--url URL]
 
-Pack skill-manager.json and every component path it references, then replace
-the Skillbook zip on Nexus (DELETE, then PUT — the files repo is ALLOW_ONCE).
+Pack skill-manager.json and its Agent Skill packages, then replace the Skillbook
+zip on Nexus (DELETE, then PUT — the files repo is ALLOW_ONCE).
 
   --dry-run             Pack and validate only. Do not upload.
   --require-validate    Fail if validate-source is not available.
@@ -104,10 +104,16 @@ for package in packages:
         continue
     for component in components:
         if not isinstance(component, dict):
-            continue
+            raise SystemExit("skill-manager.json components must be objects")
+        if component.get("kind") != "skill":
+            raise SystemExit("skill-manager.json may contain only skill components")
         path = component.get("path")
         if isinstance(path, str) and path.strip():
+            if not path.startswith("skills/"):
+                raise SystemExit(f"skill component path must be under skills/: {path}")
             paths.add(path)
+        else:
+            raise SystemExit("skill components must declare a path")
 if not paths:
     raise SystemExit("skill-manager.json declares no component paths")
 print("\n".join(sorted(paths)))

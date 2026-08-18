@@ -1,6 +1,6 @@
 # Working in this repo
 
-This is a library of Agent Skills (agentskills.io format) and the single
+This is a library of plain Agent Skills (agentskills.io format) and the single
 source of truth for skills on this machine. The canonical source is
 `skills/<name>/`. Skill Manager installs namespaced copies
 (`~/.agents/skills/skillbook-*`, `~/.claude/skills/skillbook-*`) from the
@@ -11,16 +11,10 @@ Rules:
 - **Added, renamed, or removed a skill?** Update `skill-manager.json` in
   the same change: every `skills/<name>/` directory needs a standalone v2
   skill package, and any optional bundle of those skills must list that
-  component. Plugin-layout skills under `plugins/<plugin>/skills/` appear
-  only in that plugin's mixed package — not as their own card and not in
-  an extra skills-only bundle. Then run `./scripts/publish-source.sh` and
+  component. Then run `./scripts/publish-source.sh` and
   refresh/update Skillbook in Skill Manager. Agents do not see an edit
   until that snapshot is published and the app updates. Reload the agent
   after a new skill or a frontmatter change.
-- **Added, renamed, or removed an MCP server?** Put a portable Agent
-  Plugins 1.0.0 document under `mcp/` (bare `PATH` command, no
-  `${PLUGIN_ROOT}` / `${PLUGIN_DATA}`), add a standalone `mcpServer`
-  package, and update any MCP or mixed bundle that should include it.
 - **Creating or changing a skill?** Follow `skills/jacob-create-skill/SKILL.md`
   — it is the house process (clarify → scaffold → draft → validate).
 - Every skill must pass

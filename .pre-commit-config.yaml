@@ -21,8 +21,3 @@ repos:
     rev: 0.12.1   # keep in sync with the uv version the repo is built with
     hooks:
       - id: uv-lock   # fails the commit if pyproject.toml changed without uv.lock
-
-  - repo: https://github.com/facebook/pyrefly-pre-commit
-    rev: 1.2.0   # keep in sync with the pinned pyrefly dev dependency
-    hooks:
-      - id: pyrefly-check
