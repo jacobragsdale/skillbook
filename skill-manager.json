@@ -19,6 +19,12 @@
       "components": [{ "kind": "skill", "path": "skills/git-ops" }]
     },
     {
+      "id": "herdr",
+      "name": "Herdr",
+      "description": "Control Herdr, a terminal multiplexer for coding agents.",
+      "components": [{ "kind": "skill", "path": "skills/herdr" }]
+    },
+    {
       "id": "jacob-create-skill",
       "name": "Create agent skills",
       "description": "Create, improve, scaffold, and validate reusable agent skills.",
