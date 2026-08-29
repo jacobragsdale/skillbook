@@ -15,21 +15,16 @@ Each skill is a folder under [`skills/`](skills/) whose name matches the
 
 | Skill | Purpose |
 | --- | --- |
-| [`capture-app-context`](skills/capture-app-context/SKILL.md) | Discover surrounding application operations and create source-attributed repo-scoped context skills. |
 | [`git-ops`](skills/git-ops/SKILL.md) | Keep solo repositories on `main`, commit at working checkpoints, push after each commit, and finish clean. |
 | [`herdr`](skills/herdr/SKILL.md) | Control Herdr panes, tabs, workspaces, and other agents from a Herdr-managed session. Vendored from [herdr v0.8.2](https://github.com/herdrdev/herdr/blob/v0.8.2/skills/herdr/SKILL.md). |
 | [`jacob-create-skill`](skills/jacob-create-skill/SKILL.md) | Create, improve, scaffold, and validate reusable agent skills. |
 | [`jacob-home-server`](skills/jacob-home-server/SKILL.md) | Operate the home server: Docker stacks, SOPS secrets, deployments, backups, media, networking, and recovery. |
-| [`mermaid`](skills/mermaid/SKILL.md) | Create and render viewer-focused Mermaid engineering diagrams. |
 | [`python-standards`](skills/python-standards/SKILL.md) | Apply high-integrity Python, Pydantic, typing, pandas, async, performance, uv, Ruff, and ty standards. |
 | [`python-testing`](skills/python-testing/SKILL.md) | Design and review pytest tests, fixtures, and pandas test data. |
-| [`releases`](skills/releases/SKILL.md) | Maintain local release records backed by live Azure Repos evidence. This skill is explicit-only. |
 | [`typescript-standards`](skills/typescript-standards/SKILL.md) | Apply strict TypeScript, Angular, ESLint, template, API, async, and runtime-validation standards. |
 | [`write-diataxis-docs`](skills/write-diataxis-docs/SKILL.md) | Write and audit technical documentation as tutorials, how-to guides, reference, or explanation. |
 
-Skills are model-invocable by default through their descriptions. The
-`releases` skill is deliberately manual-only because it reads and writes local
-release records and requires an Azure DevOps preflight.
+Skills are model-invocable by default through their descriptions.
 
 ## Publish the skills
 
@@ -79,15 +74,15 @@ material in `references/` and reusable files in `assets/`.
 
 ## Verify changes
 
-Run every test file after changing skills or tooling:
+Run a changed skill's validator:
 
 ```bash
-for test_file in tests/*.py; do uv run "$test_file"; done
+uv run skills/jacob-create-skill/scripts/validate_skill.py skills/<name>
 ```
 
-For a skill change, also run its validator. For a new, renamed, or removed
-skill, update `skill-manager.json` and publish the refreshed artifact. The full
-workflow is documented in [`AGENTS.md`](AGENTS.md).
+For a new, renamed, or removed skill, update `skill-manager.json` and publish
+the refreshed artifact. The full workflow is documented in
+[`AGENTS.md`](AGENTS.md).
 
 ## Repository layout
 
@@ -98,8 +93,6 @@ skills/<name>/references/    # optional on-demand documentation
 skills/<name>/assets/        # optional reusable templates or files
 skill-manager.json           # skills-only artifact manifest
 scripts/publish-source.sh    # packs the skills and replaces the Nexus artifact
-tests/                       # skill and packaging regression tests
-rules/                       # always-on rules referenced by repo instructions
 AGENTS.md                    # repository workflow and maintenance rules
 ```
 

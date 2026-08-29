@@ -1,6 +1,0 @@
-interface:
-  display_name: "Releases"
-  short_description: "Track releases with Azure Repos evidence"
-  default_prompt: "Use $releases to review my active software releases and flag delivery gaps."
-policy:
-  allow_implicit_invocation: false

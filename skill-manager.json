@@ -7,12 +7,6 @@
   },
   "packages": [
     {
-      "id": "capture-app-context",
-      "name": "Capture app context",
-      "description": "Discover surrounding application operations and create repo-scoped context skills.",
-      "components": [{ "kind": "skill", "path": "skills/capture-app-context" }]
-    },
-    {
       "id": "git-ops",
       "name": "Git operations",
       "description": "Keep solo repositories on main, commit at working checkpoints, and finish clean.",
@@ -37,12 +31,6 @@
       "components": [{ "kind": "skill", "path": "skills/jacob-home-server" }]
     },
     {
-      "id": "mermaid",
-      "name": "Mermaid diagrams",
-      "description": "Create and render viewer-focused Mermaid engineering diagrams.",
-      "components": [{ "kind": "skill", "path": "skills/mermaid" }]
-    },
-    {
       "id": "python-standards",
       "name": "Python standards",
       "description": "Apply high-integrity Python, Pydantic, typing, pandas, async, uv, Ruff, and ty standards.",
@@ -53,12 +41,6 @@
       "name": "Python testing",
       "description": "Design and review pytest tests, fixtures, and pandas test data.",
       "components": [{ "kind": "skill", "path": "skills/python-testing" }]
-    },
-    {
-      "id": "releases",
-      "name": "Releases",
-      "description": "Maintain local release records backed by live Azure Repos evidence.",
-      "components": [{ "kind": "skill", "path": "skills/releases" }]
     },
     {
       "id": "typescript-standards",
@@ -79,15 +61,6 @@
       "components": [
         { "kind": "skill", "id": "python-standards", "path": "skills/python-standards" },
         { "kind": "skill", "id": "python-testing", "path": "skills/python-testing" }
-      ]
-    },
-    {
-      "id": "documentation",
-      "name": "Documentation",
-      "description": "Mermaid diagrams and Diátaxis documentation together.",
-      "components": [
-        { "kind": "skill", "id": "mermaid", "path": "skills/mermaid" },
-        { "kind": "skill", "id": "write-diataxis-docs", "path": "skills/write-diataxis-docs" }
       ]
     }
   ]

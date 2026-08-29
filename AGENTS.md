@@ -20,8 +20,6 @@ Rules:
 - Every skill must pass
   `uv run skills/jacob-create-skill/scripts/validate_skill.py skills/<name>`
   before commit. Treat warnings as decisions, not noise.
-- Run the test suite (`uv run tests/<file>.py` for each file in `tests/`)
-  before committing changes to skills or tooling.
 - Skill descriptions are directive triggers: capability and top keywords in
   the first sentence (~80 chars), then "Use when …" with an "even if …"
   clause. The validator enforces the shape.
