@@ -51,7 +51,7 @@
     {
       "id": "python-testing",
       "name": "Python testing",
-      "description": "Design and review pytest tests, fixtures, and pandas/Pandera test data.",
+      "description": "Design and review pytest tests, fixtures, and pandas test data.",
       "components": [{ "kind": "skill", "path": "skills/python-testing" }]
     },
     {

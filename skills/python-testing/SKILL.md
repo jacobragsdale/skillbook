@@ -1,6 +1,6 @@
 ---
 name: python-testing
-description: "Design and review Python tests: pytest, fixtures, pandas and Pandera test data. Use when writing, reviewing, or debugging Python tests or coverage — even if unrequested. Not for implementation, typing, or Ruff config; use python-standards."
+description: "Design and review Python tests: pytest, fixtures, pandas test data. Use when writing, reviewing, or debugging Python tests or coverage — even if unrequested. Not for implementation, typing, or Ruff config; use python-standards."
 ---
 
 # Python testing house standard
@@ -49,16 +49,16 @@ batch job:
 
 ### Tier 3 — boundary reject paths
 
-A boundary model's value is what it refuses. Per Pydantic model or Pandera
+A boundary model's value is what it refuses. Per Pydantic model or frame
 schema: one test that valid input passes, then one each for wrong dtype, null
 in a non-nullable column, duplicate composite key, and an out-of-domain value.
 Test that *this schema* says what you think it says; never test that Pydantic
-or Pandera works.
+or pandas works.
 
 ### Tier 4 — gateway contract tests
 
 Mark these `integration`. Call the real query, stored procedure, or endpoint
-and validate the result with the same Pandera schema production uses. Assert
+and validate the result with the same frame schema production uses. Assert
 the shape — columns, dtypes, nullability — and nothing about the values, which
 change daily. This is what converts "someone altered the stored procedure"
 into a red test instead of a 3am pipeline failure, and it is the tier most
@@ -137,7 +137,7 @@ command, so a default test run never needs a database or a network.
 1. Build frames in code from a per-schema builder — five rows or fewer, and
    state only the fields the test is about. A test whose input is a 40-column
    extract tells the reader nothing about what is being tested.
-2. Derive the builder's dtypes from the Pandera schema so fixtures cannot
+2. Derive the builder's dtypes from the frame schema so fixtures cannot
    drift from the contract, and assert once that the builder's output
    validates.
 3. Compare frames with `assert_frame_equal` after sorting and
@@ -155,7 +155,7 @@ command, so a default test run never needs a database or a network.
 
 ```python
 _TRADE_DEFAULTS = {"account_id": "A1", "trade_id": "T1", "quantity": 10, "price_micros": 1_250_000}
-_TRADE_DTYPES = {name: column.dtype.type for name, column in TRADES_SCHEMA.columns.items()}
+_TRADE_DTYPES = TRADES_SCHEMA.dtypes  # the boundary schema owns the dtype mapping
 
 
 def trades_frame(*rows: Mapping[str, object]) -> pd.DataFrame:
@@ -164,12 +164,12 @@ def trades_frame(*rows: Mapping[str, object]) -> pd.DataFrame:
 
 
 def test_builder_produces_a_frame_the_schema_accepts() -> None:
-    TRADES_SCHEMA.validate(trades_frame())  # one line; guards every other test against fixture drift
+    validate_frame(trades_frame(), TRADES_SCHEMA)  # one line; guards every other test against fixture drift
 
 
 def test_zero_quantity_trades_are_rejected() -> None:
-    with pytest.raises(pa.errors.SchemaErrors):
-        TRADES_SCHEMA.validate(trades_frame({"quantity": 0}), lazy=True)
+    with pytest.raises(FrameSchemaError):
+        validate_frame(trades_frame({"quantity": 0}), TRADES_SCHEMA)
 ```
 
 Read `references/data-fixtures.md` before writing golden-file comparisons,

@@ -22,7 +22,7 @@ Each skill is a folder under [`skills/`](skills/) whose name matches the
 | [`jacob-home-server`](skills/jacob-home-server/SKILL.md) | Operate the home server: Docker stacks, SOPS secrets, deployments, backups, media, networking, and recovery. |
 | [`mermaid`](skills/mermaid/SKILL.md) | Create and render viewer-focused Mermaid engineering diagrams. |
 | [`python-standards`](skills/python-standards/SKILL.md) | Apply high-integrity Python, Pydantic, typing, pandas, async, performance, uv, Ruff, and ty standards. |
-| [`python-testing`](skills/python-testing/SKILL.md) | Design and review pytest tests, fixtures, and pandas/Pandera test data. |
+| [`python-testing`](skills/python-testing/SKILL.md) | Design and review pytest tests, fixtures, and pandas test data. |
 | [`releases`](skills/releases/SKILL.md) | Maintain local release records backed by live Azure Repos evidence. This skill is explicit-only. |
 | [`typescript-standards`](skills/typescript-standards/SKILL.md) | Apply strict TypeScript, Angular, ESLint, template, API, async, and runtime-validation standards. |
 | [`write-diataxis-docs`](skills/write-diataxis-docs/SKILL.md) | Write and audit technical documentation as tutorials, how-to guides, reference, or explanation. |

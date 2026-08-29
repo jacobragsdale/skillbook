@@ -8,7 +8,6 @@ upstream payloads, property-based invariants, or a real database.
 - [Recorded fixtures from APIs and stored procedures](#recorded-fixtures-from-apis-and-stored-procedures)
 - [Golden files](#golden-files)
 - [Property-based tests with Hypothesis](#property-based-tests-with-hypothesis)
-- [Synthesizing frames from a Pandera schema](#synthesizing-frames-from-a-pandera-schema)
 - [The integration tier](#the-integration-tier)
 - [HTTP and async](#http-and-async)
 
@@ -91,16 +90,6 @@ When a property test fails, Hypothesis prints a minimal counterexample. Copy it
 into a permanent `parametrize` case — the property test finds the bug once, the
 example test keeps it fixed.
 
-## Synthesizing frames from a Pandera schema
-
-`SCHEMA.example(size=5)` and `SCHEMA.strategy()` generate conforming frames;
-both need the `pandera[strategies]` extra, which pulls in Hypothesis.
-
-Use them to feed a property test, or to prove a schema is satisfiable at all.
-Do not use them as ordinary fixtures: the values are arbitrary, so the test
-stops documenting its own case, and generation is slow enough to notice in a
-suite. Hand-built frames from the builder in SKILL.md stay the default.
-
 ## The integration tier
 
 Every test here carries `@pytest.mark.integration` and is excluded from the
@@ -143,7 +132,7 @@ read-only contract tests.
 @pytest.mark.integration
 def test_trades_proc_still_returns_the_agreed_contract(dev_connection: Connection) -> None:
     frame = fetch_trades(dev_connection, partition=date(2026, 7, 1))
-    TRADES_SCHEMA.validate(frame, lazy=True)  # the production schema, unmodified
+    validate_frame(frame, TRADES_SCHEMA)  # the production schema, unmodified
 ```
 
 Assert nothing about the values. Row counts and prices change daily; the
