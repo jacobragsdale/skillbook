@@ -6,7 +6,7 @@ file with optional scripts, references, assets, and client metadata.
 
 [`skills/`](skills/) is the source of truth. Edit a canonical skill here, never
 an installed copy. The repository contains no skill-serving service or other
-runtime: agents receive ordinary skill directories through Skill Manager.
+runtime: agents receive ordinary skill directories through Agent Plugins.
 
 ## Current skills
 
@@ -28,7 +28,7 @@ Skills are model-invocable by default through their descriptions.
 
 ## Publish the skills
 
-Skill Manager reads [`skill-manager.json`](skill-manager.json), whose packages
+Agent Plugins reads [`agent-plugins.json`](agent-plugins.json), whose packages
 contain only `skill` components under `skills/`. Every skill is available as a
 standalone package; related skills may also appear together in an optional
 bundle. Installed skills are namespaced copies (`skillbook-<name>`), not live
@@ -49,7 +49,7 @@ a curl prompt.
 The script rejects non-skill components, zips the manifest and referenced skill
 directories, replaces the existing Nexus artifact, and verifies the anonymous
 download against the local SHA-256 checksum. After publishing, refresh
-Skillbook in Skill Manager and update already-installed packages. Reload an
+Skillbook in Agent Plugins and update already-installed packages. Reload an
 agent after adding a skill or changing frontmatter.
 
 ## Create or update a skill
@@ -80,7 +80,7 @@ Run a changed skill's validator:
 uv run skills/jacob-create-skill/scripts/validate_skill.py skills/<name>
 ```
 
-For a new, renamed, or removed skill, update `skill-manager.json` and publish
+For a new, renamed, or removed skill, update `agent-plugins.json` and publish
 the refreshed artifact. The full workflow is documented in
 [`AGENTS.md`](AGENTS.md).
 
@@ -91,7 +91,7 @@ skills/<name>/SKILL.md       # canonical skill instructions
 skills/<name>/scripts/       # optional self-contained uv scripts
 skills/<name>/references/    # optional on-demand documentation
 skills/<name>/assets/        # optional reusable templates or files
-skill-manager.json           # skills-only artifact manifest
+agent-plugins.json           # skills-only artifact manifest
 scripts/publish-source.sh    # packs the skills and replaces the Nexus artifact
 AGENTS.md                    # repository workflow and maintenance rules
 ```

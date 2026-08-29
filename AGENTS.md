@@ -2,17 +2,17 @@
 
 This is a library of plain Agent Skills (agentskills.io format) and the single
 source of truth for skills on this machine. The canonical source is
-`skills/<name>/`. Skill Manager installs namespaced copies
+`skills/<name>/`. Agent Plugins installs namespaced copies
 (`~/.agents/skills/skillbook-*`, `~/.claude/skills/skillbook-*`) from the
 Nexus zip — never edit those copies, edit them here.
 
 Rules:
 
-- **Added, renamed, or removed a skill?** Update `skill-manager.json` in
+- **Added, renamed, or removed a skill?** Update `agent-plugins.json` in
   the same change: every `skills/<name>/` directory needs a standalone v2
   skill package, and any optional bundle of those skills must list that
   component. Then run `./scripts/publish-source.sh` and
-  refresh/update Skillbook in Skill Manager. Agents do not see an edit
+  refresh/update Skillbook in Agent Plugins. Agents do not see an edit
   until that snapshot is published and the app updates. Reload the agent
   after a new skill or a frontmatter change.
 - **Creating or changing a skill?** Follow `skills/jacob-create-skill/SKILL.md`

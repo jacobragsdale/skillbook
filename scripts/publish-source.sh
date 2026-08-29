@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-MANIFEST="$REPO/skill-manager.json"
+MANIFEST="$REPO/agent-plugins.json"
 DEFAULT_URL="https://repo.ragsdale.dev/repository/files/sources/skillbook-latest.zip"
 MAX_BYTES=$((50 * 1024 * 1024))
 KEYCHAIN_SERVICE="repo.ragsdale.dev"
@@ -16,7 +16,7 @@ usage() {
   cat <<'EOF'
 Usage: publish-source.sh [--dry-run] [--require-validate] [--url URL]
 
-Pack skill-manager.json and its Agent Skill packages, then replace the Skillbook
+Pack agent-plugins.json and its Agent Skill packages, then replace the Skillbook
 zip on Nexus (DELETE, then PUT — the files repo is ALLOW_ONCE).
 
   --dry-run             Pack and validate only. Do not upload.
@@ -63,7 +63,7 @@ done
 }
 
 python3 -c 'import json, pathlib, sys; json.load(pathlib.Path(sys.argv[1]).open(encoding="utf-8"))' "$MANIFEST" || {
-  echo "publish-source.sh: skill-manager.json is not valid JSON" >&2
+  echo "publish-source.sh: agent-plugins.json is not valid JSON" >&2
   exit 1
 }
 
@@ -95,7 +95,7 @@ manifest = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 paths: set[str] = set()
 packages = manifest.get("packages")
 if not isinstance(packages, list):
-    raise SystemExit("skill-manager.json packages must be a list")
+    raise SystemExit("agent-plugins.json packages must be a list")
 for package in packages:
     if not isinstance(package, dict):
         continue
@@ -104,9 +104,9 @@ for package in packages:
         continue
     for component in components:
         if not isinstance(component, dict):
-            raise SystemExit("skill-manager.json components must be objects")
+            raise SystemExit("agent-plugins.json components must be objects")
         if component.get("kind") != "skill":
-            raise SystemExit("skill-manager.json may contain only skill components")
+            raise SystemExit("agent-plugins.json may contain only skill components")
         path = component.get("path")
         if isinstance(path, str) and path.strip():
             if not path.startswith("skills/"):
@@ -115,7 +115,7 @@ for package in packages:
         else:
             raise SystemExit("skill components must declare a path")
 if not paths:
-    raise SystemExit("skill-manager.json declares no component paths")
+    raise SystemExit("agent-plugins.json declares no component paths")
 print("\n".join(sorted(paths)))
 PY
 )
@@ -167,7 +167,7 @@ copy_portable_path() {
   )
 }
 
-cp -- "$MANIFEST" "$STAGE/skill-manager.json"
+cp -- "$MANIFEST" "$STAGE/agent-plugins.json"
 for rel in "${COMPONENT_PATHS[@]}"; do
   case "$rel" in
     /* | .. | ../* | */.. | */../*)
@@ -183,8 +183,8 @@ done
   zip -r -X -q "$ZIP_PATH" .
 )
 
-[[ -f "$STAGE/skill-manager.json" ]] || {
-  echo "publish-source.sh: staged tree is missing skill-manager.json" >&2
+[[ -f "$STAGE/agent-plugins.json" ]] || {
+  echo "publish-source.sh: staged tree is missing agent-plugins.json" >&2
   exit 1
 }
 
@@ -194,7 +194,7 @@ if [[ "$ZIP_SIZE" -le 0 ]]; then
   exit 1
 fi
 if [[ "$ZIP_SIZE" -gt "$MAX_BYTES" ]]; then
-  echo "publish-source.sh: zip is ${ZIP_SIZE} bytes; Skill Manager limit is ${MAX_BYTES}" >&2
+  echo "publish-source.sh: zip is ${ZIP_SIZE} bytes; Agent Plugins limit is ${MAX_BYTES}" >&2
   exit 1
 fi
 
@@ -206,7 +206,7 @@ find_validate_source() {
     return 0
   fi
   local sibling
-  sibling="$(cd "$REPO/.." && pwd)/skill-manager/src-tauri/target"
+  sibling="$(cd "$REPO/.." && pwd)/agent-plugins/src-tauri/target"
   local candidate
   for candidate in "$sibling/release/validate-source" "$sibling/debug/validate-source"; do
     if [[ -x "$candidate" ]]; then
@@ -295,4 +295,4 @@ fi
 
 echo "published ${DEST_URL}"
 echo "sha256 ${CHECKSUM}"
-echo "Refresh Skillbook in Skill Manager, then Update installed packages."
+echo "Refresh Skillbook in Agent Plugins, then Update installed packages."
