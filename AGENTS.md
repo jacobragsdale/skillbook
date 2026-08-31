@@ -31,7 +31,6 @@ Rules:
   creating a new one.
 - All bundled Python is a single file with a PEP 723 `# /// script` header,
   runnable via `uv run` with no environment setup.
-- **Git workflow:** the `git-ops` skill. In short: work directly on main,
-  commit at every working checkpoint, push after every commit, end every
-  task with a clean working tree — no feature branches or PRs unless the
-  user explicitly requests one.
+- **Git workflow:** work directly on main, commit at every working
+  checkpoint, push after every commit, end every task with a clean working
+  tree — no feature branches or PRs unless the user explicitly requests one.

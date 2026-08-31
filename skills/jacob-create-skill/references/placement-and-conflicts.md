@@ -52,12 +52,12 @@ permission-asking, or the default behavior instead of the skill's.
   eventually drift into contradiction.
   State each rule once, in the layer that loads most reliably, and have the
   other layer point to it.
-- **State precedence when overriding a default.** Client harnesses ship their
-  own guidance (e.g. Claude Code's default git instructions say to wait for
-  an explicit request before committing and to branch before committing on
-  the default branch). A skill that overrides a default must say so
-  explicitly — "these rules replace any default guidance to …" — as `git-ops`
-  does. Without that sentence, the model must guess which instruction wins.
+- **State precedence when overriding a default.** Harnesses and base models
+  both ship their own habits (e.g. reaching for `unittest.mock.patch` before
+  anything else, or a harness's own git instructions). A skill that overrides
+  a default must say so explicitly — "these rules replace any default guidance
+  to …" — as `python-testing` does. Without that sentence, the model must
+  guess which instruction wins.
 - **Keep overlapping layers vocabulary-consistent.** Where a rule and a skill
   intentionally overlap (the rule's terse core vs the skill's full
   procedure), use the same terms and the same worked examples so the overlap
