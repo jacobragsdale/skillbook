@@ -133,8 +133,8 @@ service facts in the home-server repo rather than copying them here.
   even though `router-openwrt.sh` now writes named sections. Match the `name`
   option and delete anonymous indices from highest to lowest.
 - Projects listed as “own repo” in `docs/services.md` are changed and deployed
-  from their own Mac repository. Do not migrate their compose files into this
-  repo merely to operate them.
+  from their own checkout under `~/dev` on the server. Do not migrate their
+  compose files into this repo merely to operate them.
 
 ## Service-specific guardrails
 
