@@ -6,13 +6,14 @@ description: "Operates Jacob's home server: Docker stacks, SOPS secrets, deploys
 # Jacob's home server
 
 Operate `desktop` at `100.103.224.99` over Tailscale as user `jacob`. Treat
-`~/Development/home-server` on the Mac as the source of truth and
-`~/home-server` on the server as an rsync target. The server never pulls from
-GitHub; a verified commit and push are the configuration backup.
+the git checkout (`~/dev/home-server` on the Mac or on the server) as the
+source of truth and `~/home-server` on the server as its rsync target;
+`scripts/deploy.sh` syncs it there from either machine. The server never
+pulls from GitHub; a verified commit and push are the configuration backup.
 
 ## Start every task
 
-1. Work from the Mac repository. Check the worktree with `git status --short`
+1. Work from the git checkout. Check the worktree with `git status --short`
    before editing and preserve unrelated changes.
 2. Read `README.md`, `docs/services.md`, and the files that own the requested
    behavior. Read `docs/state-and-backups.md` for persistence or recovery
@@ -35,9 +36,9 @@ VM operation.
 ## Safety boundaries
 
 - Never edit compose files, scripts, units, dotfiles, or declared host config
-  on the server. Edit the Mac repo and apply it with the repo scripts; deploy
+  on the server. Edit the checkout and apply it with the repo scripts; deploy
   uses `rsync --delete`, so remote edits disappear.
-- Every deploy syncs the entire clean, committed Mac tree. A stack argument
+- Every deploy syncs the entire clean, committed checkout. A stack argument
   limits which Compose projects are applied, not which files rsync copies, and
   `deploy.sh` refuses staged, unstaged, or untracked changes. Review, commit,
   and push the complete intended artifact before deploying it unless Jacob
