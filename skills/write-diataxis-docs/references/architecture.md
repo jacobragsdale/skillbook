@@ -1,13 +1,6 @@
 # Documentation architecture, audits, and quality
 
-This file covers:
-- how to split content into modes
-- how to structure a docs set
-- how to handle pages that fit no single mode
-- how to improve docs iteratively
-- what "quality" means
-
-It was reviewed against diataxis.fr and its repository on 2026-09-22.
+Reviewed against diataxis.fr and its repository on 2026-09-22.
 
 ## Contents
 
@@ -30,7 +23,7 @@ It was reviewed against diataxis.fr and its repository on 2026-09-22.
 - Adjacent modes blur along a shared trait:
   - Tutorial and how-to guide both guide action.
   - How-to guide and reference both serve work.
-  - Reference and explanation are both theory.
+  - Reference and explanation both inform cognition.
   - Explanation and tutorial both serve study.
 
   When two modes are blurring, ask which trait they do not share.
@@ -61,9 +54,8 @@ Composite pages are fine when each section stays loyal to one mode.
   rationale on separate pages.
 - **Quick start:** a short tutorial for readers who will skim. Keep it to one
   path with visible results, and link out for everything else.
-- **Troubleshooting:** a how-to guide whose goal is getting a failure fixed:
-  symptom, cause, then resolution. An error-code catalogue is reference. See
-  `how-to-guides.md`.
+- **Troubleshooting:** a how-to guide. See
+  [how-to-guides.md](how-to-guides.md#troubleshooting-guides).
 - **Changelog and release notes:** a dated, neutral record, grouped as added,
   changed, deprecated, removed, fixed, and security. Put each breaking change
   first, with a link to a migration how-to guide. Follow the project's
@@ -72,9 +64,8 @@ Composite pages are fine when each section stays loyal to one mode.
   a "how" in a how-to guide, a "what" in reference, a "why" in explanation. If
   an FAQ exists, keep the answers short and link to the page that owns each
   one.
-- **Generated API reference:** necessary but not sufficient. Hand-write
-  reference for cross-cutting behavior and constraints, and add how-to guides
-  and explanation around it.
+- **Generated API reference:** see [reference.md](reference.md). Surround it
+  with how-to guides and explanation.
 - **Agent instruction files (`AGENTS.md`, `CLAUDE.md`):** how-to and reference
   for a competent reader. No tutorial content.
 - **Examples and cookbook galleries:** each example is a how-to guide when it
@@ -128,7 +119,7 @@ itself guarantee accuracy, visual design, or accessibility.
   Judge deep quality with the fresh-reader test in `SKILL.md`, or by watching
   a representative reader.
 
-For runnable docs:
+To verify runnable docs:
 - Start from the declared prerequisites in a clean or representative
   environment.
 - Execute the steps exactly as written.

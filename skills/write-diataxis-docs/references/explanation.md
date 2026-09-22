@@ -7,8 +7,7 @@ one topic, or to one real or implied "why" question.
 
 ## Required shape
 
-1. Name the topic or question. The title should read naturally after an
-   implied "About…".
+1. Name the topic or question (see Title).
 2. Establish the context and the concepts the reader needs.
 3. Give the reasons: design decisions, constraints, history, and trade-offs.
 4. Connect the topic to neighboring ideas and consequences.

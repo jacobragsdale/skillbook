@@ -20,7 +20,7 @@ product's features.
    recover (house rule).
 6. End at the result, with a way to confirm it worked.
 
-## Not just a procedure
+## Beyond procedures
 
 A how-to guide can fork, overlap other guides, and have more than one entry or
 exit point. It can cover basic procedures: "basic" versus "advanced" is not what
@@ -60,7 +60,9 @@ Put a catalogue of error codes in reference and link to it.
 - "If you want x, do y. To achieve w, do z."
 - "Refer to the x reference for a full list of options."
 
-**Title:** state the goal, such as "How to rotate the signing key". A gerund
+## Title
+
+State the goal, such as "How to rotate the signing key". A gerund
 with no goal ("Rotating keys") is weak, and a bare noun ("Signing keys") is
 worst. Drop "How to" only when the section already implies it.
 
@@ -68,8 +70,7 @@ worst. Drop "How to" only when the section already implies it.
 
 - Is the goal a real user outcome rather than a product operation?
 - Does the guide assume competence instead of teaching basics?
-- Can the user adapt the steps to realistic variations?
-- Are hazards, verification, and recovery included where a step can fail?
+- Does it handle realistic variations, hazards, verification, and recovery?
 - Have teaching, option dumps, and background been moved out and linked?
 
 ## Skeleton

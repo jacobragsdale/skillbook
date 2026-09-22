@@ -25,7 +25,7 @@ the cut pass.
 
 | Tell | Fix |
 |---|---|
-| Announcing the page: "In this guide, we'll explore…", "This section describes…" | Start with the content. |
+| Describing the page instead of delivering it: "In this guide, we'll explore…", "This section describes…" | Start with the content. A one-sentence goal ("In this tutorial, we will build…") is content. |
 | A first sentence that restates the heading | Make it add a fact, the goal, or the answer. |
 | A closing "Summary", "Conclusion", or "Key takeaways" that repeats the page | Delete it, or replace it with next-step links. |
 | Significance padding: "plays a crucial role", "it's important to note", "it's worth mentioning" | State the fact. |
@@ -39,9 +39,9 @@ the cut pass.
 | Vague attribution: "experts recommend", "it is widely considered" | Cite the source, or cut the claim. |
 | Time-bound words: new, now, currently, recently, "as of this writing" | Write timelessly, or give the version. |
 | Promised future features | Link to the tracking issue, or leave it out. |
-| Bold used for emphasis, emoji, horizontal rules between sections | Remove them. Bold is for UI labels. |
+| Bold for emphasis mid-sentence, emoji, horizontal rules between sections | Remove them. Bold marks UI labels and, where the local docs use them, list lead-ins. |
 | Em dashes in every paragraph | Use commas, parentheses, or two sentences. |
-| Headings over a single paragraph, or a heading for every thought | Merge them into prose under a broader heading. |
+| A heading for every thought or paragraph | Merge them into prose under a broader heading. |
 | Bullet fragments where the reasoning should connect | Write sentences in a paragraph. |
 | Tables of items that have only one attribute | Use a list or a sentence. |
 | Invented flags, options, or APIs, or bugs documented as features | Check against source; mark `TODO: verify`. |
@@ -52,8 +52,8 @@ the cut pass.
 ## Voice and grammar
 
 - Address the reader as "you". Use the imperative for instructions.
-- Use active voice and present tense: "The server returns 404", not "A 404
-  will be returned".
+  Tutorials may use a shared "we" (see `tutorials.md`).
+- Use present tense: "The server returns 404", not "will return".
 - Use contractions if the local docs do.
 - Put the verb early. Cut unneeded "you can", "there is", and "there are".
 - Prefer plain words:
@@ -68,12 +68,12 @@ the cut pass.
 
 ## Headings, lists, tables, and callouts
 
-- Use sentence-case headings. Do not skip levels. Do not stack a heading
-  directly under another heading with nothing between them.
+- Use sentence-case headings. Do not stack a heading directly under another
+  heading with nothing between them.
 - Put a heading's keyword in its first two words. Readers scan the left edge.
-- Use numbered lists for sequences, and bullets for three or more parallel
-  items with parallel grammar. Introduce a list with a complete sentence or
-  with "To <goal>:".
+- Use numbered lists for sequences, and bullets for parallel items with
+  parallel grammar. Introduce a list with a complete sentence, "To <goal>:",
+  or a conventional label such as "Prerequisites:".
 - Use tables when each row has two or more attributes. Keep cell text short;
   a cell that needs a paragraph belongs in a heading-and-field block.
 - Callouts (note, warning, tip): at most one per screen. A warning is for data
@@ -82,9 +82,7 @@ the cut pass.
 
 ## Code, commands, and placeholders
 
-- Put every command, path, flag, key, and literal value in code formatting.
-- Tag every fence with its language (`sh`, `python`, `yaml`, `text` for
-  output).
+- Tag output fences as `text` so they are not highlighted as code.
 - Put the command and its output in separate blocks. Show output only when the
   reader needs something from it.
 - Don't show a prompt symbol (`$`) unless the local docs do. It breaks
@@ -98,9 +96,7 @@ the cut pass.
 
 ## Links
 
-- Write link text that makes sense out of context. Use the destination's
-  title or the task it covers. Never use "click here", "this page", or a bare
-  URL.
+- Use the destination's title, or the task it covers, as the link text.
 - Introduce cross-references with "For more information, see <link>". Link
   each target once per page, at its first relevant mention.
 - Link to the specific section anchor, not just the top of a long page.
@@ -111,10 +107,8 @@ the cut pass.
 - Stack no more than two nouns as modifiers.
 - Keep the optional "that" where it makes the grammar easier to follow.
 - Write dates unambiguously (`2026-09-22` or "22 September 2026").
-- Give every image alt text that conveys its information. Never let an image
-  or screenshot be the only place a fact lives.
-- Never rely on color or position alone ("the green button", "the box on the
-  right").
+- Never let an image or screenshot be the only place a fact lives, and never
+  identify something by color or position alone ("the green button").
 
 ## Testing docs as code
 
@@ -122,7 +116,7 @@ Choose these checks in this order: run what the repo already uses, then add the
 smallest check that proves the change.
 
 - **Code samples:**
-  - `doctest` for Python docstrings.
+  - `doctest` for examples in Python docstrings and reST.
   - `pytest-markdown-docs` or `mktestdocs` for Python fences in Markdown.
   - The project's own test runner for any other language.
 - **Links:** `lychee` checks URLs and anchors across Markdown and HTML.
@@ -140,9 +134,7 @@ smallest check that proves the change.
   summary in a blockquote, then H2 sections that list links with one-line
   descriptions. Add it only when asked, or when the site already publishes
   one.
-- `AGENTS.md`, `CLAUDE.md`, and similar files are how-to and reference for a
-  competent reader: build, test, and style commands, plus project rules.
-  Never write them as a tutorial.
+- For `AGENTS.md` and similar files, see `architecture.md`.
 
 ## Sources
 

@@ -17,7 +17,7 @@ Copy this checklist into your working notes and tick it off:
 - [ ] 2. Mode chosen per content unit; mode reference read
 - [ ] 3. Drafted in the local voice
 - [ ] 4. Cut pass done
-- [ ] 5. Commands and examples run; reader test if required
+- [ ] 5. Commands and examples run; fresh-reader test for a new tutorial or how-to
 - [ ] 6. Reported what remains unverified
 ```
 
@@ -36,9 +36,15 @@ the outcome the page must produce. Ask only when an unresolved audience or
 outcome choice would change the document's mode or scope; otherwise state the
 assumption and proceed.
 
+When sources disagree (a README versus `AGENTS.md`, or docs versus code), trust
+the running code first, then the most specific and most recent document, and
+tell the user about the conflict.
+
 Read two or three neighboring pages and adopt their heading case, person,
-admonition syntax, code-fence languages, line wrapping, and terminology. Apply
-[references/style.md](references/style.md) only where the repository is silent.
+admonition syntax, code-fence languages, line wrapping, and terminology.
+[references/style.md](references/style.md) supplies the defaults wherever the
+repository has no convention of its own. Where the two conflict, the
+repository wins.
 
 ## 2. Classify before drafting
 
@@ -54,9 +60,11 @@ Ask two questions of each content unit (page, section, or sentence):
 | Cognition + work | Reference | "What is…?" | [references/reference.md](references/reference.md) |
 | Cognition + study | Explanation | "Why…?" | [references/explanation.md](references/explanation.md) |
 
-Read the reference for every mode you are writing, and no others. Each one
-holds the required shape, the language patterns, the title form, a check, and
-a skeleton.
+Read the reference for every mode you are writing or auditing, and no others.
+Each one holds the required shape, the language patterns, the title form, a
+check, and a skeleton. In a skeleton, `<angle>` marks a slot: fill it in or
+delete it. Lines marked "(house rule)" are this skill's additions to
+Diátaxis.
 
 Classify by need, not by title or surface form. Steps alone do not make a
 tutorial: both tutorials and how-to guides give steps, and how-to guides can
@@ -91,16 +99,17 @@ A few defaults hold for every mode:
   - Use numbered steps for sequences.
   - Use tables or repeated field blocks for reference facts.
   - Use paragraphs for explanation and connective text.
-  - Use a bullet list only for three or more parallel, discrete items.
-  - Headings name the task, object, or question. Never put a heading over a
-    single short paragraph.
+  - Use a bullet list only for parallel, discrete items.
+  - Headings name the task, object, or question. Don't give every thought its
+    own heading.
 - **Examples are real.** Build commands and code from values in the codebase,
   not `foo`, `bar`, or `your-api-key-here`. Name placeholders in
   `UPPER_SNAKE_CASE` and define them right after the block. Put commands and
   their output in separate blocks.
 - **Callouts are rare.** Write prerequisites, steps, expected results, and
   links as body text. Save a warning for data loss, security exposure, or an
-  irreversible action.
+  irreversible action. Use the local admonition syntax. For Markdown rendered
+  on GitHub with no local convention, use `> [!WARNING]`.
 - **Length matches scope.** Cover what this reader needs for this need, then
   stop.
 
@@ -108,33 +117,42 @@ A few defaults hold for every mode:
 
 Reread the draft once, only to delete:
 
-- Openers that announce the page ("In this guide we will…", "This section
-  describes…"), and closing summaries, conclusions, or takeaways that repeat
-  the page.
+- Openers that describe the page instead of delivering it ("In this guide
+  we'll explore…", "This section describes…"). A one-sentence statement of
+  what a tutorial builds or a how-to guide achieves is content, not padding.
+- Closing summaries, conclusions, or takeaways that repeat the page.
 - Significance padding ("plays a crucial role", "it's important to note").
 - Marketing and ease words: seamless, powerful, robust, simply, just, easily.
 - Hedges that express no real uncertainty.
 - Emoji and bold used for emphasis.
 
-Every sentence must carry information the page does not already give. For the
-full list of tells and their fixes, see
-[references/style.md](references/style.md).
+Every sentence must carry information the page does not already give. Read
+[references/style.md](references/style.md) for this pass. It lists the full set
+of tells and their fixes.
 
 ## 5. Verify
 
 Run every documented command, code sample, and procedure from the declared
-prerequisites in a safe, representative environment. Compare the actual output
-with what the page promises. If the result differs from the page, the page is
-wrong, not the reader. Check that links and anchors resolve. When something
-cannot be run, such as production-only steps, paid services, or destructive
-operations, say exactly which parts are unverified. Never present an unrun
-sequence as tested.
+prerequisites. Compare the actual output with what the page promises. If the
+result differs from the page, the page is wrong, not the reader. Check that
+links and anchors resolve.
 
-For a new tutorial or how-to guide, test it with a fresh reader when you can
-spawn a subagent. Give the subagent only the page and the reader's declared
-starting state. Ask it to list each place where it would have to guess, and
-to answer three questions the target reader would ask. Fix the page wherever
-the subagent guessed or answered wrongly.
+Run steps with side effects in a disposable copy, such as a scratch clone,
+`git worktree`, container, or dry-run flag, not in the user's live
+environment. Ask before anything that touches shared or remote systems. If you
+replace a missing tool with a stand-in, report that step as partly verified.
+When something cannot be run at all, such as production-only steps or paid
+services, say exactly which parts are unverified. Never present an unrun
+sequence as tested. In an audit, spot-check the commands that are safe to run,
+and report the rest as unchecked.
+
+For a new tutorial or how-to guide, run a fresh-reader test with a subagent.
+Give it only the page and the reader's declared starting state, and tell it
+not to read the repository. Ask it to list each place where it would have to
+guess, and to answer three questions the target reader would ask. Fix the page
+wherever the subagent guessed or answered wrongly. Leave the `TODO: verify`
+items you have already marked. If you cannot spawn a subagent, say that the
+test was not run.
 
 ## 6. Organize and deliver
 
@@ -144,12 +162,13 @@ mode, or when auditing a docs set, read
 [references/architecture.md](references/architecture.md) first.
 
 Improve existing docs in small, publishable steps. Do not create empty category
-pages or propose a wholesale migration unless the user asks for one.
+pages or propose a wholesale migration unless the user asks for one. When you
+add or move a page, register it in the site's navigation (nav config,
+toctree, sidebar, or index) and update the links that point to it.
 
-For an audit, report one row per finding: `location → user need → current
-mode → problem → smallest repair`. Order the rows so that a wrong or unclear
-purpose comes before cosmetic issues. For authored content, deliver the
-document plus only what the user needs to act on:
+For an audit, report in the table format from `architecture.md`. For authored
+content, deliver the document plus only what the user needs to act on:
+
 - the assumptions you made
 - the `TODO: verify` items
 - the unverified steps
@@ -166,9 +185,10 @@ learner builds. It leads through one controlled run, with each step followed by
 "You should see…" and the real output. The queue appears in a single clause:
 "The job waits in the queue until a worker picks it up." The complete flag
 list becomes CLI reference, generated from `--help`. The queue rationale
-becomes an explanation page, "About the worker queue". The tutorial links to
-both from its final "Next steps", not mid-path. The report lists the tutorial
-as run end-to-end on a clean checkout, and says which flags `--help` did not
+becomes an explanation page, "The worker queue". The tutorial links to both
+instead of explaining inline: the explanation link goes after the queue
+clause, and both go under "Next steps". The report lists the tutorial as run
+end-to-end on a clean checkout, and says which flags `--help` did not
 describe.
 
 ## Bundled resources
@@ -177,9 +197,10 @@ Read each file only when its trigger applies:
 
 - `references/tutorials.md`, `how-to-guides.md`, `reference.md`,
   `explanation.md`: read the file for each mode you are writing or reviewing.
-- `references/style.md`: read when the repository has no style conventions,
-  or during the cut pass. It holds the list of tells, voice, procedure
-  mechanics, code and link conventions, and docs-testing tools.
+- `references/style.md`: read during the cut pass, and whenever the
+  repository has no convention for the point at hand. It holds the list of
+  tells, voice and grammar, code and link conventions, and docs-testing
+  tools.
 - `references/architecture.md`: read for navigation, landing pages, composite
   or out-of-mode pages, and audits. It holds the improvement loop, quality
   layers, and sources.

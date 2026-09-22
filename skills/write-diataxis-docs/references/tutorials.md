@@ -8,9 +8,8 @@ prerequisites, the tutorial is broken.
 
 ## Required shape
 
-1. Say what the learner will make or do. Do not promise what they will learn.
-   "In this tutorial, we will build…" is right. "In this tutorial you will
-   learn…" presumes an outcome the author cannot guarantee.
+1. Say what the learner will make ("In this tutorial, we will build…"), not
+   what they will learn: the author cannot guarantee learning.
 2. Declare a controlled starting state and exact prerequisites, or provide
    them yourself, for example as a sample project or a container.
 3. Lead through one concrete path in small steps, each producing a visible
@@ -50,8 +49,10 @@ dependency warnings.
 
 The tutor-and-learner "we" belongs here and nowhere else.
 
-**Title:** name what the learner builds or does ("Deploy your first
-service"), not "Introduction to…" or a bare feature name.
+## Title
+
+Name what the learner builds or does ("Deploy your first service"), not
+"Introduction to…" or a bare feature name.
 
 ## Check
 
@@ -59,8 +60,8 @@ service"), not "Introduction to…" or a bare feature name.
   whole tutorial to confirm.
 - Does every consequential action have an expected result the learner can
   see?
-- Is the path free of choices, generalizations, and optional detours?
-- Is every explanation cut to the minimum and linked out?
+- Is the path free of choices, generalizations, detours, and explanation
+  beyond one clause?
 - Does the page end on an accomplishment rather than a summary?
 
 ## Skeleton
