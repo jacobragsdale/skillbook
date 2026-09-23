@@ -25,6 +25,12 @@
       "components": [{ "kind": "skill", "path": "skills/jacob-home-server" }]
     },
     {
+      "id": "polish",
+      "name": "Polish",
+      "description": "Multi-agent polish pass: a verified plan of small improvements across seven review lenses, then implement approved items.",
+      "components": [{ "kind": "skill", "path": "skills/polish" }]
+    },
+    {
       "id": "python-standards",
       "name": "Python standards",
       "description": "Apply high-integrity Python, Pydantic, typing, pandas, async, uv, Ruff, and ty standards.",
