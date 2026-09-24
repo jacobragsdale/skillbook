@@ -1,0 +1,18 @@
+# Copy to ~/.config/tui-template/config.toml. Every key is optional.
+
+# ── Theme ──────────────────────────────────────────────────────────────
+[theme]
+# terminal (default), terminal-light, mono or custom.
+# preset = "terminal"
+
+# The `theme` tool writes this table for every program it knows; with it
+# present and no preset, `custom` is used. Hex colours, all required.
+# [theme.custom]
+# surface = "#171b28"
+# overlay = "#626c9c"
+# fg      = "#dfe6ff"
+# subtle  = "#aab4dd"
+# muted   = "#626c9c"
+# accent  = "#c07cff"
+# red     = "#ff5f87"
+# green   = "#4ef5a4"

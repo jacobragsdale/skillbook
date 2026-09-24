@@ -1,0 +1,21 @@
+# CI runs this: `cargo run -- --replay scripts/smoke.keys src`.
+# The first frame, a filter typed and cleared, help opened by mouse and
+# closed by a click outside it, and a directory opened by double-click.
+wait
+frame start
+expect Files
+key /
+type con
+expect config.rs
+frame filtered
+key Esc
+click on ? Help
+expect Help
+frame help
+click 1 1
+expect-not Esc closes
+double-click on app/
+wait
+expect pointer.rs
+frame opened
+key q

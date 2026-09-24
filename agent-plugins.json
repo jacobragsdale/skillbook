@@ -43,6 +43,12 @@
       "components": [{ "kind": "skill", "path": "skills/python-testing" }]
     },
     {
+      "id": "rust-tui",
+      "name": "Rust TUI",
+      "description": "Scaffold and extend mouse-first ratatui + crossterm terminal apps: pure state, worker threads, theme tokens, headless replay.",
+      "components": [{ "kind": "skill", "path": "skills/rust-tui" }]
+    },
+    {
       "id": "typescript-standards",
       "name": "TypeScript standards",
       "description": "Apply strict TypeScript, Angular, ESLint, template, API, async, and runtime-validation standards.",

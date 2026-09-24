@@ -162,7 +162,7 @@ copy_portable_path() {
   done < <(
     find "$src" \
       \( -name '__pycache__' -o -name '.DS_Store' -o -name '*.pyc' \
-      -o -name '.ruff_cache' -o -name '.pytest_cache' -o -name '.git' \) -prune -o \
+      -o -name '.ruff_cache' -o -name '.pytest_cache' -o -name '.git' -o -name 'target' \) -prune -o \
       -mindepth 1 -print0
   )
 }

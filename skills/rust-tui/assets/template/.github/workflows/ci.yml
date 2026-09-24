@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --all-targets --all-features -- -D warnings
+      - run: cargo test --all-targets
+      # The renderer tests assert through theme tokens, so the suite runs
+      # again in each preset that changes what a token holds.
+      - run: cargo test --all-targets
+        env:
+          NO_COLOR: 1
+      - run: cargo test --all-targets
+        env:
+          TUI_TEMPLATE_THEME: terminal-light
+      - run: cargo build --release
+      - run: cargo test --release -- --ignored
+      - run: target/release/tui-template --replay scripts/smoke.keys src
