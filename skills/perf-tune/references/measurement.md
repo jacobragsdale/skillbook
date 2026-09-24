@@ -129,10 +129,16 @@ needs:
 1. **Differential run.** Feed identical inputs to A and B and byte-compare
    everything they produce: stdout (`abtest.py` does this), exit code, files
    (`sha256sum` or `diff -r` of output dirs), and database rows
-   (`ORDER BY` dump).
+   (`ORDER BY` dump). When the workload's stdout is only a test runner's
+   summary, write a harness that dumps the changed code's results (a test
+   file or small binary), keep it in the scratchpad, copy it into each side
+   only for the run, and strip timing lines from its output.
 2. **Edge corpus.** Beyond the workload input, run both sides on empty
    input, one item, the largest realistic input, unicode, malformed input,
-   and error paths. Error messages and exit codes are output too.
+   and error paths. Error messages and exit codes are output too. For
+   generated inputs, count how many cases reach the changed branch and tune
+   the generator until that count is a large share, because random inputs
+   often miss the fast path entirely.
 3. **Ordering.** If parallelism or a hash map changes result order, find out
    whether order is part of the contract (docs, callers, tests, downstream
    diffs). If it is, restore it (stable sort, indexed results). If it's

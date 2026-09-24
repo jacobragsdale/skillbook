@@ -15,8 +15,9 @@ median ratio, with a verdict: faster, slower, or no detectable difference.
 `compare` applies the same statistics to two files of per-iteration samples
 (one number per line, any unit) emitted by an in-process harness.
 
-Each ratio line shows the interval's reach as `±x%`; on a self-comparison
-(the same command as A and B) that is the noise floor.
+"no detectable difference (±x%)" gives how far the interval reaches from no
+change; on a self-comparison (the same command as A and B) that is the noise
+floor.
 
 Exit codes: 0 report printed; 1 a command failed (the side and its stderr
 tail are shown) or bad input; 3 A and B stdout differ (first differing
@@ -92,15 +93,14 @@ def report(metric: str, a: list[float], b: list[float], unit: str, rng: random.R
     elif lo > 1:
         verdict = f"SLOWER by {(point - 1) * 100:.1f}% (CI {(lo - 1) * 100:.1f}%..{(hi - 1) * 100:.1f}%)"
     else:
-        verdict = "no detectable difference"
+        verdict = f"no detectable difference (±{max(1 - lo, hi - 1) * 100:.1f}%)"
     print(f"{metric}:")
     for label, xs in (("A", a), ("B", b)):
         print(
             f"  {label}: median {statistics.median(xs):.3f} {unit}  p95 {percentile(xs, 0.95):.3f}"
             f"  min {min(xs):.3f}  stdev {statistics.stdev(xs):.3f}  n={len(xs)}"
         )
-    reach = max(1 - lo, hi - 1) * 100
-    print(f"  B/A median ratio {point:.4f} (CI {lo:.4f}..{hi:.4f}, ±{reach:.1f}%) -> {verdict}")
+    print(f"  B/A median ratio {point:.4f} (CI {lo:.4f}..{hi:.4f}) -> {verdict}")
 
 
 def cmd_run(args: argparse.Namespace) -> int:

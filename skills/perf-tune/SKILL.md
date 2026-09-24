@@ -45,8 +45,9 @@ When nothing runnable exists and the user can't supply a workload, continue
 in static mode: mark every plan item "unmeasured" and say so in the verdict.
 
 Build the optimized configuration (release, `-O2`, production mode), because
-debug builds profile a different program. Note exactly which artifact the
-workload runs; every later "rebuild" means that artifact.
+debug builds profile a different program. Name the one exact artifact the
+workload runs, never a glob: a hashed name like `target/release/deps/perf-*`
+also matches stale builds. Every later "rebuild" means that artifact.
 
 Look at what the workload prints. When stdout is a pass/fail summary or
 timings rather than the program's real output (a test runner's "7 passed"),
@@ -62,8 +63,8 @@ and run counts**, run the checks, then measure the workload against itself:
 uv run <this-skill-dir>/scripts/abtest.py run --a '<workload>' --b '<workload>' --runs 30
 ```
 
-Record the baseline wall and CPU medians and the noise floor: the `±x%` on
-the wall-time ratio line of this self-comparison. Output must be identical
+Record the baseline wall and CPU medians and the noise floor: the `±x%` in
+the wall-time verdict of this self-comparison. Output must be identical
 across these runs. If `abtest.py` exits 4, the output is nondeterministic;
 pass `--normalize '<filter>'` (strip timings, `sort` unordered lines) or fix
 the seed until it is stable, and use the same flag in every later A/B.
@@ -187,11 +188,13 @@ Then for each approved item in plan order:
    Use `--runs 50` or more when the estimate is under 3% of the baseline.
 4. Prove equivalence with every layer the item's risk needs, from
    `references/measurement.md` **Proving equivalence**. `abtest.py` covers
-   stdout on the workload input only. Keep differential harnesses in the
+   stdout on the workload input only; when that stdout is a summary, the
+   differential harness is the only real check. Keep harnesses in the
    scratchpad, copy the same file into both sides for the run, and remove
    them before committing.
 5. Keep the item only when wall time is FASTER and every equivalence check
-   passes. Otherwise revert it (`git restore .` and delete files it created)
+   passes. When the interval's near edge is within the noise floor, repeat
+   the A/B with another `--seed` and keep it only if both say FASTER. Otherwise revert it (`git restore .` and delete files it created)
    and record the numbers and the reason.
 6. Commit a kept item with its A/B numbers in the message body, then,
    unless it is the last item, move the baseline to it (`git -C
