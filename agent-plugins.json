@@ -31,6 +31,12 @@
       "components": [{ "kind": "skill", "path": "skills/polish" }]
     },
     {
+      "id": "perf-tune",
+      "name": "Perf tune",
+      "description": "Profile-driven performance tuning: ranked speedup plan, then approved changes proven faster by interleaved A/B benchmarks with identical output.",
+      "components": [{ "kind": "skill", "path": "skills/perf-tune" }]
+    },
+    {
       "id": "python-standards",
       "name": "Python standards",
       "description": "Apply high-integrity Python, Pydantic, typing, pandas, async, uv, Ruff, and ty standards.",
