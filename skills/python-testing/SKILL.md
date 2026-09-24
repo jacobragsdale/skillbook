@@ -7,7 +7,7 @@ description: "Design and review Python tests: pytest, fixtures, pandas test data
 
 Decide what to test, then build the smallest test data that states the case.
 Implementation, typing, and tooling configuration belong to `python-standards`;
-this asset covers test design, pytest setup, and test data only.
+this skill covers test design, pytest setup, and test data only.
 
 These rules replace default test-writing habits. Specifically: do not reach for
 `unittest.mock.patch` or `pytest-mock`, do not assert on mock calls, and do not
@@ -102,9 +102,8 @@ lines in it are load-bearing and easy to drop:
 
 - `filterwarnings = ["error"]` — in pandas 3, chained assignment raises
   `ChainedAssignmentError`, which subclasses `Warning`: under default filters
-  the write is silently discarded and the suite still passes. This line is what
-  makes the `python-standards` chained-assignment rule enforceable, and it
-  catches deprecations before an upgrade does.
+  the write is silently discarded and the suite still passes. It also catches
+  deprecations before an upgrade does.
 - `xfail_strict = true` — an `xfail` that starts passing is a failure, not a
   silent pass.
 - `--strict-markers --strict-config` — a typo'd marker or config key errors

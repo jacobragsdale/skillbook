@@ -1,6 +1,6 @@
 ---
 name: herdr
-description: "Control Herdr, a terminal workspace manager for coding agents — create panes, tabs, workspaces, and worktrees, start agents in them, send messages or handoff packets to another agent, and read another agent's output. Use ONLY when the user explicitly asks for Herdr or explicitly asks to open a pane/tab/workspace, spin up another agent, or pass work or a message to another agent. Never invoke it merely because a task could benefit from parallelism, delegation, or a background terminal."
+description: "Control Herdr terminal panes, tabs, workspaces, and the agents running in them. Use when the user explicitly asks for Herdr, a new pane/tab/workspace, another agent, or to message or read one — even if they don't say Herdr. Never for mere parallelism."
 ---
 
 # Herdr
@@ -36,7 +36,7 @@ printf '%s\n' "$HERDR_WORKSPACE_ID" "$HERDR_TAB_ID" "$HERDR_PANE_ID"
 
 ## The binary is the authority
 
-This file was written against **herdr 0.8.2**. Syntax moves. Print a group without a subcommand to get its current commands:
+This file was written against **herdr 0.9.1**. Syntax moves. Client and server versions can differ after an update: check `herdr status` before relying on a newer feature, and never stop or upgrade the server to get one. Print a group without a subcommand to get its current commands:
 
 ```bash
 herdr agent      # list get read send-keys prompt rename focus wait attach start explain
@@ -58,17 +58,21 @@ Agent commands take a unique live agent name **or** the pane ID hosting it — n
 
 | State | Meaning |
 |---|---|
-| `idle` | ready for input, and its tab has been seen in the focused UI |
+| `idle` | ready for input, and the server has marked it seen |
 | `done` | same idle state, after *unseen* background work finished |
 | `working` | mid-turn |
 | `blocked` | Herdr detected an approval or question UI |
 | `unknown` | an agent is present but unclassified — **not** proof of completion |
 
-CLI reads do not mark a tab seen; focusing it does.
+Explicit focus commands mark a target seen; CLI reads do not. A TUI client's Done badge can differ from the CLI state.
 
 ### Herdr agents are not the same list as `ListAgents`
 
 `herdr agent list` shows agents occupying Herdr panes. Claude Code's own `ListAgents` shows peer Claude sessions, which may include sessions in no Herdr pane at all, and omits non-Claude agents. When the user says "the other agent in this workspace", resolve it against `herdr agent list` filtered to `$HERDR_WORKSPACE_ID`, and say which one you picked if more than one could match.
+
+### Saved SSH machines
+
+IDs and agent names are scoped to one server. To control a saved machine, put `herdr --machine <label-or-id>` in front of discovery and every later command, and discover IDs there — local IDs and `--current` do not identify remote panes. `herdr machine list` lists saved profiles; add or remove them only when asked.
 
 ## Discover before you build
 
@@ -150,7 +154,7 @@ herdr agent read <target> --source recent-unwrapped --lines 30
 
 A `blocked` target is rejected with `agent_blocked` before any input is sent. Inspect the dialog with `agent get` and `agent read`, then **ask the user** how to answer it — do not answer an approval prompt on their behalf.
 
-If a prompt from a non-working state produces no observed lifecycle change within 5s, Herdr returns `agent_prompt_stalled` rather than hanging.
+With `--wait`, a prompt from a non-working state must produce `working` or `blocked` activity within 5s, or Herdr returns `agent_prompt_stalled`. A stall or `timeout` does not prove the prompt was never delivered — `agent read` before resending.
 
 ### Write handoff packets that stand alone
 
@@ -165,7 +169,7 @@ herdr agent read <target> --source recent-unwrapped --lines 120
 
 Read sources: `visible` (viewport), `recent` (with soft wraps), `recent-unwrapped` (wraps joined — prefer for logs and transcripts), `detection` (the plain-text snapshot Herdr classifies on). Add `--format ansi` only when color is the evidence.
 
-If raising `--lines` reveals nothing more, the agent is drawing on the terminal's **alternate screen** and those rows never entered scrollback — no line count recovers them. Fallback: ask the agent to write its full response as Markdown to a temp path and reply with only that path, then read the file. Use this only after a read has actually failed; do not bake it into the first prompt.
+If raising `--lines` reveals nothing more, the agent is drawing on the terminal's **alternate screen**; Herdr recovers that history only for some idle agents. Fallback: ask the agent to write its full response as Markdown to a temp path and reply with only that path, then read the file. Use this only after a read has actually failed; do not bake it into the first prompt.
 
 ### Interactive controls
 
@@ -193,7 +197,8 @@ herdr pane read <pane-id> --source recent-unwrapped --lines 120
 
 - `--no-focus` for background work unless the user asked to switch context.
 - Always target `--current`, an explicit pane ID, or a unique agent name. Never rely on the UI-focused pane — it may belong to the user or another client.
-- Do not close workspaces, tabs, panes, or sessions you did not create.
+- Do not close workspaces, tabs, panes, or sessions you did not create. Never add `workspace close --group` just to get past `workspace_group_close_required`.
+- Pass `--trust-repository` to a worktree command only after the user has verified the repository; it is not a retry flag.
 - Never run `herdr server stop` from an active session; it stops the server and every pane process.
 - Never kill the main Herdr process. Use a named session (`herdr --session <name>`) for experiments needing an isolated server.
 - Server errors are JSON on stderr with exit 1; CLI syntax errors exit 2.

@@ -15,7 +15,7 @@ Each skill is a folder under [`skills/`](skills/) whose name matches the
 
 | Skill | Purpose |
 | --- | --- |
-| [`herdr`](skills/herdr/SKILL.md) | Control Herdr panes, tabs, workspaces, and other agents from a Herdr-managed session. Vendored from [herdr v0.8.2](https://github.com/herdrdev/herdr/blob/v0.8.2/skills/herdr/SKILL.md). |
+| [`herdr`](skills/herdr/SKILL.md) | Control Herdr panes, tabs, workspaces, and other agents from a Herdr-managed session. Rewritten from [herdr v0.9.1](https://github.com/herdrdev/herdr/blob/v0.9.1/skills/herdr/SKILL.md). |
 | [`jacob-create-skill`](skills/jacob-create-skill/SKILL.md) | Create, improve, scaffold, and validate reusable agent skills. |
 | [`jacob-home-server`](skills/jacob-home-server/SKILL.md) | Operate the home server: Docker stacks, SOPS secrets, deployments, backups, media, networking, and recovery. |
 | [`polish`](skills/polish/SKILL.md) | Run a multi-agent polish pass (`/polish` only): seven review lenses, a verified plan of small improvements, then implement the approved items. |

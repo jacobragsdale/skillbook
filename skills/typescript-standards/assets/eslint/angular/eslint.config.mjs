@@ -3,13 +3,14 @@
 import angular from "angular-eslint";
 import eslint from "@eslint/js";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
+import { defineConfig } from "eslint/config";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import tseslint from "typescript-eslint";
 
 const tsconfigRootDir = dirname(fileURLToPath(import.meta.url));
 
-export default tseslint.config(
+export default defineConfig(
   {
     ignores: [".angular/**", "coverage/**", "dist/**"] // Skip generated Angular, coverage, and build output.
   },

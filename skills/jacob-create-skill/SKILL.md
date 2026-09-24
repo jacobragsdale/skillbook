@@ -103,10 +103,16 @@ House rules, and why:
 - **Replace vague nuance with decision rules.** Avoid "unless it matters."
   State the default, the observable condition that changes it, and the allowed
   alternative. Explain why when the task needs contextual judgment.
-- **Match the guidance form to the failure type.** Agent skips a rule → hard
-  prohibition, not "prefer". Agent produces the wrong shape → exact template
-  with REQUIRED fields, not a prohibition list. Agent forgets things → a
-  checklist, not prose reminders.
+- **Match the guidance form to the failure type:**
+
+  | Observed need | Form |
+  |---|---|
+  | Agent skips a rule | Hard prohibition, not "prefer" |
+  | Wrong output shape | Exact template with REQUIRED fields |
+  | Agent forgets steps | Checklist, not prose reminders |
+  | Fragile, ordered operation | Exact command or low-parameter script |
+  | Preferred pattern with variation | Default plus observable escape condition |
+  | Non-obvious environment fact | Prominent gotcha |
 - **Default automatic invocation.** Skills in this repo are model-invocable:
   the description is the router, so it must earn the trigger. Add
   `disable-model-invocation: true` only when a skill must never fire on its
@@ -187,8 +193,6 @@ When asked to improve a skill:
 - `scripts/init_skill.py` — **run** to scaffold a new skill folder.
 - `scripts/validate_skill.py` — **run** to lint core or target-specific
   frontmatter plus these house rules.
-- `references/best-practices.md` — **read** when unsure about a design choice
-  (evidence, scope, control, token budgets, sources).
 - `references/frontmatter.md` — **read** before using any frontmatter field
   beyond `name`/`description` or adding Codex metadata, and for per-client
   routing windows and Cursor reliability gotchas.

@@ -108,8 +108,7 @@ Claude Code currently documents these extensions:
 | `shell` | `bash` or `powershell` for dynamic shell blocks |
 
 Claude Code discovers `.claude/skills/` at personal, project, nested-project,
-plugin, and managed scopes. This repository therefore maintains Claude symlinks
-even though Cursor can also discover the canonical `.agents` location.
+plugin, and managed scopes.
 
 When `disable-model-invocation: true`, Claude does not put the description in
 model context. A description test then measures menu/catalog quality and future
@@ -145,8 +144,11 @@ root, plus user/admin/system locations, and follows symlinked skill folders.
 ## Sources
 
 - https://agentskills.io/specification
+- https://agentskills.io/skill-creation/best-practices
+- https://agentskills.io/skill-creation/optimizing-descriptions
 - https://cursor.com/docs/skills
 - https://code.claude.com/docs/en/skills
+- https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
 - https://developers.openai.com/codex/skills
 - Cursor 80-char truncation and gotchas (staff-confirmed):
   https://forum.cursor.com/t/skill-descriptions-are-truncated-in-initial-agent-context/163761,

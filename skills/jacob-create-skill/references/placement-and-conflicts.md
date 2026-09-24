@@ -13,7 +13,7 @@ by how often the behavior must hold, not by where it is easiest to write:
 | Behavior | Vehicle |
 |---|---|
 | On-demand procedure (how to deploy, how to scaffold) | Skill — body loads only when triggered, so detail is free |
-| Standing constraint that must hold every session (style, workflow policy) | Always-on rule — Cursor `.cursor/rules` `.mdc` or `AGENTS.md`; in this library, `rules/*.md` referenced from each repo's AGENTS.md |
+| Standing constraint that must hold every session (style, workflow policy) | Always-on rule — Cursor `.cursor/rules` `.mdc` or `AGENTS.md` |
 | Policy with a procedural long tail (git workflow, house standards) | Rule + skill pair: a terse rule holds the always-on core and names the skill for the full procedure |
 
 The pointer line in the rule matters on its own: a memory-file pointer to a
@@ -37,9 +37,7 @@ Write (or keep) a rule rather than a skill when:
 Cursor `.mdc` frontmatter: `alwaysApply`, `description` (agent-requested
 mode), `globs`; keep each rule under 500 lines. `AGENTS.md` (root and nested)
 is the plain-markdown equivalent and is portable across Cursor, Codex,
-Copilot, and others. This library's `rules/*.md` are written for the
-AGENTS.md-reference pattern; a repo that wants native attachment can paste
-one into `.cursor/rules/<name>.mdc` with the appropriate frontmatter.
+Copilot, and others.
 
 ## Conflicts and precedence
 

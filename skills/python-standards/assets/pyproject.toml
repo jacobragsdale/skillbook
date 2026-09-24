@@ -2,7 +2,7 @@
 
 [tool.ruff]
 line-length = 200
-required-version = ">=0.16.0"
+required-version = ">=0.16.8"
 force-exclude = true
 show-fixes = true
 unsafe-fixes = false

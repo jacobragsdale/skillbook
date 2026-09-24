@@ -18,9 +18,12 @@ them.
   incidentally.
 - Check the installed Angular compatibility range before changing TypeScript.
   Match the `angular-eslint` major version to Angular's major version.
-- Use ESLint flat config for new setups. TSLint is deprecated; migrate a legacy
+- ESLint 10 accepts only flat config. Migrate a legacy TSLint or `.eslintrc`
   Angular project with the version-matched `angular-eslint` schematic rather
   than running both linters.
+- TypeScript 7 is npm's `latest`, but `typescript-eslint` 8 and Angular 22
+  support only `<6.1`. Install `typescript@~6.0` in a new setup; bare
+  `typescript` breaks typed linting and the Angular compiler.
 - Treat the bundled lint files as current flat-config baselines. If a
   version-matched older plugin does not expose one of their presets or rules,
   retain its generated compatible config, record the missing guarantee, and

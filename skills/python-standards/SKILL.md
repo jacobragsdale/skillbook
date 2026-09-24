@@ -111,8 +111,6 @@ model_config = ConfigDict(
   instead of rescanning a list.
 - Batch and bound I/O. One round trip per row is the usual cause of a slow
   job.
-- Optimize the measured path only; leave the rest at the simplest correct
-  implementation.
 
 ## pandas
 

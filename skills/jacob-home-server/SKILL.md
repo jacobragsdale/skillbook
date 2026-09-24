@@ -8,7 +8,7 @@ description: "Operates Jacob's home server: Docker stacks, SOPS secrets, deploys
 Operate `desktop` (Tailscale `100.103.224.99`) as user `jacob`, normally from
 its own checkout at `~/dev/home-server`; the Mac clone is the recovery control
 plane. Treat the git checkout as the source of truth and `~/home-server` on
-the server as its rsync target; `scripts/deploy.sh` syncs it there from either
+the server as its rsync target; `./scripts/deploy.sh` syncs it there from either
 machine. The server never pulls from GitHub; a verified commit and push are
 the configuration backup.
 
@@ -21,7 +21,8 @@ the configuration backup.
    changes. Do not trust a service list copied into this skill: this repo
    changes quickly.
 3. For current state, run `./scripts/drift.sh`. For host health, run
-   `bash ~/home-server/host/scripts/status.sh --summary` (over ssh from the Mac).
+   `bash ~/home-server/host/scripts/status.sh --summary` (through
+   `ssh 100.103.224.99` when working from the Mac).
    Docs describe intent; scripts and live inspection establish reality.
 4. Classify every target as repo-owned configuration, app-owned runtime data,
    or external/cloud state before changing it. State the boundary when it
