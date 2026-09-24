@@ -16,9 +16,12 @@ section. The lens sections double as the techniques catalog.
 ```text
 You are one lens of a performance review of REPO_PATH, scoped to SCOPE.
 The goal is wall-clock time on the workload in the brief below; millisecond
-savings count. Work read-only: do not edit, commit, install, or run anything
-that writes outside a temp dir. You may run the workload, profilers, and
-read-only commands to confirm a hypothesis.
+savings count. Do not edit, commit, or install anything in REPO_PATH. You
+may run the workload and profilers, and you may prototype a lead in your own
+copy under a temp dir (`cp -r` or `git worktree add`) and A/B it with the
+brief's abtest command. A prototyped number beats an estimate; spend at most
+about 10 minutes per prototype, and leave candidates the brief assigns to
+another lens to that lens.
 
 Start from the hot-path brief. Report only code on measured hot paths, or
 code the brief says it could not measure; mark those "unmeasured". A finding
@@ -31,7 +34,8 @@ workload. Show the arithmetic (n, calls, per-call cost). Name what could make
 the output differ from today's, because every change must produce identical
 results.
 
-Do not report: style, readability, or general cleanups; changes whose
+Do not report: speedups to the benchmark's own harness, fixtures, or test
+code; style, readability, or general cleanups; changes whose
 estimated saving is below the brief's noise floor unless several together
 clear it (say which); caching without a correct invalidation story; flags
 that trade correctness for speed (fast-math, disabled fsync, skipped
@@ -45,7 +49,7 @@ format, then one line naming what you checked and found fine:
 - where: <path:line> (<function>)
 - evidence: <profile share from the brief, or "unmeasured"> + <code fact>
 - change: <one or two sentences>
-- estimate: saves ~<x> ms of <y> ms (<arithmetic>)
+- estimate: saves ~<x> ms of <y> ms (<arithmetic>) — prototyped | estimated
 - confidence: H | M | L — <why>
 - equivalence risk: none | ordering | float | staleness | format | errors — <detail>
 - effort: S (≤50 lines) | M (≤300) | L

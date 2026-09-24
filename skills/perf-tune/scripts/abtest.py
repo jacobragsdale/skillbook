@@ -15,14 +15,19 @@ median ratio, with a verdict: faster, slower, or no detectable difference.
 `compare` applies the same statistics to two files of per-iteration samples
 (one number per line, any unit) emitted by an in-process harness.
 
-Exit codes: 0 report printed; 1 a command failed or bad input; 3 A and B
-stdout differ (first differing outputs are saved for diffing); 4 A's own
-output varies between runs, so equality can't be checked (normalize it, e.g.
-`| sort` or strip timestamps, or pass --no-check-output and prove equivalence
-another way).
+Each ratio line shows the interval's reach as `±x%`; on a self-comparison
+(the same command as A and B) that is the noise floor.
 
-Output checking covers stdout only. When the program writes files, make the
-command print them, e.g. `./prog -o out.bin && sha256sum out.bin`.
+Exit codes: 0 report printed; 1 a command failed (the side and its stderr
+tail are shown) or bad input; 3 A and B stdout differ (first differing
+outputs are saved for diffing); 4 one side's output varies between its own
+runs, so equality can't be checked (use --normalize to strip timings or
+order, or pass --no-check-output and prove equivalence another way).
+
+Output checking covers stdout only, and only proves something when stdout is
+the program's real output. A test runner's "7 passed" is not. When the
+program writes files, make the command print them, e.g.
+`./prog -o out.bin && sha256sum out.bin`. The workload's stderr is discarded.
 """
 
 import argparse
@@ -39,17 +44,28 @@ from pathlib import Path
 BOOTSTRAP_ITERATIONS = 5000
 
 
-def run_once(cmd: str) -> tuple[float, float, bytes, str]:
-    """Return (wall_ms, cpu_ms, stdout_bytes, sha256) for one run."""
-    start = time.perf_counter_ns()
-    proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-    assert proc.stdout is not None
-    out = proc.stdout.read()
-    _, status, usage = os.wait4(proc.pid, 0)
-    wall_ms = (time.perf_counter_ns() - start) / 1e6
-    proc.returncode = os.waitstatus_to_exitcode(status)
-    if proc.returncode != 0:
-        sys.exit(f"error: command exited {proc.returncode}: {cmd}")
+def tail(data: bytes, lines: int = 20) -> str:
+    return "\n".join(data.decode(errors="replace").splitlines()[-lines:])
+
+
+def run_once(side: str, cmd: str, normalize: str | None) -> tuple[float, float, bytes, str]:
+    """Return (wall_ms, cpu_ms, stdout_bytes, sha256) for one run; exit on failure."""
+    with tempfile.TemporaryFile() as err:
+        start = time.perf_counter_ns()
+        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=err)
+        assert proc.stdout is not None
+        out = proc.stdout.read()
+        _, status, usage = os.wait4(proc.pid, 0)
+        wall_ms = (time.perf_counter_ns() - start) / 1e6
+        code = os.waitstatus_to_exitcode(status)
+        if code != 0:
+            err.seek(0)
+            sys.exit(f"error: {side} exited {code}: {cmd}\n--- stderr tail ---\n{tail(err.read())}")
+    if normalize:
+        norm = subprocess.run(normalize, shell=True, input=out, capture_output=True, check=False)
+        if norm.returncode != 0:
+            sys.exit(f"error: --normalize exited {norm.returncode} on {side}'s output\n{tail(norm.stderr)}")
+        out = norm.stdout
     cpu_ms = (usage.ru_utime + usage.ru_stime) * 1000
     return wall_ms, cpu_ms, out, hashlib.sha256(out).hexdigest()
 
@@ -76,32 +92,35 @@ def report(metric: str, a: list[float], b: list[float], unit: str, rng: random.R
     elif lo > 1:
         verdict = f"SLOWER by {(point - 1) * 100:.1f}% (CI {(lo - 1) * 100:.1f}%..{(hi - 1) * 100:.1f}%)"
     else:
-        verdict = f"no detectable difference (B/A CI {lo:.3f}..{hi:.3f})"
+        verdict = "no detectable difference"
     print(f"{metric}:")
     for label, xs in (("A", a), ("B", b)):
         print(
             f"  {label}: median {statistics.median(xs):.3f} {unit}  p95 {percentile(xs, 0.95):.3f}"
             f"  min {min(xs):.3f}  stdev {statistics.stdev(xs):.3f}  n={len(xs)}"
         )
-    print(f"  B/A median ratio {point:.4f} -> {verdict}")
+    reach = max(1 - lo, hi - 1) * 100
+    print(f"  B/A median ratio {point:.4f} (CI {lo:.4f}..{hi:.4f}, ±{reach:.1f}%) -> {verdict}")
 
 
 def cmd_run(args: argparse.Namespace) -> int:
     rng = random.Random(args.seed)
     for _ in range(args.warmup):
-        run_once(args.a)
-        run_once(args.b)
+        run_once("A", args.a, args.normalize)
+        run_once("B", args.b, args.normalize)
     samples: dict[str, list[tuple[float, float]]] = {"A": [], "B": []}
     hashes: dict[str, set[str]] = {"A": set(), "B": set()}
     first_out: dict[str, bytes] = {}
-    for _ in range(args.runs):
+    for round_ in range(1, args.runs + 1):
+        print(f"\rround {round_}/{args.runs}", end="", file=sys.stderr, flush=True)
         order = ["A", "B"]
         rng.shuffle(order)
         for side in order:
-            wall, cpu, out, digest = run_once(args.a if side == "A" else args.b)
+            wall, cpu, out, digest = run_once(side, args.a if side == "A" else args.b, args.normalize)
             samples[side].append((wall, cpu))
             hashes[side].add(digest)
             first_out.setdefault(side, out)
+    print(file=sys.stderr)
 
     for i, (metric, unit) in enumerate((("wall time", "ms"), ("cpu time (user+sys)", "ms"))):
         report(metric, [s[i] for s in samples["A"]], [s[i] for s in samples["B"]], unit, rng)
@@ -109,9 +128,10 @@ def cmd_run(args: argparse.Namespace) -> int:
     if args.no_check_output:
         print("output: NOT CHECKED (--no-check-output); prove equivalence another way")
         return 0
-    if len(hashes["A"]) > 1:
-        print(f"output: A produced {len(hashes['A'])} distinct outputs across runs; cannot compare")
-        return 4
+    for side in ("A", "B"):
+        if len(hashes[side]) > 1:
+            print(f"output: {side} produced {len(hashes[side])} distinct outputs across its runs; cannot compare")
+            return 4
     if hashes["A"] != hashes["B"]:
         outdir = Path(tempfile.mkdtemp(prefix="abtest-"))
         (outdir / "a.out").write_bytes(first_out["A"])
@@ -151,6 +171,12 @@ def main() -> int:
     )
     run.add_argument("--warmup", type=int, default=3, help="unmeasured runs per side first (default 3)")
     run.add_argument("--seed", type=int, default=0, help="seed for run order and bootstrap (default 0)")
+    run.add_argument(
+        "--normalize",
+        metavar="CMD",
+        help="shell filter applied to each run's stdout before hashing, outside the timing, e.g. "
+        "\"sed 's/finished in .*//'\" or 'sort'; the workload's own exit code still counts",
+    )
     run.add_argument("--no-check-output", action="store_true", help="skip the stdout equality check")
     run.set_defaults(func=cmd_run)
 

@@ -18,14 +18,16 @@ fixes that need root to the user; never run them yourself.
 |---|---|---|
 | CPU governor | `cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor` | `powersave` inflates variance; suggest `sudo cpupower frequency-set -g performance` |
 | Load | `uptime`; `top -bn1 \| head -15` | Ask the user to stop heavy jobs, or note it |
-| Power | laptop on battery | Ask for AC power |
+| Power | `find /sys/class/power_supply -name online -exec cat {} +` (no output on desktops) | `0` means battery; ask for AC power |
 | Core pinning | `taskset -c 2 <cmd>` (both A and B) | Use it when variance is high on a multi-core box |
 | Cache state | — | State warm or cold. Cold needs `sync; echo 3 \| sudo tee /proc/sys/vm/drop_caches` between runs, so it's user-only |
 | Disk noise | — | For CPU-focused work, put inputs on tmpfs (`/dev/shm`); for IO work, use the real disk |
 
 `abtest.py` interleaves A and B in random order, which cancels slow drift
 (thermal throttling, background jobs) but not bursts. Rerun when the p95 is
-far above the median on either side.
+far above the median on either side. Absolute medians drift about 1%
+between sessions even when each run's interval is tighter, so compare A and
+B only within one `abtest.py` run, never across runs.
 
 ## Noise floor and run counts
 
@@ -35,7 +37,7 @@ Run the workload against itself before changing anything:
 uv run <skill-dir>/scripts/abtest.py run --a '<workload>' --b '<workload>' --runs 30
 ```
 
-The B/A confidence interval width is the noise floor: the smallest change a
+The `±x%` on the wall-time ratio line is the noise floor: the smallest change a
 30-run comparison can detect. Rules:
 
 - An estimated saving below the noise floor can't be proven end-to-end.
@@ -83,8 +85,20 @@ when production data doesn't.
 
 ## Profilers
 
-Prefer ephemeral runners (`uvx`, `npx`, `go run`) over installs. Ask before
-installing system packages.
+Prefer ephemeral runners (`uvx`, `npx`, `go run`) or installs into the
+scratchpad (`cargo install --root <scratch> samply`); neither counts as
+installing. Ask before installing system packages.
+
+Profile a build with symbols: release builds often strip them. For Rust,
+build into a separate target dir with
+`CARGO_PROFILE_RELEASE_STRIP=none CARGO_PROFILE_RELEASE_DEBUG=line-tables-only
+CARGO_TARGET_DIR=<scratch>/prof-target`; for C/C++ add `-g` to the optimized
+flags; for Go and the JVM, symbols are there by default.
+
+`perf` and `samply` need `/proc/sys/kernel/perf_event_paranoid` at 1 or
+lower for a normal user. When it's 2 or higher, suggest
+`sudo sysctl kernel.perf_event_paranoid=1` to the user and use a fallback
+until they do.
 
 | Question | Tool |
 |---|---|
@@ -98,9 +112,13 @@ installing system packages.
 | Database | `EXPLAIN ANALYZE`; the slow query log |
 | Allocations | `heaptrack`, `memray` (Python), `dhat` (Rust) |
 
-With no profiler available, time phases directly: wrap major stages in
-monotonic-clock timestamps written to stderr, run the workload, and remove
-the instrumentation before measuring the baseline.
+With no profiler available, fall back in this order:
+
+1. Time each case of the workload on its own (one bench case, one
+   endpoint, one subcommand) and use the harness's own per-case timings.
+2. In a throwaway worktree, wrap the major stages of the slow case in
+   monotonic-clock timestamps written to stderr, and bisect the time down
+   to functions. Never instrument the user's checkout.
 
 ## Proving equivalence
 
