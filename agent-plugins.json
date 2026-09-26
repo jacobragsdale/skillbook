@@ -49,6 +49,12 @@
       "components": [{ "kind": "skill", "path": "skills/python-testing" }]
     },
     {
+      "id": "qa-analyst",
+      "name": "QA analyst",
+      "description": "Financial-software QA: clarified spec, frozen test plan, parity testing against a reference system in QA, and a sealed, audit-ready evidence pack.",
+      "components": [{ "kind": "skill", "path": "skills/qa-analyst" }]
+    },
+    {
       "id": "rust-tui",
       "name": "Rust TUI",
       "description": "Scaffold and extend mouse-first ratatui + crossterm terminal apps: pure state, worker threads, theme tokens, headless replay.",

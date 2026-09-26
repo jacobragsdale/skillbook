@@ -18,9 +18,12 @@ Each skill is a folder under [`skills/`](skills/) whose name matches the
 | [`herdr`](skills/herdr/SKILL.md) | Control Herdr panes, tabs, workspaces, and other agents from a Herdr-managed session. Rewritten from [herdr v0.9.1](https://github.com/herdrdev/herdr/blob/v0.9.1/skills/herdr/SKILL.md). |
 | [`jacob-create-skill`](skills/jacob-create-skill/SKILL.md) | Create, improve, scaffold, and validate reusable agent skills. |
 | [`jacob-home-server`](skills/jacob-home-server/SKILL.md) | Operate the home server: Docker stacks, SOPS secrets, deployments, backups, media, networking, and recovery. |
+| [`perf-tune`](skills/perf-tune/SKILL.md) | Profile-driven performance tuning (`/perf-tune` only): a ranked speedup plan, then approved changes proven by interleaved A/B benchmarks with identical output. |
 | [`polish`](skills/polish/SKILL.md) | Run a multi-agent polish pass (`/polish` only): seven review lenses, a verified plan of small improvements, then implement the approved items. |
 | [`python-standards`](skills/python-standards/SKILL.md) | Apply high-integrity Python, Pydantic, typing, pandas, async, performance, uv, Ruff, and ty standards. |
 | [`python-testing`](skills/python-testing/SKILL.md) | Design and review pytest tests, fixtures, and pandas test data. |
+| [`qa-analyst`](skills/qa-analyst/SKILL.md) | Act as analyst and QA tester for a financial-software change (`/qa-analyst` only): clarified spec, frozen test plan, parity testing in QA, and a sealed evidence pack for the ticket. |
+| [`rust-tui`](skills/rust-tui/SKILL.md) | Scaffold and extend mouse-first ratatui + crossterm terminal apps in the house style. |
 | [`typescript-standards`](skills/typescript-standards/SKILL.md) | Apply strict TypeScript, Angular, ESLint, template, API, async, and runtime-validation standards. |
 | [`write-diataxis-docs`](skills/write-diataxis-docs/SKILL.md) | Write and audit technical documentation as tutorials, how-to guides, reference, or explanation. |
 
