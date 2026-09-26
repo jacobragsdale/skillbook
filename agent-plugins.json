@@ -7,6 +7,12 @@
   },
   "packages": [
     {
+      "id": "e2e-audit",
+      "name": "E2E audit",
+      "description": "Live end-to-end audit: model every state and edge case, test each on real databases, APIs, and the deployed instance, fix defects as found, and clean up tagged test data.",
+      "components": [{ "kind": "skill", "path": "skills/e2e-audit" }]
+    },
+    {
       "id": "herdr",
       "name": "Herdr",
       "description": "Control Herdr, a terminal multiplexer for coding agents.",
