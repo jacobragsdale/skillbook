@@ -25,6 +25,12 @@
       "components": [{ "kind": "skill", "path": "skills/jacob-create-skill" }]
     },
     {
+      "id": "jacob-email",
+      "name": "Email (Proton Mail)",
+      "description": "Search, read, organize, and draft Jacob's Proton Mail through the home server's Bridge. Never sends.",
+      "components": [{ "kind": "skill", "path": "skills/jacob-email" }]
+    },
+    {
       "id": "jacob-home-server",
       "name": "Home server operations",
       "description": "Operate the home server: Docker stacks, SOPS secrets, deployments, backups, and recovery.",
