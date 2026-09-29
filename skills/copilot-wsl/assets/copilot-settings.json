@@ -1,0 +1,5 @@
+{
+  "defaultPermissionMode": "allow-all",
+  "enableAllGithubMcpTools": true,
+  "sandbox": { "enabled": false }
+}

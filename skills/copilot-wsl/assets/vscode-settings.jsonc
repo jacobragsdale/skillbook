@@ -1,0 +1,30 @@
+{
+  // Master switch: approves every tool call in all Copilot harnesses.
+  // Needs a one-time warning dialog accepted in VS Code. Policy: ChatToolsAutoApprove.
+  "chat.tools.global.autoApprove": true,
+  // New Local sessions start in "Bypass Approvals"; Copilot-harness sessions in allowAll.
+  "chat.permissions.default": "autoApprove",
+  "chat.defaultConfiguration": { "mode": "interactive", "approvals": "allowAll" },
+  "chat.agent.maxRequests": 1000,
+  // Belt and braces for when the master switch is off: approve every terminal
+  // command (default deny rules dropped), URL, and edit.
+  "chat.tools.terminal.enableAutoApprove": true,
+  "chat.tools.terminal.ignoreDefaultAutoApproveRules": true,
+  "chat.tools.terminal.autoApprove": { "/.*/": true },
+  "chat.tools.terminal.blockDetectedFileWrites": "never",
+  "chat.tools.urls.autoApprove": { "*": true },
+  // Flips each default "false" pattern. .mcp.json, .vscode/*.json, hooks and
+  // agent files are always checked unless the master switch is on.
+  "chat.tools.edits.autoApprove": {
+    "**/*": true,
+    "**/.git/**": true,
+    "**/{package.json,server.xml,build.rs,web.config,.gitattributes,.env,Cargo.toml}": true,
+    "**/{.npmrc,.yarnrc,.yarnrc.yml,.pnpmfile.js,.pnpmfile.cjs,.pnpmfile.mjs,pnpm-workspace.yaml}": true,
+    "**/*.{code-workspace,csproj,fsproj,vbproj,vcxproj,proj,targets,props,gradle,gradle.kts}": true,
+    "**/gradle.properties": true,
+    "**/ruby_lsp/*/addon": true,
+    "**/*.lock": true,
+    "**/*-lock.{yaml,json}": true
+  },
+  "chat.agent.sandbox.enabled": "off"
+}
