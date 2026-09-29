@@ -15,6 +15,7 @@ Each skill is a folder under [`skills/`](skills/) whose name matches the
 
 | Skill | Purpose |
 | --- | --- |
+| [`api-cli`](skills/api-cli/SKILL.md) | Generate agent-first Python CLIs from OpenAPI, Swagger, and AsyncAPI specs: search-first discovery, compact help, trimmed JSON output, and bounded websocket streams. |
 | [`herdr`](skills/herdr/SKILL.md) | Control Herdr panes, tabs, workspaces, and other agents from a Herdr-managed session. Rewritten from [herdr v0.9.1](https://github.com/herdrdev/herdr/blob/v0.9.1/skills/herdr/SKILL.md). |
 | [`jacob-create-skill`](skills/jacob-create-skill/SKILL.md) | Create, improve, scaffold, and validate reusable agent skills. |
 | [`jacob-email`](skills/jacob-email/SKILL.md) | Search, read, archive, label, and draft Jacob's Proton Mail through the home server's Bridge (`pmail`); never sends. |

@@ -1,0 +1,60 @@
+"""Smoke tests over the whole generated catalogue.
+
+Every command must render its help and turn placeholder arguments into a
+request with --dry-run (no network), and search must find sampled commands by
+name. A failure here means commands.json and cli.py disagree: rebuild both.
+"""
+
+import json
+from pathlib import Path
+
+import pytest
+
+from {{pkg}} import cli
+
+
+def words(op: cli.Op) -> list[str]:
+    return [w for w in (op.get("ns", ""), op["group"], op["action"]) if w]
+
+
+def label(op: cli.Op) -> str:
+    return " ".join(words(op))
+
+
+def sample(p: cli.Param, upload: Path) -> str:
+    if "enum" in p:
+        return str(p["enum"][0])
+    kind = p.get("items", "str") if p["kind"] == "array" else p["kind"]
+    return {"int": "1", "num": "1.5", "bool": "true", "json": "{}", "file": str(upload)}.get(kind, "sample")
+
+
+def test_overview_points_at_search(capsys: pytest.CaptureFixture[str]) -> None:
+    assert cli.main([]) == 0
+    assert " search " in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("op", cli.OPS, ids=label)
+def test_help_renders(op: cli.Op, capsys: pytest.CaptureFixture[str]) -> None:
+    assert cli.main([*words(op), "--help"]) == 0
+    assert f" {op['action']} " in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("op", cli.OPS, ids=label)
+def test_dry_run_fills_the_path(op: cli.Op, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    upload = tmp_path / "upload.bin"
+    upload.write_bytes(b"x")
+    args = words(op)
+    for p in op["params"]:
+        if p.get("required"):
+            args += [f"--{p['flag']}", sample(p, upload)]
+    if op.get("raw_body") and op.get("body_required"):
+        args += ["--input", f"@{upload}"]
+    assert cli.main([*args, "--dry-run"]) == 0
+    shown = json.loads(capsys.readouterr().out)
+    assert "{" not in shown["url"]
+
+
+@pytest.mark.parametrize("op", cli.OPS[:: max(1, len(cli.OPS) // 40)], ids=label)
+def test_search_finds_command_by_name(op: cli.Op) -> None:
+    top = [hit for _, _, hit in cli.rank(label(op))[:5]]
+    assert op in top
