@@ -23,10 +23,10 @@ skill's "act only on explicit request" only where Start a ticket says.
    repos; a branch may lack the id; a tab may belong to no ticket. A gap is a
    question for Jacob, never an error, and never a guess written to ADO.
 3. **Nothing changes without a yes.** Every ADO write, agent start and prompt
-   waits for Jacob's yes to that exact change. Show the change first. Jacob naming a
-   ticket and its change or status ("tag 73120 blocked", "73120 is blocked on
-   Dana") is that yes, along with what the conventions attach to it (the
-   blocked tag's comment). Anything else you add needs its own yes.
+   waits for Jacob's yes to that exact change. Show the change first. Jacob
+   naming a ticket and its change or status ("tag 73120 blocked", "73120 is
+   blocked on Dana") is that yes, along with what the conventions attach to it
+   (the blocked tag's comment). Anything else you add needs its own yes.
 4. **Closing is Jacob's call, one ticket at a time.** Set Resolved or Closed
    only for a ticket Jacob names, in a direct instruction or in reply to a
    question about closing it. A yes to a batch never closes anything. "Done"
@@ -52,7 +52,8 @@ It prints one JSON object (`--help` documents every key) built from herdr
 agent-cli (Jacob's current-sprint tickets, their links, Jacob's PRs).
 
 - `sources`: anything not `ok` failed. Say so in one line (agent-cli exit 3
-  means "run `agent-cli doctor`") and carry on with the rest.
+  means "run `agent-cli doctor`") and carry on with the rest. An agent-cli
+  older than `ado sprint get` fails only `ado sprint`: no dates or days left.
 - `conventions`: Jacob's team rules: agent kind, tags and when they apply,
   the done rule, where analysis runs, ticket-to-repo hints. When it is `null`,
   say so once and offer to copy `assets/conventions.md` to
@@ -60,8 +61,7 @@ agent-cli (Jacob's current-sprint tickets, their links, Jacob's PRs).
   that asset's defaults.
 - `tabs[]`: `free` and `why` say whether a folder can take a new ticket.
   `screen` is the agent's last lines when it is blocked, finished, or idle on
-  unfinished work. `ticket` is null when
-  nothing ties the tab to a ticket.
+  unfinished work. `ticket` is null when nothing ties the tab to a ticket.
 - `tickets[]`: open tickets, highest priority first. `flags` are the
   mechanical findings Catch up turns into proposals.
 
@@ -105,9 +105,11 @@ preamble, and no recap of what you did not change.
 ## Catch up
 
 When Jacob asks to catch up, sync or fix tickets, answer with the proposals
-and questions only, not the board:
+and questions only: no board, no preamble, nothing after the questions.
 
-1. Number one proposal per ticket, combining its changes, each with evidence:
+1. Number one proposal per ticket, each with evidence. Every flag is one
+   change, and a ticket with several flags gets all of them in its proposal
+   (New → Active *and* link the PR):
 
    | Flag | Proposal |
    |---|---|
@@ -152,13 +154,13 @@ Close? 73066 is ready-to-deploy and PR 840 merged 5 days ago. In production?
 
 ## Update one ticket
 
-When Jacob reports or asks for a change to one ticket ("73140 is blocked on the
-data team", "73120 is in QA", "close 73066", "the lab tab is 73101"), run the snapshot for its `rev`
-and current tags, make the change in one `workitem update` with `--if-rev`,
-using the conventions' tag and its rule (a `blocked` tag gets a one-sentence
-comment in Jacob's words), then say in one line what was written. A tab
-tied to a ticket is recorded as a branch link (`workitem link`, as in Catch
-up). Closing follows rule 4.
+When Jacob reports or asks for a change to one ticket ("73140 is blocked on
+the data team", "73120 is in QA", "close 73066", "the lab tab is 73101"), run
+the snapshot for its `rev` and current tags, make the change in one
+`workitem update` with `--if-rev`, using the conventions' tag and its rule (a
+`blocked` tag gets a one-sentence comment in Jacob's words), then say in one
+line what was written, and stop. A tab tied to a ticket is recorded as a
+branch link (`workitem link`, as in Catch up). Closing follows rule 4.
 
 ## Start a ticket
 
@@ -222,7 +224,8 @@ Same snapshot. Answer in exactly this shape and stop: no board, no catch-up
 list, no questions after it. Three to six items for the next working day only
 (from `now`: Friday plans Monday): finish what is started first (blocked,
 finished, in review), then P1 New tickets whose tab will be free, then the
-rest. The OUT OF SYNC line is a count, as on the board.
+rest. Ticket fixes and close questions are not plan items: they stay in the
+OUT OF SYNC count, as on the board.
 
 ```text
 <WEEKDAY> · <open> open, <n> working days left: about <open ÷ n> a day
@@ -241,8 +244,8 @@ changing priority (`--priority`) happens only on yes.
 
 Answer from agent-cli with the narrowest call (`agent-cli search <words>`
 finds commands). Default to Jacob's tickets; other people only when named:
-"has Alex started anything?" is
-`agent-cli ado workitem list --assignee Alex --iteration @current --state New --fields id,title`.
+"has Dana started anything?" is
+`agent-cli ado workitem list --assignee Dana --iteration @current --state New --fields id,title`.
 
 ## Before you answer
 
