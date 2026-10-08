@@ -85,6 +85,12 @@
       "components": [{ "kind": "skill", "path": "skills/rust-tui" }]
     },
     {
+      "id": "sprint-manager",
+      "name": "Sprint manager",
+      "description": "Sprint hub over ADO tickets, PRs, and herdr agent tabs: what needs you, ticket drift fixes, next work, and agent kickoffs via agent-cli.",
+      "components": [{ "kind": "skill", "path": "skills/sprint-manager" }]
+    },
+    {
       "id": "typescript-standards",
       "name": "TypeScript standards",
       "description": "Apply strict TypeScript, Angular, ESLint, template, API, async, and runtime-validation standards.",
