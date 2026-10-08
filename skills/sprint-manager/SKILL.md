@@ -1,6 +1,6 @@
 ---
 name: sprint-manager
-description: "Jacob's sprint hub over ADO tickets, PRs, and herdr agent tabs via agent-cli. Use when the user asks what needs them or what's next, says a ticket is blocked or done, or wants tickets caught up, planned, or started in a tab — even if they don't say sprint."
+description: "Jacob's sprint hub over ADO tickets, PRs, and herdr agent tabs. Use when the user asks what needs them or what's next, says a ticket is blocked, done, or tied to a tab, or wants tickets caught up, planned, or started — even if they don't say sprint."
 ---
 
 # Sprint manager
@@ -59,7 +59,8 @@ agent-cli (Jacob's current-sprint tickets, their links, Jacob's PRs).
   `~/.config/sprint-manager/conventions.md` for Jacob to edit; until then use
   that asset's defaults.
 - `tabs[]`: `free` and `why` say whether a folder can take a new ticket.
-  `screen` is a blocked or finished agent's last lines. `ticket` is null when
+  `screen` is the agent's last lines when it is blocked, finished, or idle on
+  unfinished work. `ticket` is null when
   nothing ties the tab to a ticket.
 - `tickets[]`: open tickets, highest priority first. `flags` are the
   mechanical findings Catch up turns into proposals.
@@ -88,7 +89,8 @@ Order NEEDS YOU by what waiting costs:
    `screen`.
 2. Finished agents (`done`): their output waits for Jacob's review.
 3. Jacob's active PRs with open threads, or a `waiting` or `rejected` vote.
-4. Idle agents on a ticket branch with no PR: probably waiting for Jacob.
+4. Idle agents whose tab is not free and whose `screen` ends in a question
+   or a request: waiting on Jacob. Summarize what they ask.
 5. Tabs whose `ticket` is null but whose branch or title fits an open ticket:
    ask whether it is that ticket.
 
@@ -151,11 +153,12 @@ Close? 73066 is ready-to-deploy and PR 840 merged 5 days ago. In production?
 ## Update one ticket
 
 When Jacob reports or asks for a change to one ticket ("73140 is blocked on the
-data team", "73120 is in QA", "close 73066"), run the snapshot for its `rev`
+data team", "73120 is in QA", "close 73066", "the lab tab is 73101"), run the snapshot for its `rev`
 and current tags, make the change in one `workitem update` with `--if-rev`,
 using the conventions' tag and its rule (a `blocked` tag gets a one-sentence
-comment in Jacob's words), then say in one line what was written. Closing
-follows rule 4.
+comment in Jacob's words), then say in one line what was written. A tab
+tied to a ticket is recorded as a branch link (`workitem link`, as in Catch
+up). Closing follows rule 4.
 
 ## Start a ticket
 
@@ -176,7 +179,7 @@ When Jacob says "start 73131", "kick off …", or picks a suggestion:
    the target tab and ask "Send to <tab> and set <id> Active?" (Active only if
    it is New).
 5. **On yes:**
-   - No agent in the tab: `herdr agent start wi<id> --kind <Kind> --pane <pane> -- <Args>`
+   - No agent in the tab: `herdr agent start ab<id> --kind <Kind> --pane <pane> -- <Args>`
      with Kind and Args from conventions. On `agent_not_ready`, read
      `herdr agent read <pane> --source visible` and tell Jacob what it shows
      (often a folder-trust question for Jacob to answer in the tab), then
@@ -189,7 +192,8 @@ When Jacob says "start 73131", "kick off …", or picks a suggestion:
      it was New.
 6. Tell Jacob which tab to watch.
 
-Packet template; the tab's agent has none of this conversation:
+Packet template; the tab's agent has none of this conversation, so fill every
+`<…>` before showing it:
 
 ```text
 Ticket <id> (<type>): <title>
@@ -204,7 +208,7 @@ Acceptance criteria:
 How to work:
 - Check out <default branch>, pull, create the branch. Commit as you go and push the branch.
 - When done, open a PR linked to the ticket:
-  agent-cli ado pr create --repo <repo> --source <branch> --title "<title>" --workitem <id>
+  agent-cli ado pr create --repo <repo> --source <branch> --title "<id> <ticket title>" --workitem <id>
 - Do not change the ticket's state, tags or comments; Jacob's hub does that.
 - Stop and ask here whenever a decision is Jacob's.
 ```
@@ -214,19 +218,20 @@ to findings.md in this folder. No branch or PR."
 
 ## Plan tomorrow, replan
 
-Same snapshot; answer with the plan, not the board, and leave catch-up items
-to one line ("6 tickets out of sync: say catch up"). Three to six items for the
-next working day (from `now`: Friday plans Monday): finish what is started
-first (blocked, finished, in review), then P1 New tickets whose tab will be
-free, then the rest. Then the pace, and what won't fit:
+Same snapshot. Answer in exactly this shape and stop: no board, no catch-up
+list, no questions after it. Three to six items for the next working day only
+(from `now`: Friday plans Monday): finish what is started first (blocked,
+finished, in review), then P1 New tickets whose tab will be free, then the
+rest. The OUT OF SYNC line is a count, as on the board.
 
 ```text
-MONDAY · 11 open, 3 working days left: about 4 a day
+<WEEKDAY> · <open> open, <n> working days left: about <open ÷ n> a day
 1. Answer storefront's publish question (73120, P1, stalled)
 2. Review pipelines' migration result, then its PR 879 (73104)
 3. Fix Dana's thread on PR 882 (73090, P1)
 4. Start 73131 Add Apple Pay in web/checkout (P1, tab free)
-MOVE TO SPRINT 19?  73140 Dark-mode emails (P3, not started), 73077 on-call doc (12 days quiet)
+MOVE TO <next sprint>?  73140 Dark-mode emails (P3, not started), 73077 on-call doc (12 days quiet)
+OUT OF SYNC  <n> tickets: say "catch up" to review the fixes
 ```
 
 Keep the plan in ADO, not in a file: moving tickets (`--iteration @next`) or

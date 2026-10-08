@@ -24,7 +24,7 @@ Keys, in order:
   tabs         panes with an agent, a git repo, or a ticket id in the folder;
                "free" is true when the folder can take a new ticket, "why"
                says why or why not, "screen" is the agent's last lines when it
-               is blocked or done
+               is blocked, done, or idle on unfinished work
   tickets      @me's open tickets (not Closed, Removed or Done), by priority
   other_prs    @me's active PRs tied to no ticket in the sprint
   conventions  the conventions file's text, or null when it does not exist
@@ -436,7 +436,8 @@ def build(
                     "free": free,
                     "why": why,
                     "warning": f"{agents_per_folder[pane.cwd]} agents share this folder" if agents_per_folder[pane.cwd] > 1 else None,
-                    "screen": screens.get(pane.pane),
+                    # An idle agent on unfinished work may be waiting on a question.
+                    "screen": screens.get(pane.pane) if pane.status in {"blocked", "done"} or not free else None,
                 }
             )
         )
@@ -513,7 +514,7 @@ def snapshot(days: int, conventions: Path, own_pane: str, now: datetime) -> dict
         folders = sorted({p.cwd for p in panes})
         f_gits = {cwd: pool.submit(read_git, cwd) for cwd in folders}
         f_links = {i.id: pool.submit(read_links, i.id) for i in open_items}
-        f_screens = {p.pane: pool.submit(screen, p.pane) for p in panes if p.status in {"blocked", "done"}}
+        f_screens = {p.pane: pool.submit(screen, p.pane) for p in panes if p.status in {"blocked", "done", "idle"}}
         gits: dict[str, Git | None] = {cwd: attempt(sources, "git", None, f.result) for cwd, f in f_gits.items()}
         links = {item_id: attempt(sources, "ado links", Links(frozenset(), (), ()), f.result) for item_id, f in f_links.items()}
         screens = {pane: f.result() for pane, f in f_screens.items()}
