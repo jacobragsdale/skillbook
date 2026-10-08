@@ -404,6 +404,8 @@ def build(
 ) -> tuple[list[dict[str, object]], list[dict[str, object]], list[dict[str, object]]]:
     """Join tickets, PRs and panes. Returns (tabs, tickets, other_prs)."""
     by_id = {item.id: item for item in items}
+    # A branch linked in ADO ties a tab to its ticket even when the name has no id.
+    linked_branches = {branch: item_id for item_id, link in links.items() for branch in link.branches}
     agents_per_folder = Counter(pane.cwd for pane in panes if pane.agent)
 
     tabs: list[dict[str, object]] = []
@@ -413,7 +415,7 @@ def build(
         found = ids_in(repo.branch if repo else "", Path(pane.cwd).name)
         if not (pane.agent or repo or found):
             continue
-        ticket = next((i for i in found if i in by_id), None)
+        ticket = next((i for i in found if i in by_id), None) or (linked_branches.get(f"{repo.repo}:{repo.branch}") if repo else None)
         branch_prs = [pr for pr in prs.values() if repo and pr.repo == repo.repo and pr.source == repo.branch and repo.branch != repo.default]
         free, why = tab_state(pane.status, repo, by_id[ticket].state if ticket else None, branch_prs)
         if ticket:
@@ -568,7 +570,7 @@ def self_check() -> None:
         Item(102, "Task", "forgotten", "Active", 3, (), datetime(2026, 9, 27, tzinfo=UTC), 2),
         Item(103, "Task", "done", "Closed", 2, (), now, 9),
     ]
-    links = {100: Links(frozenset(), (), ()), 101: Links(frozenset({7}), (), (900,)), 102: Links(frozenset(), (), ())}
+    links = {100: Links(frozenset(), (), ()), 101: Links(frozenset({7}), (), (900,)), 102: Links(frozenset(), ("lab:spike-x",), ())}
     prs = {
         7: PR(7, "api", "Fix it", "completed", "101-fix", False, (), None, frozenset({101})),
         8: PR(8, "api", "Start it", "active", "100-start", False, (("Sam", "waiting"),), 2, frozenset()),
@@ -578,8 +580,9 @@ def self_check() -> None:
         Pane("w1:p1", "plat/api", "/r/api", "claude", "idle", "x"),
         Pane("w1:p2", "plat/web", "/r/web", None, None, ""),
         Pane("w1:p3", "plat/old", "/r/old", "claude", "blocked", "y"),
+        Pane("w1:p4", "plat/lab", "/r/lab", "claude", "idle", "z"),
     ]
-    gits = {"/r/api": Git("api", "100-start", "main", 0), "/r/web": Git("web", "main", "main", 0), "/r/old": Git("old", "103-done", "main", 0)}
+    gits = {"/r/api": Git("api", "100-start", "main", 0), "/r/web": Git("web", "main", "main", 0), "/r/old": Git("old", "103-done", "main", 0), "/r/lab": Git("lab", "spike-x", "main", 0)}
     tabs, tickets, other = build(items, links, prs, panes, gits, {900: "Closed"}, {}, now)
     by_where = {t["where"]: t for t in tabs}
     assert by_where["plat/api"]["free"] is False and "PR 8" in str(by_where["plat/api"]["why"])
@@ -588,7 +591,7 @@ def self_check() -> None:
     flags = {t["id"]: t.get("flags", []) for t in tickets}
     assert flags[100] == ["new_with_work", "pr_not_linked:8"], flags[100]
     assert flags[101] == ["all_prs_merged", "blocker_closed:900"], flags[101]
-    assert flags[102] == ["no_evidence"], flags[102]
+    assert by_where["plat/lab"]["ticket"] == 102 and flags[102] == [], flags[102]
     assert 103 not in flags and [t["id"] for t in tickets] == [101, 100, 102]
     assert [p["id"] for p in other] == [9]
     assert tab_state(None, Git("api", "101-fix", "main", 0), "Active", [prs[7]]) == (True, "this branch's PRs are done: switch to main first")

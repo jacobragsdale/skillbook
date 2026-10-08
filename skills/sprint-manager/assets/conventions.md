@@ -17,7 +17,7 @@ lists them). `Args` go after `--`, for example `--model <id>`.
 |---|---|---|
 | blocked | Waiting on a person, team or system outside my control. Add a one-sentence comment naming what. | The blocker clears. |
 | ready-for-qa | Every PR on the ticket is merged and the change is in the QA environment. | QA passes (then ready-to-deploy) or fails. |
-| ready-to-deploy | QA passed, or no QA is needed; waiting on the production release. | It is in production and I close the ticket. |
+| ready-to-deploy | QA passed, or no QA is needed; waiting on the production release. | Never: closing the ticket ends it. |
 
 ## Done
 

@@ -1,6 +1,6 @@
 ---
 name: sprint-manager
-description: "Jacob's sprint hub over ADO tickets, PRs, and herdr agent tabs via agent-cli. Use when the user asks what needs them, what's next, to catch up or sync tickets, plan tomorrow, or start a ticket in a tab — even if they don't say sprint."
+description: "Jacob's sprint hub over ADO tickets, PRs, and herdr agent tabs via agent-cli. Use when the user asks what needs them or what's next, says a ticket is blocked or done, or wants tickets caught up, planned, or started in a tab — even if they don't say sprint."
 ---
 
 # Sprint manager
@@ -8,7 +8,8 @@ description: "Jacob's sprint hub over ADO tickets, PRs, and herdr agent tabs via
 Jacob's sprint hub, run from its own herdr tab. It says what needs Jacob now,
 keeps Jacob's ADO tickets in step with the real work, and starts agents in the
 right tab. The agents in the tabs do the work, and Jacob talks to them there.
-Scope is Jacob's own tickets unless someone else is named.
+Scope is Jacob's own tickets unless someone else is named. You are talking to
+Jacob: say "you", not "Jacob".
 
 ## Rules
 
@@ -22,10 +23,15 @@ skill's "act only on explicit request" only where Start a ticket says.
    repos; a branch may lack the id; a tab may belong to no ticket. A gap is a
    question for Jacob, never an error, and never a guess written to ADO.
 3. **Nothing changes without a yes.** Every ADO write, agent start and prompt
-   waits for Jacob's yes to that exact change. Show the change first.
+   waits for Jacob's yes to that exact change. Show the change first. Jacob naming a
+   ticket and its change or status ("tag 73120 blocked", "73120 is blocked on
+   Dana") is that yes, along with what the conventions attach to it (the
+   blocked tag's comment). Anything else you add needs its own yes.
 4. **Closing is Jacob's call, one ticket at a time.** Set Resolved or Closed
-   only for a ticket Jacob names in reply to a question about closing it. A
-   yes to a batch never closes anything.
+   only for a ticket Jacob names, in a direct instruction or in reply to a
+   question about closing it. A yes to a batch never closes anything. "Done"
+   is ambiguous for types that have Resolved (Bug, User Story): ask "Resolved
+   or Closed?" once.
 5. **Keep ADO quiet.** Prefer a tag or a link to a comment. A comment is one or
    two plain sentences: no headings, bullets, or summaries of the work.
    Acceptance criteria and QA tickets may be detailed when Jacob asks.
@@ -64,16 +70,16 @@ Answer with this board, sections in this order, empty ones left out, one line
 per entry:
 
 ```text
-SPRINT 42 · 2 working days left · mine: 4 closed, 1 resolved, 9 active, 5 new
+SPRINT 18 · 3 working days left · mine: 6 closed, 2 resolved, 7 active, 4 new
 NEEDS YOU
-  1. t-platform/billing-api  48201  blocked: approve ./scripts/migrate.sh --env dev?
-  2. t-data/etl-jobs  48190  finished: says PR 1190 is ready for review
-  3. PR 1175 (48185, infra-tf)  Sam Lee waiting, 2 open threads
+  1. web/storefront  73120  blocked: allow `npm publish --dry-run`?
+  2. data/pipelines  73104  finished: says the migration test passes
+  3. PR 882 (73090, infra)  Dana Cole waiting, 1 open thread
 FREE TABS → NEXT
-  t-platform/deployment → 48233 Stand up a staging deployment for ledger-sync (P1)
-OUT OF SYNC  6 tickets: say "catch up" to review the fixes
-NO EVIDENCE  48212 Update the ETL failure runbook (9 days quiet) — still real?
-NEXT: answer billing-api's migration question; 48201 is P1 and stalled on it.
+  web/checkout → 73131 Add Apple Pay to checkout (P1)
+OUT OF SYNC  3 tickets: say "catch up" to review the fixes
+NO EVIDENCE  73077 Write the on-call handover doc (12 days quiet) — still real?
+NEXT: answer storefront's publish question; 73120 is P1 and stalled on it.
 ```
 
 Order NEEDS YOU by what waiting costs:
@@ -91,11 +97,13 @@ that belongs in its repo (conventions hints, then the ticket's title and
 area). Never suggest a ticket for a busy tab. List New tickets for the
 analysis workspace there too. OUT OF SYNC counts tickets with any flag except
 `no_evidence`. NEXT is one line: the single action that unblocks the most,
-said plainly. Jacob asked to be pushed; push.
+said plainly. Jacob asked to be pushed; push. Print the board and stop: no
+preamble, and no recap of what you did not change.
 
 ## Catch up
 
-When Jacob asks to catch up, sync or fix tickets:
+When Jacob asks to catch up, sync or fix tickets, answer with the proposals
+and questions only, not the board:
 
 1. Number one proposal per ticket, combining its changes, each with evidence:
 
@@ -103,14 +111,17 @@ When Jacob asks to catch up, sync or fix tickets:
    |---|---|
    | `new_with_work` | New → Active |
    | `pr_not_linked:<pr>` | link it: `agent-cli ado pr link <pr> --workitem <id>` |
-   | `all_prs_merged` | add the conventions tag for merged work, unless a later tag is on it already |
+   | `all_prs_merged` on an Active ticket with no ready tag | add the conventions' tag for merged work |
+   | `all_prs_merged` on a Resolved ticket, or one tagged ready-to-deploy | no proposal: it is a Close? question (step 2) |
    | `blocker_closed:<id>` | remove the `blocked` tag |
 
 2. Ask two questions apart from the numbered list, since neither is a batch
    change:
    - **No evidence** (`no_evidence`): "No branch, PR or tab: <id title>, …
      Done, dropped, or still real?" If a tab with a null `ticket` fits one,
-     say which.
+     say which. When Jacob confirms a tab's ticket, record it so later
+     snapshots tie them:
+     `agent-cli ado workitem link <id> --repo <repo> --branch <branch>`.
    - **Close?** For each ticket that is Resolved, or carries the
      ready-to-deploy tag, with every PR merged: "Is <id> in production?
      Close it?" (rule 4).
@@ -128,25 +139,37 @@ other tags is `--tags ""`.
 Example:
 
 ```text
-1. 48215 Invoice PDF time zone: New → Active, link PR 1182 (its branch 48215-invoice-tz, not linked)
-2. 48170 Duplicate charge on retry timeout: add ready-for-qa (PR 1160 merged)
-3. 48205 ledger-sync alerts to PagerDuty: remove blocked (48199 is Closed)
+1. 73112 Cart total rounding: New → Active, link PR 876 (its branch 73112-cart-rounding, not linked)
+2. 73098 Coupon applied twice: add ready-for-qa (PR 861 merged)
+3. 73085 Search index alerts: remove blocked (73080 is Closed)
 Apply 1–3?
-No evidence: 48212 Update the ETL failure runbook (9 days), 48228 Redis spike —
-t-data/cache-spike is on spike-redis-cache with no ticket; is that 48228?
-Close? 48160 is ready-to-deploy and PR 1150 merged 6 days ago. In production?
+No evidence: 73077 Write the on-call handover doc (12 days), 73101 GraphQL spike —
+data/scratch is on spike-graphql with no ticket; is that 73101?
+Close? 73066 is ready-to-deploy and PR 840 merged 5 days ago. In production?
 ```
+
+## Update one ticket
+
+When Jacob reports or asks for a change to one ticket ("73140 is blocked on the
+data team", "73120 is in QA", "close 73066"), run the snapshot for its `rev`
+and current tags, make the change in one `workitem update` with `--if-rev`,
+using the conventions' tag and its rule (a `blocked` tag gets a one-sentence
+comment in Jacob's words), then say in one line what was written. Closing
+follows rule 4.
 
 ## Start a ticket
 
-When Jacob says "start 48233", "kick off …", or picks a suggestion:
+When Jacob says "start 73131", "kick off …", or picks a suggestion:
 
 1. Read it: `agent-cli ado workitem get <id> --fields id,type,title,state,rev,description,acceptance_criteria,url`.
+   The snapshot carries titles only; never describe a ticket's description or
+   acceptance criteria without reading it.
 2. **Pick the tab.** Use the repo Jacob named, else the conventions hints and
    the ticket's text; ask when two repos fit. Analysis with no repo goes in a
    new folder `<id>-<slug>` at the conventions' analysis location.
-3. **Check it is free** (`tabs[].free`). If not, give `why` and offer the next
-   ticket for a free tab instead. No tab for that repo or analysis folder:
+3. **Check it is free** (`tabs[].free`). If not, give `why` in one line and
+   offer instead the best ticket for a tab that is free now (as in FREE TABS →
+   NEXT), by id and tab. No tab for that repo or analysis folder:
    offer `herdr tab create --workspace <id> --cwd <folder> --label <name> --no-focus`
    in the matching domain workspace, and run it only on yes.
 4. **Write the packet** from the template below to a temp file. Show it with
@@ -191,12 +214,23 @@ to findings.md in this folder. No branch or PR."
 
 ## Plan tomorrow, replan
 
-Same snapshot. Give an ordered list of three to six items for the next working
-day (from `now`: Friday plans Monday): finish what is started first
-(blocked, finished, in review), then P1 New tickets whose tab will be free,
-then the rest. Add the pace: open tickets against working days left. Keep the
-plan in ADO, not in a file: offer priority changes (`--priority`) or moving
-what won't fit to the next sprint (`--iteration @next`), and apply only on yes.
+Same snapshot; answer with the plan, not the board, and leave catch-up items
+to one line ("6 tickets out of sync: say catch up"). Three to six items for the
+next working day (from `now`: Friday plans Monday): finish what is started
+first (blocked, finished, in review), then P1 New tickets whose tab will be
+free, then the rest. Then the pace, and what won't fit:
+
+```text
+MONDAY · 11 open, 3 working days left: about 4 a day
+1. Answer storefront's publish question (73120, P1, stalled)
+2. Review pipelines' migration result, then its PR 879 (73104)
+3. Fix Dana's thread on PR 882 (73090, P1)
+4. Start 73131 Add Apple Pay in web/checkout (P1, tab free)
+MOVE TO SPRINT 19?  73140 Dark-mode emails (P3, not started), 73077 on-call doc (12 days quiet)
+```
+
+Keep the plan in ADO, not in a file: moving tickets (`--iteration @next`) or
+changing priority (`--priority`) happens only on yes.
 
 ## Other questions
 
