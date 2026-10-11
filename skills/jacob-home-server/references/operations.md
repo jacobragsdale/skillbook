@@ -153,6 +153,7 @@ service facts in the home-server repo rather than copying them here.
   deliberate protections; read the script before altering them.
 - RomM's `EJS_defaultControls` replaces the entire control map. Supply a full
   per-core map; browser localStorage may still override per-game toggles.
+  RomM re-reads `config.yml` on every request, so edits need no restart.
 - Treat only the Home Assistant files explicitly synced by `deploy.sh` as
   repo-owned. The rest of `~/home-assistant` is live, root-owned app data.
 - Read `docs/services.md` hardware detail before audio or ML work. Match ALSA
