@@ -61,8 +61,10 @@ VM operation.
   can join production systems, repoint DNS, arm notification timers, and prune
   the real backup repository.
 - Prefer the repository's Bash entry points. The SSH login shell is zsh; for
-  nontrivial ad-hoc remote logic, invoke Bash explicitly. If pacman was killed,
-  confirm no pacman process exists before removing `/var/lib/pacman/db.lck`.
+  nontrivial ad-hoc remote logic, invoke Bash explicitly. If apt or dpkg was
+  killed mid-run, confirm no apt or dpkg process exists, then finish it with
+  `sudo dpkg --configure -a`; dpkg's locks die with the process, so there is
+  no lock file to delete.
 
 ## Apply changes
 

@@ -50,13 +50,16 @@ rebuild, or destroying/resetting the on-demand Windows VM.
 ## Production rebuild
 
 Follow `docs/rebuild.md` and the current `bootstrap.sh` header, not a memorized
-sequence. The durable shape is: validate the destructive archinstall disk
-config → install Arch → restore the age key → `deploy.sh --sync-only` → run
+sequence. The durable shape is: identify the target disk by model and serial
+→ from a Debian live system, `host/debian/provision-root.sh partition` (only
+when `/home` is lost) and `build` → reboot and check the new SSH host key →
+restore the age key → `deploy.sh --sync-only` → run
 `bootstrap.sh` with automation cold → reclaim and approve the Tailscale
 identity/IP → restore the chosen restic snapshot → full deploy →
 `EXPECT_AUTOMATION=cold scripts/verify.sh` plus drift →
 `host/install.sh --activate` → normal verify/drift and real client tests → a
-fresh successful backup.
+fresh successful backup. When `/home` survived, `build` alone reinstalls the
+system beside it: skip the age key and the restic restore.
 
 Reconfirm the hostname, fixed Tailscale identity/IP, LAN reservation, disk
 layout, age key, restic password, and SSH access before starting. Credentials
@@ -68,6 +71,9 @@ to succeed before treating container restart-policy state as healthy.
 
 ## Rebuild rehearsal
 
+- `host/debian/rehearsal.sh` builds and runs the rehearsal guest on the server
+  (its header lists the commands); `docs/rebuild.md` "Rehearse safely" has the
+  sequence.
 - Set `REHEARSAL=1` on `bootstrap.sh`, `host/install.sh`, and every deploy or
   drift command pointed at the VM. Also set `SERVER=<vm-alias>`. This prevents a
   tailnet join and leaves timers disarmed.
@@ -76,12 +82,10 @@ to succeed before treating container restart-policy state as healthy.
   timers can page the phone or delete rehearsal data.
 - Compose binds the production Tailscale and LAN addresses. Add both as `/32`
   loopback addresses in the VM before deploy and re-add them after reboot.
-- A fresh box has password-based sudo until the first `host/install.sh` run
-  installs the validated NOPASSWD drop-in. Plan for the first prompt.
 - For QEMU/slirp, disable IPv6 or provide deterministic reachable DNS before
   Docker builds. Over serial, ttyS0 is a login prompt; detached installers must
-  not read the tty. After an interrupted archinstall, clear leftover chroot
-  `gpg-agent` or nspawn processes before re-wiping.
+  not read the tty. After an interrupted `provision-root.sh build`, unmount
+  `/mnt/debian` recursively before running it again.
 - Treat a successful rehearsal as evidence only after restore verification,
   targeted endpoint checks, host health, and drift all pass.
 

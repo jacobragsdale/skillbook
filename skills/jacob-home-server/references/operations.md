@@ -93,12 +93,18 @@ service facts in the home-server repo rather than copying them here.
 
 - Declare packages in `host/packages.txt`, host configuration in `host/etc/`,
   units in `host/systemd/`, and automation in `host/scripts/`. Do not use an
-  ad-hoc `pacman -S` as the final state.
+  ad-hoc `apt install` as the final state.
 - After checks and a clean commit/push, run the full no-argument deploy. It
   invokes `host/install.sh`, creates missing data-layout roots, converges the
   repo-owned systemd namespace in both directions, and preserves the current
   activation state. Do not run the installer a second time. Package removal is
-  a separate human decision: inspect reverse dependencies before `pacman -Rns`.
+  a separate human decision: inspect reverse dependencies
+  (`apt-cache rdepends --installed <package>`) before `apt-get purge`.
+- Debian's `systemd-boot` package owns the loader and writes a loader entry
+  for each kernel; a new kernel or rebuilt initramfs boots on trial and the
+  loader falls back when the trial fails. Read "Boot and kernel upgrades" in
+  `docs/services.md` before touching `/boot/efi`, `/etc/kernel`, or a loader
+  entry, and never pin a default entry.
 - Routine maintenance deliberately excludes Docker runtime upgrades. Read
   `host/scripts/maintenance.sh` before intentionally updating Docker,
   containerd, or runc because that path restarts the runtime and runs a canary.
