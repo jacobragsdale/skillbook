@@ -24,7 +24,8 @@ zip on Nexus (DELETE, then PUT — the files repo is ALLOW_ONCE).
   --url URL             Destination artifact URL (default: skillbook-latest.zip).
 
 Password, first match wins: NEXUS_PASSWORD, macOS keychain item
-repo.ragsdale.dev for NEXUS_USER (default admin), else curl prompts.
+repo.ragsdale.dev for NEXUS_USER (default admin), the file NEXUS_PASSWORD_FILE
+(default ~/.config/skillbook/nexus-password), else curl prompts.
 EOF
 }
 
@@ -50,7 +51,7 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-for required in python3 zip curl shasum; do
+for required in python3 curl shasum unzip; do
   command -v "$required" >/dev/null 2>&1 || {
     echo "publish-source.sh: required command is missing: $required" >&2
     exit 1
@@ -178,10 +179,20 @@ for rel in "${COMPONENT_PATHS[@]}"; do
   copy_portable_path "$rel"
 done
 
-(
-  cd "$STAGE"
-  zip -r -X -q "$ZIP_PATH" .
-)
+# Python's zipfile rather than zip(1), which the Linux host does not have.
+python3 - "$STAGE" "$ZIP_PATH" <<'PY'
+import os
+import sys
+import zipfile
+
+stage, out = sys.argv[1], sys.argv[2]
+with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as archive:
+    for root, dirs, files in os.walk(stage):
+        dirs.sort()
+        for name in [*dirs, *sorted(files)]:
+            path = os.path.join(root, name)
+            archive.write(path, os.path.relpath(path, stage))
+PY
 
 [[ -f "$STAGE/agent-plugins.json" ]] || {
   echo "publish-source.sh: staged tree is missing agent-plugins.json" >&2
@@ -240,6 +251,10 @@ NEXUS_USER="${NEXUS_USER:-admin}"
 PASSWORD="${NEXUS_PASSWORD:-}"
 if [[ -z "$PASSWORD" ]] && command -v security >/dev/null 2>&1; then
   PASSWORD="$(security find-generic-password -s "$KEYCHAIN_SERVICE" -a "$NEXUS_USER" -w 2>/dev/null || true)"
+fi
+PASSWORD_FILE="${NEXUS_PASSWORD_FILE:-$HOME/.config/skillbook/nexus-password}"
+if [[ -z "$PASSWORD" && -r "$PASSWORD_FILE" ]]; then
+  PASSWORD="$(<"$PASSWORD_FILE")"
 fi
 
 AUTH_ARGS=()

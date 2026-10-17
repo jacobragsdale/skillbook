@@ -39,9 +39,11 @@ standalone package; related skills may also appear together in an optional
 bundle. Installed skills are namespaced copies (`skillbook-<name>`), not live
 links into this repository.
 
-Requires `python3`, `zip`, `curl`, and `shasum`. Upload uses the Nexus `admin`
-password from `NEXUS_PASSWORD`, the macOS keychain item `repo.ragsdale.dev`, or
-a curl prompt.
+Requires `python3`, `curl`, `shasum`, and `unzip`, so it runs on the Linux host
+and on macOS. Upload uses the Nexus `admin` password from `NEXUS_PASSWORD`, the
+macOS keychain item `repo.ragsdale.dev`, the file
+`~/.config/skillbook/nexus-password` (mode 600; override with
+`NEXUS_PASSWORD_FILE`), or a curl prompt.
 
 ```bash
 # Pack and validate without uploading
