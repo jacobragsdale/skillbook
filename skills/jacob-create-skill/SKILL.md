@@ -1,6 +1,7 @@
 ---
 name: jacob-create-skill
 description: Create, improve, or validate agent skills (SKILL.md folders). Use whenever the user wants a new skill, trigger fix, review, refactor, scaffold, or bundled script — even if they don't say "skill" but want a reusable agent workflow, checklist, or SOP.
+disable-model-invocation: true
 metadata:
   author: jacob
 ---

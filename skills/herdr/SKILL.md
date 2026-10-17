@@ -1,6 +1,7 @@
 ---
 name: herdr
 description: "Control Herdr terminal panes, tabs, workspaces, and the agents running in them. Use when the user explicitly asks for Herdr, a new pane/tab/workspace, another agent, or to message or read one — even if they don't say Herdr. Never for mere parallelism."
+disable-model-invocation: true
 ---
 
 # Herdr

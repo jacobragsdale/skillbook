@@ -29,7 +29,9 @@ Each skill is a folder under [`skills/`](skills/) whose name matches the
 | [`typescript-standards`](skills/typescript-standards/SKILL.md) | Apply strict TypeScript, Angular, ESLint, template, API, async, and runtime-validation standards. |
 | [`write-diataxis-docs`](skills/write-diataxis-docs/SKILL.md) | Write and audit technical documentation as tutorials, how-to guides, reference, or explanation. |
 
-Skills are model-invocable by default through their descriptions.
+Skills are model-invocable by default through their descriptions. `herdr` and
+`jacob-create-skill` set `disable-model-invocation: true`: they stay out of the
+model's context and run only when invoked by name (`/herdr`, `/jacob-create-skill`).
 
 ## Publish the skills
 
