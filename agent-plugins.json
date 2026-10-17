@@ -13,6 +13,12 @@
       "components": [{ "kind": "skill", "path": "skills/api-cli" }]
     },
     {
+      "id": "capture-app-context",
+      "name": "Capture app context",
+      "description": "Write a repo's operational context: environments, logs, databases, AKS workloads, jobs, and outside systems, confirmed read-only through agent-cli, into docs/app-context.md.",
+      "components": [{ "kind": "skill", "path": "skills/capture-app-context" }]
+    },
+    {
       "id": "copilot-wsl",
       "name": "Copilot on WSL",
       "description": "Install GitHub Copilot CLI and configure it and VS Code Copilot on Windows WSL for full access with no approval prompts.",

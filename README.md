@@ -16,6 +16,7 @@ Each skill is a folder under [`skills/`](skills/) whose name matches the
 | Skill | Purpose |
 | --- | --- |
 | [`api-cli`](skills/api-cli/SKILL.md) | Generate agent-first Python CLIs from OpenAPI, Swagger, and AsyncAPI specs: search-first discovery, compact help, trimmed JSON output, and bounded websocket streams. |
+| [`capture-app-context`](skills/capture-app-context/SKILL.md) | Write a repo's operational context (`/capture-app-context` only): environments, logs, databases, AKS workloads, jobs, and outside systems, confirmed read-only through agent-cli, into `docs/app-context.md`. |
 | [`herdr`](skills/herdr/SKILL.md) | Control Herdr panes, tabs, workspaces, and other agents from a Herdr-managed session. Rewritten from [herdr v0.9.1](https://github.com/herdrdev/herdr/blob/v0.9.1/skills/herdr/SKILL.md). |
 | [`jacob-create-skill`](skills/jacob-create-skill/SKILL.md) | Create, improve, scaffold, and validate reusable agent skills. |
 | [`jacob-email`](skills/jacob-email/SKILL.md) | Search, read, archive, label, and draft Jacob's Proton Mail through the home server's Bridge (`pmail`); never sends. |
@@ -29,9 +30,11 @@ Each skill is a folder under [`skills/`](skills/) whose name matches the
 | [`typescript-standards`](skills/typescript-standards/SKILL.md) | Apply strict TypeScript, Angular, ESLint, template, API, async, and runtime-validation standards. |
 | [`write-diataxis-docs`](skills/write-diataxis-docs/SKILL.md) | Write and audit technical documentation as tutorials, how-to guides, reference, or explanation. |
 
-Skills are model-invocable by default through their descriptions. `herdr` and
-`jacob-create-skill` set `disable-model-invocation: true`: they stay out of the
-model's context and run only when invoked by name (`/herdr`, `/jacob-create-skill`).
+Skills are model-invocable by default through their descriptions. `herdr`,
+`jacob-create-skill`, and `capture-app-context` set
+`disable-model-invocation: true`: they stay out of the model's context and run
+only when invoked by name (`/herdr`, `/jacob-create-skill`,
+`/capture-app-context`).
 
 ## Publish the skills
 
