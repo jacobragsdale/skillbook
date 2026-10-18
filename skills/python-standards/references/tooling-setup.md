@@ -1,7 +1,24 @@
 # Tooling setup
 
-Read when standardizing a repo's tooling, migrating a type checker, or
-debugging a hook that behaves differently from the local command.
+Read when creating or standardizing one of Jacob's repos, migrating a type
+checker, or debugging a hook that behaves differently from the local command.
+
+## House repo layout
+
+- Keep dependencies, dev dependencies, and tool configuration in one
+  `pyproject.toml`; commit `uv.lock`. Remove `requirements*.txt`, `setup.py`,
+  `setup.cfg`, `Pipfile`, and setup scripts.
+- For a new project, choose `project.requires-python` from its deployment and
+  dependency constraints, configure tools against that floor, and test the
+  floor in CI. A `.python-version` picks a development interpreter; it does
+  not define the compatibility range.
+- Expose each entry point as one `uv run` command with no prerequisite shell
+  state.
+- Decorate every overriding method with `@override` (the asset's ty rules
+  enforce it); import it from `typing_extensions` when the floor predates 3.12.
+- After a dependency or environment change, delete only the repo-local
+  `.venv`, run `uv sync --locked`, and check the entry point imports from the
+  fresh environment.
 
 ## Standardize a repo
 
