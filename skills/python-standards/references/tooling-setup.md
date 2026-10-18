@@ -1,6 +1,6 @@
 # Tooling setup
 
-Read when creating or standardizing one of Jacob's repos, migrating a type
+Read when creating a repo or standardizing one on request, migrating a type
 checker, or debugging a hook that behaves differently from the local command.
 
 ## House repo layout
@@ -14,6 +14,8 @@ checker, or debugging a hook that behaves differently from the local command.
   not define the compatibility range.
 - Expose each entry point as one `uv run` command with no prerequisite shell
   state.
+- Commit `.env.example`, gitignore the rest of `.env*`, load the file with
+  `uv run --env-file .env`, and never call `load_dotenv()`.
 - Decorate every overriding method with `@override` (the asset's ty rules
   enforce it); import it from `typing_extensions` when the floor predates 3.12.
 - After a dependency or environment change, delete only the repo-local

@@ -5,14 +5,11 @@ description: "Enforce high-integrity Python implementation and tooling; exclude 
 
 # Python house standard
 
-These rules cover the Python you write or change. In someone else's repo, its
-own config, tools, and conventions win: do not migrate its tooling, tighten
-its checks, add a dependency, or refactor code the task does not touch.
-Jacob's own repos also get the house libraries and tooling in
-[Jacob's own repos](#jacobs-own-repos). A repo is his own only when its
-`AGENTS.md` says the house Python standards apply, he says so, or you are
-creating a new repo for him; when you create one, add that line to its
-`AGENTS.md`.
+These rules cover the Python you write or change. The repo's own config,
+tools, and conventions win: unless the user asks, do not migrate its tooling,
+tighten its checks, add a dependency, or refactor code the task does not
+touch. [Libraries and tooling](#libraries-and-tooling) says which house
+choices apply, based on what the repo already uses.
 
 ## Types
 
@@ -70,10 +67,11 @@ creating a new repo for him; when you create one, add that line to its
 - Build clients, pools, and sessions in the FastAPI `lifespan` handler, not at
   import time.
 
-## Jacob's own repos
+## Libraries and tooling
 
-- Use Pydantic for record and object boundaries with this config. Lax mode is
-  deliberate: do not add `strict=True`.
+- **Pydantic is a dependency:** give new boundary models the config the
+  repo's existing models use. When there are none, use this one; lax mode is
+  deliberate, so do not add `strict=True`.
 
   ```python
   model_config = ConfigDict(
@@ -88,17 +86,19 @@ creating a new repo for him; when you create one, add that line to its
   Do not use `model_construct()` or unvalidated `model_copy(update=...)` with
   boundary data. Keep validation at ingress in hot paths too; replace a model
   with a dataclass only after measuring.
-- Load configuration once at startup through a `pydantic-settings`
-  `BaseSettings` using the options above. Give environment-backed fields no
-  default, so missing configuration stops startup. Never read required
-  settings with `os.getenv` or `os.environ.get`. Commit `.env.example`,
-  gitignore the rest of `.env*`, load it with `uv run --env-file .env`, and
-  never call `load_dotenv()`.
-- Copy the Ruff and ty sections of `assets/pyproject.toml` and all of
-  `assets/pre-commit-config.yaml` verbatim. Read
-  `references/tooling-setup.md` before creating or standardizing a repo,
-  migrating from another type checker, or debugging a hook.
-- For a package published to others, read `references/packaging.md`.
+- **pydantic-settings is a dependency:** load configuration once at startup
+  through a `BaseSettings`. Give environment-backed fields no default, so
+  missing configuration stops startup, and never read required settings with
+  `os.getenv` or `os.environ.get`.
+- **Neither is a dependency:** validate with what the repo already uses; add
+  Pydantic only when the user agrees.
+- **New repo, or the user asks to standardize one:** read
+  `references/tooling-setup.md` first, copy the Ruff and ty sections of
+  `assets/pyproject.toml` and all of `assets/pre-commit-config.yaml`
+  verbatim, and use Pydantic for boundaries and pydantic-settings for
+  configuration. Also read that reference when migrating from another type
+  checker or debugging a hook.
+- **Package published to others:** read `references/packaging.md`.
 
 ## Verification
 
