@@ -22,6 +22,9 @@ These rules replace the default "optimize while reading" behavior:
   named tolerance (float reassociation, result order).
 - Never run anything needing root or changing system settings (governor,
   cache drops, sysctl); suggest it. Ask before installing system packages.
+- Explain every number you report: name its limiter, the resource or code
+  path that stops it being twice as fast, from a profile or counters, not
+  from reading code.
 
 ## Workflow
 
@@ -49,6 +52,13 @@ debug builds profile a different program. Name the one exact artifact the
 workload runs, never a glob: a hashed name like `target/release/deps/perf-*`
 also matches stale builds. Every later "rebuild" means that artifact.
 
+Run it with production settings too: batch and transaction sizes,
+connection pools, indexes, and caches as warm or cold as production sees
+them. When the limiter turns out to be a setting (a commit per row, a debug
+flag, a missing index), the workload is untuned: say so in the brief and
+plan the setting as its own item, because code profiled around it puts the
+hot path in the wrong place.
+
 Look at what the workload prints. When stdout is a pass/fail summary or
 timings rather than the program's real output (a test runner's "7 passed"),
 `abtest.py`'s output check proves nothing: plan a differential dump harness
@@ -68,6 +78,13 @@ the wall-time verdict of this self-comparison. Output must be identical
 across these runs. If `abtest.py` exits 4, the output is nondeterministic;
 pass `--normalize '<filter>'` (strip timings, `sort` unordered lines) or fix
 the seed until it is stable, and use the same flag in every later A/B.
+
+Then confirm the timed region does the work. Requests reach the server,
+rows are written, and lazy results (generators, unawaited promises, values
+the compiler can drop) are consumed inside it. Count failures and
+non-success responses: errors and rejections are fast, so a workload that
+skips part of its work looks quick. The baseline must report zero failures,
+or the same failures on every run.
 
 ### 3. Profile
 
@@ -192,11 +209,17 @@ Then for each approved item in plan order:
    differential harness is the only real check. Keep harnesses in the
    scratchpad, copy the same file into both sides for the run, and remove
    them before committing.
-5. Keep the item only when wall time is FASTER and every equivalence check
+5. Check the arithmetic: a saving larger than the share of wall time the
+   changed code took in the profile is impossible, so that A/B measured
+   something else (a cache, skipped work, an error path). Find out what
+   before judging the item.
+6. Keep the item only when wall time is FASTER and every equivalence check
    passes. When the interval's near edge is within the noise floor, repeat
-   the A/B with another `--seed` and keep it only if both say FASTER. Otherwise revert it (`git restore .` and delete files it created)
-   and record the numbers and the reason.
-6. Commit a kept item with its A/B numbers in the message body, then,
+   the A/B with another `--seed` and keep it only if both say FASTER.
+   Otherwise revert it (`git restore .` and delete files it created) and
+   record the numbers, the reason, and the limiter that explains a "no
+   detectable difference" when the profile shows one.
+7. Commit a kept item with its A/B numbers in the message body, then,
    unless it is the last item, move the baseline to it (`git -C
    <tmp>/perf-base checkout --detach <sha>`) and rebuild, so each item is
    measured against the items kept before it. When the repo's instructions
@@ -219,6 +242,7 @@ Report with this table plus one line per skipped or rejected item:
 | 3 | Cache schema | rejected | 131.0 → 130.6 ms | no detectable diff | — |
 
 End to end: 182.4 → 118.9 ms (−34.8%, CI −35.6..−34.0), output identical.
+Now bound by JSON parsing on one core (61% of wall).
 ```
 
 ## Example
