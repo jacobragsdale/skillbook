@@ -104,6 +104,21 @@ House rules, and why:
 - **Replace vague nuance with decision rules.** Avoid "unless it matters."
   State the default, the observable condition that changes it, and the allowed
   alternative. Explain why when the task needs contextual judgment.
+- **State the target behavior, not the banned one.** Naming an unwanted
+  behavior makes it more available, so write what to do ("write one-line
+  comments"). Keep a prohibition only as a hard guardrail (the first row of
+  the table below), and pair it with the positive target.
+- **Leave lookups to the environment.** Don't restate what one command or one
+  file shows (`--help`, package scripts, config, the directory tree); a copy
+  goes stale. Write what looking can't find: an unwritten convention, the
+  reason behind a choice, a gotcha no config admits.
+- **Reuse a word the model already knows.** One pretrained term (a _tight_
+  loop, a _red_ test, _tracer bullets_) anchors a behavior in fewer tokens
+  than a spelled-out list of qualities. Repeat the word; define it once at
+  most.
+- **End each step on a checkable completion criterion.** "Done when every
+  caller is migrated" holds the agent on the step; "done when understanding
+  is reached" lets it move on early.
 - **Match the guidance form to the failure type:**
 
   | Observed need | Form |
