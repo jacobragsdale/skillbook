@@ -43,6 +43,12 @@
       "components": [{ "kind": "skill", "path": "skills/grilling" }]
     },
     {
+      "id": "handoff",
+      "name": "Handoff",
+      "description": "Write a handoff document from live repo state so a fresh agent session can continue the work, plus a prompt to paste into that session. Adapted from Matt Pocock's skills.",
+      "components": [{ "kind": "skill", "path": "skills/handoff" }]
+    },
+    {
       "id": "herdr",
       "name": "Herdr",
       "description": "Control Herdr, a terminal multiplexer for coding agents.",
