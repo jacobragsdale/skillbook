@@ -31,6 +31,12 @@
       "components": [{ "kind": "skill", "path": "skills/e2e-audit" }]
     },
     {
+      "id": "grilling",
+      "name": "Grilling",
+      "description": "Grill the user on a plan, design, or decision a round at a time, with a recommended answer for every question, until nothing is left assumed. Adapted from Matt Pocock's skills.",
+      "components": [{ "kind": "skill", "path": "skills/grilling" }]
+    },
+    {
       "id": "herdr",
       "name": "Herdr",
       "description": "Control Herdr, a terminal multiplexer for coding agents.",
@@ -95,6 +101,12 @@
       "name": "Sprint manager",
       "description": "Sprint hub over ADO tickets, PRs, and herdr agent tabs: what needs you, ticket drift fixes, next work, and agent kickoffs via agent-cli.",
       "components": [{ "kind": "skill", "path": "skills/sprint-manager" }]
+    },
+    {
+      "id": "to-questionnaire",
+      "name": "To questionnaire",
+      "description": "Turn questions the user can't answer, such as grilling's parked ones, into a Markdown questionnaire for the person who can. Adapted from Matt Pocock's skills.",
+      "components": [{ "kind": "skill", "path": "skills/to-questionnaire" }]
     },
     {
       "id": "typescript-standards",

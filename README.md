@@ -17,6 +17,7 @@ Each skill is a folder under [`skills/`](skills/) whose name matches the
 | --- | --- |
 | [`api-cli`](skills/api-cli/SKILL.md) | Generate agent-first Python CLIs from OpenAPI, Swagger, and AsyncAPI specs: search-first discovery, compact help, trimmed JSON output, and bounded websocket streams. |
 | [`capture-app-context`](skills/capture-app-context/SKILL.md) | Write a repo's operational context (`/capture-app-context` only): environments, logs, databases, AKS workloads, jobs, and outside systems, confirmed read-only through agent-cli, into `docs/app-context.md`. |
+| [`grilling`](skills/grilling/SKILL.md) | Grill the user on a plan, design, or decision a round at a time until nothing is left assumed; parked questions go to `to-questionnaire`. Adapted from [Matt Pocock's skills](https://github.com/mattpocock/skills) (MIT). |
 | [`herdr`](skills/herdr/SKILL.md) | Control Herdr panes, tabs, workspaces, and other agents from a Herdr-managed session. Rewritten from [herdr v0.9.1](https://github.com/herdrdev/herdr/blob/v0.9.1/skills/herdr/SKILL.md). |
 | [`jacob-create-skill`](skills/jacob-create-skill/SKILL.md) | Create, improve, scaffold, and validate reusable agent skills. |
 | [`jacob-email`](skills/jacob-email/SKILL.md) | Search, read, archive, label, and draft Jacob's Proton Mail through the home server's Bridge (`pmail`); never sends. |
@@ -27,6 +28,7 @@ Each skill is a folder under [`skills/`](skills/) whose name matches the
 | [`python-testing`](skills/python-testing/SKILL.md) | Design and review pytest tests, fixtures, and pandas test data. |
 | [`qa-analyst`](skills/qa-analyst/SKILL.md) | Act as analyst and QA tester for a financial-software change (`/qa-analyst` only): clarified spec, frozen test plan, parity testing in QA, and a sealed evidence pack for the ticket. |
 | [`rust-tui`](skills/rust-tui/SKILL.md) | Scaffold and extend mouse-first ratatui + crossterm terminal apps in the house style. |
+| [`to-questionnaire`](skills/to-questionnaire/SKILL.md) | Turn questions the user can't answer into a Markdown questionnaire for the person who can. Adapted from [Matt Pocock's skills](https://github.com/mattpocock/skills) (MIT). |
 | [`typescript-standards`](skills/typescript-standards/SKILL.md) | Apply strict TypeScript, Angular, ESLint, template, API, async, and runtime-validation standards. |
 | [`write-diataxis-docs`](skills/write-diataxis-docs/SKILL.md) | Write and audit technical documentation as tutorials, how-to guides, reference, or explanation. |
 
