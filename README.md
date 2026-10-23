@@ -29,6 +29,7 @@ Each skill is a folder under [`skills/`](skills/) whose name matches the
 | [`python-standards`](skills/python-standards/SKILL.md) | Apply high-integrity Python, Pydantic, typing, pandas, async, performance, uv, Ruff, and ty standards. |
 | [`python-testing`](skills/python-testing/SKILL.md) | Design and review pytest tests, fixtures, and pandas test data. |
 | [`qa-analyst`](skills/qa-analyst/SKILL.md) | Act as analyst and QA tester for a financial-software change (`/qa-analyst` only): clarified spec, frozen test plan, parity testing in QA, and a sealed evidence pack for the ticket. |
+| [`retro`](skills/retro/SKILL.md) | Session retro (`/retro` only): digest a Claude Code or pi transcript, classify agent mistakes, and fix each at the highest level that works, words last. Merged from [Matt Pocock's](https://github.com/mattpocock/skills) `retro` and [pstack's](https://github.com/cursor/plugins/tree/main/pstack) `correct` (both MIT). |
 | [`rust-tui`](skills/rust-tui/SKILL.md) | Scaffold and extend mouse-first ratatui + crossterm terminal apps in the house style. |
 | [`to-questionnaire`](skills/to-questionnaire/SKILL.md) | Turn questions the user can't answer into a Markdown questionnaire for the person who can. Adapted from [Matt Pocock's skills](https://github.com/mattpocock/skills) (MIT). |
 | [`typescript-standards`](skills/typescript-standards/SKILL.md) | Apply strict TypeScript, Angular, ESLint, template, API, async, and runtime-validation standards. |

@@ -103,6 +103,12 @@
       "components": [{ "kind": "skill", "path": "skills/qa-analyst" }]
     },
     {
+      "id": "retro",
+      "name": "Retro",
+      "description": "Session retro: digest a Claude Code or pi transcript, classify agent mistakes and friction, and fix each at the highest level that works (structure, types, a check, a test, words last), proven against the real mistake. Merged from Matt Pocock's retro and pstack's correct.",
+      "components": [{ "kind": "skill", "path": "skills/retro" }]
+    },
+    {
       "id": "rust-tui",
       "name": "Rust TUI",
       "description": "Scaffold and extend mouse-first ratatui + crossterm terminal apps: pure state, worker threads, theme tokens, headless replay.",
