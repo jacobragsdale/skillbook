@@ -25,6 +25,12 @@
       "components": [{ "kind": "skill", "path": "skills/copilot-wsl" }]
     },
     {
+      "id": "diagnosing-bugs",
+      "name": "Diagnosing bugs",
+      "description": "Diagnose hard bugs and regressions: build a fast, red-capable repro loop first, minimise it, test ranked falsifiable hypotheses, then fix at a correct seam with a regression test. Adapted from Matt Pocock's skills.",
+      "components": [{ "kind": "skill", "path": "skills/diagnosing-bugs" }]
+    },
+    {
       "id": "e2e-audit",
       "name": "E2E audit",
       "description": "Live end-to-end audit: model every state and edge case, test each on real databases, APIs, and the deployed instance, fix defects as found, and clean up tagged test data.",

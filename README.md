@@ -17,6 +17,7 @@ Each skill is a folder under [`skills/`](skills/) whose name matches the
 | --- | --- |
 | [`api-cli`](skills/api-cli/SKILL.md) | Generate agent-first Python CLIs from OpenAPI, Swagger, and AsyncAPI specs: search-first discovery, compact help, trimmed JSON output, and bounded websocket streams. |
 | [`capture-app-context`](skills/capture-app-context/SKILL.md) | Write a repo's operational context (`/capture-app-context` only): environments, logs, databases, AKS workloads, jobs, and outside systems, confirmed read-only through agent-cli, into `docs/app-context.md`. |
+| [`diagnosing-bugs`](skills/diagnosing-bugs/SKILL.md) | Diagnose hard bugs and regressions: a red repro loop before any theory, ranked falsifiable hypotheses, and a fix at a correct seam with a regression test. Adapted from [Matt Pocock's skills](https://github.com/mattpocock/skills) (MIT). |
 | [`grilling`](skills/grilling/SKILL.md) | Grill the user on a plan, design, or decision a round at a time until nothing is left assumed; parked questions go to `to-questionnaire`. Adapted from [Matt Pocock's skills](https://github.com/mattpocock/skills) (MIT). |
 | [`herdr`](skills/herdr/SKILL.md) | Control Herdr panes, tabs, workspaces, and other agents from a Herdr-managed session. Rewritten from [herdr v0.9.1](https://github.com/herdrdev/herdr/blob/v0.9.1/skills/herdr/SKILL.md). |
 | [`jacob-create-skill`](skills/jacob-create-skill/SKILL.md) | Create, improve, scaffold, and validate reusable agent skills. |
