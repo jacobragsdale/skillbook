@@ -16,12 +16,22 @@ choices apply, based on what the repo already uses.
 - Do not write `Any` in first-party interfaces. Model an unknown payload as
   `object` and narrow it, or type the shape it actually has. Keep an untyped
   dependency behind a narrow typed wrapper so neither `Any` nor ty's inferred
-  `Unknown` leaks past it.
+  `Unknown` leaks past it. `json.loads` and `tomllib.loads` return `Any`:
+  assign the result to `object` and narrow. `argparse.Namespace` is untyped:
+  turn it into a frozen dataclass per subcommand before other code reads it.
 - Keep type-checker fixes in the type domain: no runtime branches or
   assertions added only to satisfy the checker. Suppress with a named rule and
-  an adjacent reason (`# ty: ignore[rule]` under ty), never a blanket ignore.
+  an adjacent reason (`# ruff: ignore[CODE]`, `# ty: ignore[rule]`), never a
+  blanket ignore.
 - Use `None` only when absence is a valid domain state, not for partial
-  construction, missing required input, or error signaling.
+  construction, missing required input, or error signaling. Test an optional
+  with `is not None`, never truthiness: `if count:` treats `0` as missing.
+  Where `""` and `None` would mean the same, keep one at the boundary.
+- Make `bool` parameters keyword-only (`*, dry_run: bool = False`). When flags
+  interact, or a flag may grow a third value, use a `Literal` or an `Enum`, so
+  an invalid combination cannot be written.
+- Model a value with several shapes as a union of frozen dataclasses, and
+  `match` on it with `assert_never` in the final case.
 
 ## Boundaries and domain
 
