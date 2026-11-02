@@ -116,8 +116,7 @@ One commit per item. Prove each new check, type, or test fails on the real
 past mistake: reproduce the mistake (check out the bad commit in a scratch
 worktree, or re-apply the bad edit), run the check, see it fail with an
 error that names the fix, then restore. Run the check with the same command
-CI runs. A skill edit must pass `validate_skill.py` and goes through
-skillbook's publish steps. Report each item as applied with its proof, or
+CI runs. A skill edit must pass `validate_skill.py`. Report each item as applied with its proof, or
 skipped with the reason.
 
 ## Example

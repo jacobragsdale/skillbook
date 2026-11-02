@@ -6,7 +6,7 @@ file with optional scripts, references, assets, and client metadata.
 
 [`skills/`](skills/) is the source of truth. Edit a canonical skill here, never
 an installed copy. The repository contains no skill-serving service or other
-runtime: agents receive ordinary skill directories through Agent Plugins.
+runtime: each installed skill is a symlink to its folder here.
 
 ## Current skills
 
@@ -41,33 +41,21 @@ Skills are model-invocable by default through their descriptions. `herdr`,
 only when invoked by name (`/herdr`, `/jacob-create-skill`,
 `/capture-app-context`).
 
-## Publish the skills
+## Install the skills
 
-Agent Plugins reads [`agent-plugins.json`](agent-plugins.json), whose packages
-contain only `skill` components under `skills/`. Every skill is available as a
-standalone package; related skills may also appear together in an optional
-bundle. Installed skills are namespaced copies (`skillbook-<name>`), not live
-links into this repository.
-
-Requires `python3`, `curl`, `shasum`, and `unzip`, so it runs on the Linux host
-and on macOS. Upload uses the Nexus `admin` password from `NEXUS_PASSWORD`, the
-macOS keychain item `repo.ragsdale.dev`, the file
-`~/.config/skillbook/nexus-password` (mode 600; override with
-`NEXUS_PASSWORD_FILE`), or a curl prompt.
+Link each skill folder into the directories agents load skills from. A link
+makes an edit here live at once:
 
 ```bash
-# Pack and validate without uploading
-./scripts/publish-source.sh --dry-run
-
-# Replace https://repo.ragsdale.dev/repository/files/sources/skillbook-latest.zip
-./scripts/publish-source.sh
+for dir in ~/.claude/skills ~/.agents/skills; do
+  mkdir -p "$dir"
+  ln -sfn "$PWD/skills/python-standards" "$dir/python-standards"
+done
 ```
 
-The script rejects non-skill components, zips the manifest and referenced skill
-directories, replaces the existing Nexus artifact, and verifies the anonymous
-download against the local SHA-256 checksum. After publishing, refresh
-Skillbook in Agent Plugins and update already-installed packages. Reload an
-agent after adding a skill or changing frontmatter.
+Repeat the `ln` line for each skill you want installed. To uninstall a skill,
+delete its links. Reload an agent after adding a skill or changing
+frontmatter.
 
 ## Create or update a skill
 
@@ -97,9 +85,8 @@ Run a changed skill's validator:
 uv run skills/jacob-create-skill/scripts/validate_skill.py skills/<name>
 ```
 
-For a new, renamed, or removed skill, update `agent-plugins.json` and publish
-the refreshed artifact. The full workflow is documented in
-[`AGENTS.md`](AGENTS.md).
+For a new, renamed, or removed skill, update its links and the skill table
+above. The full workflow is documented in [`AGENTS.md`](AGENTS.md).
 
 ## Repository layout
 
@@ -108,8 +95,6 @@ skills/<name>/SKILL.md       # canonical skill instructions
 skills/<name>/scripts/       # optional self-contained uv scripts
 skills/<name>/references/    # optional on-demand documentation
 skills/<name>/assets/        # optional reusable templates or files
-agent-plugins.json           # skills-only artifact manifest
-scripts/publish-source.sh    # packs the skills and replaces the Nexus artifact
 AGENTS.md                    # repository workflow and maintenance rules
 ```
 
