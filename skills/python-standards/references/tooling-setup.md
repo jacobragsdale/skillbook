@@ -3,6 +3,17 @@
 Read when creating a repo or standardizing one on request, migrating a type
 checker, or debugging a hook that behaves differently from the local command.
 
+## Contents
+
+- [House repo layout](#house-repo-layout)
+- [Standardize a repo](#standardize-a-repo)
+- [Hooks that do not run](#hooks-that-do-not-run)
+- [ty resolves the wrong environment](#ty-resolves-the-wrong-environment)
+- [ty skips the rules on PEP 723 scripts](#ty-skips-the-rules-on-pep-723-scripts)
+- [Migrating from another type checker](#migrating-from-another-type-checker)
+- [Staged adoption](#staged-adoption)
+- [Ruff and ty notes](#ruff-and-ty-notes)
+
 ## House repo layout
 
 - Keep dependencies, dev dependencies, and tool configuration in one
