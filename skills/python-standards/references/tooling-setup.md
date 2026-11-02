@@ -68,21 +68,27 @@ do not mechanically preserve disabled diagnostics from the previous checker.
 ## Staged adoption
 
 Only when the user explicitly chooses staged adoption over fixing the backlog.
-ty has no checked-in diagnostic baseline. Prefer migrating one owned package or
-directory at a time and keep new or migrated code under the standard config.
+Prefer migrating one owned package or directory at a time and keep new or
+migrated code under the standard config. ty's checked-in diagnostic baseline
+(`baseline = "ty-baseline.json"` with `ty check --update-baseline`) is still a
+preview feature; use it only when the user accepts that.
 When that split is impossible, use the narrowest file-pattern override or
 specific suppression available, record why it exists, and remove it as the
 backlog shrinks. Never turn off a rule for the whole project merely to make the
 first run pass.
 
-## Ruff notes
+## Ruff and ty notes
 
-- The asset uses `extend-select`, so Ruff's own defaults stay on and the list
-  adds to them. Never convert it to `select`, which replaces them. Ruff 0.16
-  or newer is required for that default set.
-- `flake8-bandit` (`S`) is disabled in the asset's `ignore` list, which also
-  turns off the three `S` rules Ruff enables by default. Re-select `S` for a
-  repo that handles untrusted input and wants the audit.
+- The asset selects `ALL` and lists each rule it turns off with a reason, so
+  a Ruff upgrade turns on new stable rules. Because the version is pinned,
+  that happens only when the pin moves; fix or suppress what the new rules
+  report in the same change. Never switch back to an `extend-select` list, and
+  never delete a reason from the `ignore` list.
+- ty's `all = "error"` works the same way: every ty rule is an error,
+  including those ty leaves off by default. Turn one off only for a real false
+  positive, by name, with the reason beside it.
+- `flake8-bandit` (`S`) is disabled in the asset's `ignore` list. Re-select `S`
+  for a repo that handles untrusted input and wants the audit.
 - `ruff format` also formats Python inside Markdown code blocks. Expect
   `ruff format --check .` to flag documentation on the first run in an
   existing repo; reformat it rather than excluding Markdown.

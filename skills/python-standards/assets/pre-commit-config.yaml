@@ -11,7 +11,7 @@ repos:
       - id: detect-private-key
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.8
+    rev: v0.17.3
     hooks:
       - id: ruff-check
         args: [--fix]
@@ -23,6 +23,6 @@ repos:
       - id: uv-lock   # fails the commit if pyproject.toml changed without uv.lock
 
   - repo: https://github.com/astral-sh/ty-pre-commit
-    rev: v0.0.83   # keep in sync with the pinned ty dev dependency
+    rev: v0.0.95   # keep in sync with the pinned ty dev dependency
     hooks:
       - id: ty
