@@ -105,14 +105,15 @@ first run pass.
 - The `ignore` list holds only rules that cannot be fixed, each with its
   reason: the two that conflict with the formatter, `S603` (it flags every
   subprocess call), `TC001`–`TC003` (they break annotations read at runtime),
-  and `CPY001` (a legal decision). Fix a finding instead of adding a rule to
-  the list; an addition needs the same kind of reason.
+  `CPY001` (a legal decision), and `D` (see below). Fix a finding instead of
+  adding a rule to the list; an addition needs the same kind of reason.
 - ty's `all = "error"` works the same way: every ty rule is an error,
   including those ty leaves off by default. Turn one off only for a real false
   positive, by name, with the reason beside it.
-- `D` runs with the Google convention, so every public module, class, and
-  function carries a docstring. Write one that says what the name does not:
-  units, what `None` means, where the data comes from.
+- `D` is off because agents are the readers. A required docstring gets
+  written to satisfy the linter and restates the name, and a stale one
+  misleads an agent that takes it at its word. SKILL.md's rule on docstrings
+  replaces it.
 - `ruff format` also formats Python inside Markdown code blocks. Expect
   `ruff format --check .` to flag documentation on the first run in an
   existing repo; reformat it rather than excluding Markdown.

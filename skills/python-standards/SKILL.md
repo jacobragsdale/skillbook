@@ -32,6 +32,10 @@ choices apply, based on what the repo already uses.
   an invalid combination cannot be written.
 - Model a value with several shapes as a union of frozen dataclasses, and
   `match` on it with `assert_never` in the final case.
+- Write a docstring or comment only for what code and types cannot say:
+  intent, an invariant across values, units, or how an outside system
+  behaves. Never restate the name or signature; prefer a type to a sentence.
+  Change it in the same edit as the code it describes.
 
 ## Boundaries and domain
 
