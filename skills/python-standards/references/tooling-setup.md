@@ -98,20 +98,24 @@ first run pass.
 
 ## Ruff and ty notes
 
-- The asset selects `ALL` and lists each rule it turns off with a reason, so
-  a Ruff upgrade turns on new stable rules. Because the version is pinned,
-  that happens only when the pin moves; fix or suppress what the new rules
-  report in the same change. Never switch back to an `extend-select` list, and
-  never delete a reason from the `ignore` list.
+- The asset selects `ALL`, so a Ruff upgrade turns on new stable rules. The
+  version is pinned, so that happens only when the pin moves; fix what the new
+  rules report in the same change. Never switch back to an `extend-select`
+  list.
+- The `ignore` list holds only rules that cannot be fixed, each with its
+  reason: the two that conflict with the formatter, `S603` (it flags every
+  subprocess call), `TC001`–`TC003` (they break annotations read at runtime),
+  and `CPY001` (a legal decision). Fix a finding instead of adding a rule to
+  the list; an addition needs the same kind of reason.
 - ty's `all = "error"` works the same way: every ty rule is an error,
   including those ty leaves off by default. Turn one off only for a real false
   positive, by name, with the reason beside it.
-- `flake8-bandit` (`S`) is disabled in the asset's `ignore` list. Re-select `S`
-  for a repo that handles untrusted input and wants the audit.
+- `D` runs with the Google convention, so every public module, class, and
+  function carries a docstring. Write one that says what the name does not:
+  units, what `None` means, where the data comes from.
 - `ruff format` also formats Python inside Markdown code blocks. Expect
   `ruff format --check .` to flag documentation on the first run in an
   existing repo; reformat it rather than excluding Markdown.
-- `ASYNC109` stays ignored because timeout parameters can be deliberate API
-  design. Keep `PERF`, `ASYNC`, `FAST`, and the pandas-vet rules enabled in
-  every repo; they stay inactive when the matching constructs are absent. Do
-  not generate per-dependency Ruff configurations.
+- Keep `PERF`, `ASYNC`, `FAST`, and the pandas-vet rules enabled in every
+  repo; they stay inactive when the matching constructs are absent. Do not
+  generate per-dependency Ruff configurations.
