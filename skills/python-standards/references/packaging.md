@@ -9,7 +9,7 @@ Use `uv_build` for pure Python; it is uv's own backend and needs no plugin:
 
 ```toml
 [build-system]
-requires = ["uv_build>=0.12.18,<0.13"]
+requires = ["uv_build>=0.13.6,<0.14"]
 build-backend = "uv_build"
 ```
 
