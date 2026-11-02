@@ -58,6 +58,14 @@ official pre-commit hook resolves dependencies from the project's
 hook and `uv run ty check` disagree, compare the pinned ty versions and the uv
 groups selected by the hook before changing import rules.
 
+## ty skips the rules on PEP 723 scripts
+
+ty checks a file with a `# /// script` header as its own project: the
+enclosing `ty.toml` or `[tool.ty]` does not reach it, so `all = "error"` and
+the analysis settings silently fall back to ty's defaults (seen in ty 0.0.95).
+For a repo of standalone scripts, run `ty check --config-file ty.toml` and set
+`environment.python-version` to the scripts' `requires-python` floor.
+
 ## Migrating from another type checker
 
 Remove the old checker, its config, hook, and suppressions in the same change.
