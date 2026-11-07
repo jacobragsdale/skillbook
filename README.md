@@ -20,7 +20,7 @@ Each skill is a folder under [`skills/`](skills/) whose name matches the
 | [`diagnosing-bugs`](skills/diagnosing-bugs/SKILL.md) | Diagnose hard bugs and regressions: a red repro loop before any theory, ranked falsifiable hypotheses, and a fix at a correct seam with a regression test. Adapted from [Matt Pocock's skills](https://github.com/mattpocock/skills) (MIT). |
 | [`grilling`](skills/grilling/SKILL.md) | Grill the user on a plan, design, or decision a round at a time until nothing is left assumed; parked questions go to `to-questionnaire`. Adapted from [Matt Pocock's skills](https://github.com/mattpocock/skills) (MIT). |
 | [`handoff`](skills/handoff/SKILL.md) | Write a handoff document from live repo state so a fresh agent session can continue the work. Adapted from [Matt Pocock's skills](https://github.com/mattpocock/skills) (MIT). |
-| [`herdr`](skills/herdr/SKILL.md) | Control Herdr panes, tabs, workspaces, and other agents from a Herdr-managed session. Rewritten from [herdr v0.9.1](https://github.com/herdrdev/herdr/blob/v0.9.1/skills/herdr/SKILL.md). |
+| [`herdr`](skills/herdr/SKILL.md) | Drive the Herdr app's spaces, tabs, and panes from any machine, reaching the window over SSH when it runs elsewhere; the classic herdr TUI is a reference. Manual from [herdr-app v0.1.13](https://github.com/herdrdev/herdr-app/blob/v0.1.13/src/SKILL.md) (Apache-2.0); TUI part rewritten from [herdr v0.9.1](https://github.com/herdrdev/herdr/blob/v0.9.1/skills/herdr/SKILL.md). |
 | [`jacob-create-skill`](skills/jacob-create-skill/SKILL.md) | Create, improve, scaffold, and validate reusable agent skills. |
 | [`jacob-email`](skills/jacob-email/SKILL.md) | Search, read, archive, label, and draft Jacob's Proton Mail through the home server's Bridge (`pmail`); never sends. |
 | [`jacob-home-server`](skills/jacob-home-server/SKILL.md) | Operate the home server: Docker stacks, SOPS secrets, deployments, backups, media, networking, and recovery. |
@@ -35,11 +35,10 @@ Each skill is a folder under [`skills/`](skills/) whose name matches the
 | [`typescript-standards`](skills/typescript-standards/SKILL.md) | Apply strict TypeScript, Angular, ESLint, template, API, async, and runtime-validation standards. |
 | [`write-diataxis-docs`](skills/write-diataxis-docs/SKILL.md) | Write and audit technical documentation as tutorials, how-to guides, reference, or explanation. |
 
-Skills are model-invocable by default through their descriptions. `herdr`,
-`jacob-create-skill`, and `capture-app-context` set
+Skills are model-invocable by default through their descriptions.
+`jacob-create-skill` and `capture-app-context` set
 `disable-model-invocation: true`: they stay out of the model's context and run
-only when invoked by name (`/herdr`, `/jacob-create-skill`,
-`/capture-app-context`).
+only when invoked by name (`/jacob-create-skill`, `/capture-app-context`).
 
 ## Install the skills
 
